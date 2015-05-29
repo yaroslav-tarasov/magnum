@@ -32,7 +32,9 @@
 #include "Magnum/Context.h"
 #include "Magnum/Extensions.h"
 
+#ifndef MAGNUM_TARGET_WEBGL
 #include "Implementation/DebugState.h"
+#endif
 #include "Implementation/BufferState.h"
 #include "Implementation/MeshState.h"
 #include "Implementation/State.h"
@@ -44,17 +46,32 @@ Int Mesh::maxVertexAttributes() { return AbstractShaderProgram::maxVertexAttribu
 #endif
 
 #ifndef MAGNUM_TARGET_GLES2
-Long Mesh::maxElementIndex() {
+#ifndef MAGNUM_TARGET_WEBGL
+Long Mesh::maxElementIndex()
+#else
+Int Mesh::maxElementIndex()
+#endif
+{
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::ES3_compatibility>())
         return 0xFFFFFFFFl;
     #endif
 
-    GLint64& value = Context::current()->state().mesh->maxElementIndex;
+    #ifndef MAGNUM_TARGET_WEBGL
+    GLint64& value =
+    #else
+    GLint& value =
+    #endif
+        Context::current()->state().mesh->maxElementIndex;
 
     /* Get the value, if not already cached */
-    if(value == 0)
+    if(value == 0) {
+        #ifndef MAGNUM_TARGET_WEBGL
         glGetInteger64v(GL_MAX_ELEMENT_INDEX, &value);
+        #else
+        glGetIntegerv(GL_MAX_ELEMENT_INDEX, &value);
+        #endif
+    }
 
     return value;
 }
@@ -90,7 +107,7 @@ std::size_t Mesh::indexSize(IndexType type) {
     CORRADE_ASSERT_UNREACHABLE();
 }
 
-Mesh::Mesh(const MeshPrimitive primitive): _primitive{primitive}, _count{0}, _baseVertex{0}, _instanceCount{1},
+Mesh::Mesh(const MeshPrimitive primitive): _primitive{primitive}, _flags{ObjectFlag::DeleteOnDestruction}, _count{0}, _baseVertex{0}, _instanceCount{1},
     #ifndef MAGNUM_TARGET_GLES
     _baseInstance{0},
     #endif
@@ -103,8 +120,8 @@ Mesh::Mesh(const MeshPrimitive primitive): _primitive{primitive}, _count{0}, _ba
 }
 
 Mesh::~Mesh() {
-    /* Moved out, nothing to do */
-    if(!_id) return;
+    /* Moved out or not deleting on destruction, nothing to do */
+    if(!_id || !(_flags & ObjectFlag::DeleteOnDestruction)) return;
 
     /* Remove current vao from the state */
     GLuint& current = Context::current()->state().mesh->currentVAO;
@@ -113,7 +130,7 @@ Mesh::~Mesh() {
     (this->*Context::current()->state().mesh->destroyImplementation)();
 }
 
-Mesh::Mesh(Mesh&& other) noexcept: _id(other._id), _created{other._created}, _primitive(other._primitive), _count(other._count), _baseVertex{other._baseVertex}, _instanceCount{other._instanceCount},
+Mesh::Mesh(Mesh&& other) noexcept: _id(other._id), _primitive(other._primitive), _flags{other._flags}, _count(other._count), _baseVertex{other._baseVertex}, _instanceCount{other._instanceCount},
     #ifndef MAGNUM_TARGET_GLES
     _baseInstance{other._baseInstance},
     #endif
@@ -134,7 +151,7 @@ Mesh::Mesh(Mesh&& other) noexcept: _id(other._id), _created{other._created}, _pr
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
     using std::swap;
     swap(_id, other._id);
-    swap(_created, other._created);
+    swap(_flags, other._flags);
     swap(_primitive, other._primitive);
     swap(_count, other._count);
     swap(_baseVertex, other._baseVertex);
@@ -161,17 +178,18 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
 }
 
 inline void Mesh::createIfNotAlready() {
-    /* If VAO extension is not available, _created is always true */
-    if(_created) return;
+    /* If VAO extension is not available, the following is always true */
+    if(_flags & ObjectFlag::Created) return;
 
     /* glGen*() does not create the object, just reserves the name. Some
        commands (such as glObjectLabel()) operate with IDs directly and they
        require the object to be created. Binding the VAO finally creates it.
        Also all EXT DSA functions implicitly create it. */
     bindVAO();
-    CORRADE_INTERNAL_ASSERT(_created);
+    CORRADE_INTERNAL_ASSERT(_flags & ObjectFlag::Created);
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 std::string Mesh::label() {
     createIfNotAlready();
     #ifndef MAGNUM_TARGET_GLES
@@ -181,7 +199,7 @@ std::string Mesh::label() {
     #endif
 }
 
-Mesh& Mesh::setLabelInternal(const Containers::ArrayReference<const char> label) {
+Mesh& Mesh::setLabelInternal(const Containers::ArrayView<const char> label) {
     createIfNotAlready();
     #ifndef MAGNUM_TARGET_GLES
     Context::current()->state().debug->labelImplementation(GL_VERTEX_ARRAY, _id, label);
@@ -190,6 +208,7 @@ Mesh& Mesh::setLabelInternal(const Containers::ArrayReference<const char> label)
     #endif
     return *this;
 }
+#endif
 
 Mesh& Mesh::setIndexBuffer(Buffer& buffer, GLintptr offset, IndexType type, UnsignedInt start, UnsignedInt end) {
     #if defined(CORRADE_TARGET_NACL) || defined(MAGNUM_TARGET_WEBGL)
@@ -260,7 +279,8 @@ void Mesh::drawInternal(Int count, Int baseVertex, Int instanceCount, GLintptr i
 
         /* Indexed mesh */
         } else {
-            #ifndef MAGNUM_TARGET_GLES2
+            /** @todo re-enable for WebGL 2.0 when glDrawRangeElements() no longer crashes Firefox */
+            #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
             /* Indexed mesh with specified range */
             if(indexEnd) {
                 glDrawRangeElements(GLenum(_primitive), indexStart, indexEnd, count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset));
@@ -334,10 +354,10 @@ void Mesh::bindVAO() {
     GLuint& current = Context::current()->state().mesh->currentVAO;
     if(current != _id) {
         /* Binding the VAO finally creates it */
-        _created = true;
+        _flags |= ObjectFlag::Created;
         #ifndef MAGNUM_TARGET_GLES2
         glBindVertexArray(current = _id);
-        #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+        #elif !defined(CORRADE_TARGET_NACL)
         glBindVertexArrayOES(current = _id);
         #else
         CORRADE_ASSERT_UNREACHABLE();
@@ -347,25 +367,24 @@ void Mesh::bindVAO() {
 
 void Mesh::createImplementationDefault() {
     _id = 0;
-    _created = true;
+    _flags |= ObjectFlag::Created;
 }
 
 void Mesh::createImplementationVAO() {
     #ifndef MAGNUM_TARGET_GLES2
     glGenVertexArrays(1, &_id);
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     glGenVertexArraysOES(1, &_id);
     #else
     CORRADE_ASSERT_UNREACHABLE();
     #endif
-    _created = false;
     CORRADE_INTERNAL_ASSERT(_id != Implementation::State::DisengagedBinding);
 }
 
 #ifndef MAGNUM_TARGET_GLES
 void Mesh::createImplementationVAODSA() {
     glCreateVertexArrays(1, &_id);
-    _created = true;
+    _flags |= ObjectFlag::Created;
 }
 #endif
 
@@ -374,7 +393,7 @@ void Mesh::destroyImplementationDefault() {}
 void Mesh::destroyImplementationVAO() {
     #ifndef MAGNUM_TARGET_GLES2
     glDeleteVertexArrays(1, &_id);
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     glDeleteVertexArraysOES(1, &_id);
     #else
     CORRADE_ASSERT_UNREACHABLE();
@@ -406,7 +425,7 @@ void Mesh::attributePointerImplementationVAO(const GenericAttribute& attribute) 
 
 #ifndef MAGNUM_TARGET_GLES
 void Mesh::attributePointerImplementationDSAEXT(const GenericAttribute& attribute) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glEnableVertexArrayAttribEXT(_id, attribute.location);
     glVertexArrayVertexAttribOffsetEXT(_id, attribute.buffer->id(), attribute.location, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.offset);
     if(attribute.divisor)
@@ -443,7 +462,7 @@ void Mesh::attributePointerImplementationVAO(const IntegerAttribute& attribute) 
 
 #ifndef MAGNUM_TARGET_GLES
 void Mesh::attributePointerImplementationDSAEXT(const IntegerAttribute& attribute) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glEnableVertexArrayAttribEXT(_id, attribute.location);
     glVertexArrayVertexAttribIOffsetEXT(_id, attribute.buffer->id(), attribute.location, attribute.size, attribute.type, attribute.stride, attribute.offset);
     if(attribute.divisor)
@@ -474,7 +493,7 @@ void Mesh::attributePointerImplementationVAO(const LongAttribute& attribute) {
 }
 
 void Mesh::attributePointerImplementationDSAEXT(const LongAttribute& attribute) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glEnableVertexArrayAttribEXT(_id, attribute.location);
     glVertexArrayVertexAttribLOffsetEXT(_id, attribute.buffer->id(), attribute.location, attribute.size, attribute.type, attribute.stride, attribute.offset);
     if(attribute.divisor)
@@ -499,7 +518,7 @@ void Mesh::vertexAttribDivisorImplementationDSAEXT(const GLuint index, const GLu
 }
 #elif defined(MAGNUM_TARGET_GLES2)
 void Mesh::vertexAttribDivisorImplementationANGLE(const GLuint index, const GLuint divisor) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glVertexAttribDivisorANGLE(index, divisor);
     #else
     static_cast<void>(index);
@@ -507,8 +526,9 @@ void Mesh::vertexAttribDivisorImplementationANGLE(const GLuint index, const GLui
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#ifndef MAGNUM_TARGET_WEBGL
 void Mesh::vertexAttribDivisorImplementationEXT(const GLuint index, const GLuint divisor) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glVertexAttribDivisorEXT(index, divisor);
     #else
     static_cast<void>(index);
@@ -517,7 +537,7 @@ void Mesh::vertexAttribDivisorImplementationEXT(const GLuint index, const GLuint
     #endif
 }
 void Mesh::vertexAttribDivisorImplementationNV(const GLuint index, const GLuint divisor) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glVertexAttribDivisorNV(index, divisor);
     #else
     static_cast<void>(index);
@@ -525,6 +545,7 @@ void Mesh::vertexAttribDivisorImplementationNV(const GLuint index, const GLuint 
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 #endif
 
 void Mesh::bindIndexBufferImplementationDefault(Buffer&) {}
@@ -581,7 +602,7 @@ void Mesh::unbindImplementationVAO() {}
 
 #ifdef MAGNUM_TARGET_GLES2
 void Mesh::drawArraysInstancedImplementationANGLE(const GLint baseVertex, const GLsizei count, const GLsizei instanceCount) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glDrawArraysInstancedANGLE(GLenum(_primitive), baseVertex, count, instanceCount);
     #else
     static_cast<void>(baseVertex);
@@ -591,8 +612,9 @@ void Mesh::drawArraysInstancedImplementationANGLE(const GLint baseVertex, const 
     #endif
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void Mesh::drawArraysInstancedImplementationEXT(const GLint baseVertex, const GLsizei count, const GLsizei instanceCount) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glDrawArraysInstancedEXT(GLenum(_primitive), baseVertex, count, instanceCount);
     #else
     static_cast<void>(baseVertex);
@@ -603,7 +625,7 @@ void Mesh::drawArraysInstancedImplementationEXT(const GLint baseVertex, const GL
 }
 
 void Mesh::drawArraysInstancedImplementationNV(const GLint baseVertex, const GLsizei count, const GLsizei instanceCount) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glDrawArraysInstancedNV(GLenum(_primitive), baseVertex, count, instanceCount);
     #else
     static_cast<void>(baseVertex);
@@ -612,9 +634,10 @@ void Mesh::drawArraysInstancedImplementationNV(const GLint baseVertex, const GLs
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void Mesh::drawElementsInstancedImplementationANGLE(const GLsizei count, const GLintptr indexOffset, const GLsizei instanceCount) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glDrawElementsInstancedANGLE(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), instanceCount);
     #else
     static_cast<void>(count);
@@ -624,8 +647,9 @@ void Mesh::drawElementsInstancedImplementationANGLE(const GLsizei count, const G
     #endif
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void Mesh::drawElementsInstancedImplementationEXT(const GLsizei count, const GLintptr indexOffset, const GLsizei instanceCount) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glDrawElementsInstancedEXT(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), instanceCount);
     #else
     static_cast<void>(count);
@@ -636,7 +660,7 @@ void Mesh::drawElementsInstancedImplementationEXT(const GLsizei count, const GLi
 }
 
 void Mesh::drawElementsInstancedImplementationNV(const GLsizei count, const GLintptr indexOffset, const GLsizei instanceCount) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glDrawElementsInstancedNV(GLenum(_primitive), count, GLenum(_indexType), reinterpret_cast<GLvoid*>(indexOffset), instanceCount);
     #else
     static_cast<void>(count);
@@ -645,6 +669,7 @@ void Mesh::drawElementsInstancedImplementationNV(const GLsizei count, const GLin
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 #endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

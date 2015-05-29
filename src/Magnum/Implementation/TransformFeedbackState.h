@@ -27,6 +27,10 @@
 
 #include "Magnum/Context.h"
 
+#ifdef MAGNUM_TARGET_GLES2
+#error this header is not available in OpenGL ES 2.0 build
+#endif
+
 /* If not included, the following members have bad offsets, causing weird
    runtime behavior */
 #ifdef CORRADE_MSVC2013_COMPATIBILITY

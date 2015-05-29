@@ -38,7 +38,7 @@ AbstractFont::AbstractFont(): _size(0.0f) {}
 
 AbstractFont::AbstractFont(PluginManager::AbstractManager& manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)), _size(0.0f), _lineHeight(0.0f) {}
 
-bool AbstractFont::openData(const std::vector<std::pair<std::string, Containers::ArrayReference<const char>>>& data, const Float size) {
+bool AbstractFont::openData(const std::vector<std::pair<std::string, Containers::ArrayView<const char>>>& data, const Float size) {
     CORRADE_ASSERT(features() & Feature::OpenData,
         "Text::AbstractFont::openData(): feature not supported", false);
     CORRADE_ASSERT(!data.empty(),
@@ -50,7 +50,7 @@ bool AbstractFont::openData(const std::vector<std::pair<std::string, Containers:
     return isOpened();
 }
 
-std::pair<Float, Float> AbstractFont::doOpenData(const std::vector<std::pair<std::string, Containers::ArrayReference<const char>>>& data, const Float size) {
+std::pair<Float, Float> AbstractFont::doOpenData(const std::vector<std::pair<std::string, Containers::ArrayView<const char>>>& data, const Float size) {
     CORRADE_ASSERT(!(features() & Feature::MultiFile),
         "Text::AbstractFont::openData(): feature advertised but not implemented", {});
     CORRADE_ASSERT(data.size() == 1,
@@ -60,7 +60,7 @@ std::pair<Float, Float> AbstractFont::doOpenData(const std::vector<std::pair<std
     return doOpenSingleData(data[0].second, size);
 }
 
-bool AbstractFont::openSingleData(const Containers::ArrayReference<const char> data, const Float size) {
+bool AbstractFont::openSingleData(const Containers::ArrayView<const char> data, const Float size) {
     CORRADE_ASSERT(features() & Feature::OpenData,
         "Text::AbstractFont::openSingleData(): feature not supported", false);
     CORRADE_ASSERT(!(features() & Feature::MultiFile),
@@ -72,8 +72,9 @@ bool AbstractFont::openSingleData(const Containers::ArrayReference<const char> d
     return isOpened();
 }
 
-std::pair<Float, Float> AbstractFont::doOpenSingleData(Containers::ArrayReference<const char>, Float) {
+std::pair<Float, Float> AbstractFont::doOpenSingleData(Containers::ArrayView<const char>, Float) {
     CORRADE_ASSERT(false, "Text::AbstractFont::openSingleData(): feature advertised but not implemented", {});
+    return {};
 }
 
 bool AbstractFont::openFile(const std::string& filename, const Float size) {
@@ -146,6 +147,7 @@ std::unique_ptr<GlyphCache> AbstractFont::createGlyphCache() {
 
 std::unique_ptr<GlyphCache> AbstractFont::doCreateGlyphCache() {
     CORRADE_ASSERT(false, "Text::AbstractFont::createGlyphCache(): feature advertised but not implemented", {});
+    return nullptr;
 }
 
 std::unique_ptr<AbstractLayouter> AbstractFont::layout(const GlyphCache& cache, const Float size, const std::string& text) {

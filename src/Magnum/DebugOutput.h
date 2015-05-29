@@ -25,21 +25,24 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef MAGNUM_TARGET_WEBGL
 /** @file
  * @brief Class @ref Magnum::DebugOutput, @ref Magnum::DebugMessage, @ref Magnum::DebugGroup
  */
+#endif
 
 #include <string>
-#include <Corrade/Containers/Array.h>
+#include <Corrade/Containers/ArrayView.h>
 
-#include "Magnum/Magnum.h"
 #include "Magnum/OpenGL.h"
+#include "Magnum/Magnum.h"
 #include "Magnum/visibility.h"
 
 #ifdef MAGNUM_BUILD_DEPRECATED
 #include <Corrade/Utility/Macros.h>
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 namespace Magnum {
 
 namespace Implementation { struct DebugState; }
@@ -118,6 +121,8 @@ objects with labels. See @ref AbstractQuery::setLabel(),
 @ref Buffer::setLabel(), @ref Framebuffer::setLabel(), @ref Mesh::setLabel(),
 @ref Renderbuffer::setLabel(), @ref Shader::setLabel() and
 @ref TransformFeedback::setLabel() for more information.
+
+@requires_gles Debug output is not available in WebGL.
 */
 class MAGNUM_EXPORT DebugOutput {
     /* GCC 4.6 needs the struct keyword */
@@ -454,6 +459,8 @@ and the debug output is either not supported or turned off, the calls will not
 result in any allocations and thus won't have any negative performance effects.
 
 @see @ref DebugGroup
+
+@requires_gles Debug output is not available in WebGL.
 */
 class MAGNUM_EXPORT DebugMessage {
     /* GCC 4.6 needs the struct keyword */
@@ -670,12 +677,12 @@ class MAGNUM_EXPORT DebugMessage {
         DebugMessage() = delete;
 
     private:
-        static void insertInternal(Source source, Type type, UnsignedInt id, DebugOutput::Severity severity, Containers::ArrayReference<const char> string);
-        static MAGNUM_LOCAL void insertImplementationNoOp(Source, Type, UnsignedInt, DebugOutput::Severity, Containers::ArrayReference<const char>);
-        static MAGNUM_LOCAL void insertImplementationKhr(Source source, Type type, UnsignedInt id, DebugOutput::Severity severity, Containers::ArrayReference<const char> string);
-        static MAGNUM_LOCAL void insertImplementationExt(Source, Type, UnsignedInt, DebugOutput::Severity, Containers::ArrayReference<const char> string);
+        static void insertInternal(Source source, Type type, UnsignedInt id, DebugOutput::Severity severity, Containers::ArrayView<const char> string);
+        static MAGNUM_LOCAL void insertImplementationNoOp(Source, Type, UnsignedInt, DebugOutput::Severity, Containers::ArrayView<const char>);
+        static MAGNUM_LOCAL void insertImplementationKhr(Source source, Type type, UnsignedInt id, DebugOutput::Severity severity, Containers::ArrayView<const char> string);
+        static MAGNUM_LOCAL void insertImplementationExt(Source, Type, UnsignedInt, DebugOutput::Severity, Containers::ArrayView<const char> string);
         #ifndef MAGNUM_TARGET_GLES
-        static MAGNUM_LOCAL void insertImplementationGremedy(Source, Type, UnsignedInt, DebugOutput::Severity, Containers::ArrayReference<const char> string);
+        static MAGNUM_LOCAL void insertImplementationGremedy(Source, Type, UnsignedInt, DebugOutput::Severity, Containers::ArrayView<const char> string);
         #endif
 };
 
@@ -762,6 +769,8 @@ and the debug output is either not supported or turned off, the calls will not
 result in any allocations and thus won't have any negative performance effects.
 
 @see @ref DebugMessage
+
+@requires_gles Debug output is not available in WebGL.
 */
 class MAGNUM_EXPORT DebugGroup {
     /* GCC 4.6 needs the struct keyword */
@@ -876,11 +885,11 @@ class MAGNUM_EXPORT DebugGroup {
         void pop();
 
     private:
-        void pushInternal(Source source, UnsignedInt id, Containers::ArrayReference<const char> message);
+        void pushInternal(Source source, UnsignedInt id, Containers::ArrayView<const char> message);
 
-        static MAGNUM_LOCAL void pushImplementationNoOp(Source source, UnsignedInt id, Containers::ArrayReference<const char> message);
-        static MAGNUM_LOCAL void pushImplementationKhr(Source source, UnsignedInt id, Containers::ArrayReference<const char> message);
-        static MAGNUM_LOCAL void pushImplementationExt(Source source, UnsignedInt id, Containers::ArrayReference<const char> message);
+        static MAGNUM_LOCAL void pushImplementationNoOp(Source source, UnsignedInt id, Containers::ArrayView<const char> message);
+        static MAGNUM_LOCAL void pushImplementationKhr(Source source, UnsignedInt id, Containers::ArrayView<const char> message);
+        static MAGNUM_LOCAL void pushImplementationExt(Source source, UnsignedInt id, Containers::ArrayView<const char> message);
 
         static MAGNUM_LOCAL void popImplementationNoOp();
         static MAGNUM_LOCAL void popImplementationKhr();
@@ -893,5 +902,8 @@ class MAGNUM_EXPORT DebugGroup {
 Debug MAGNUM_EXPORT operator<<(Debug debug, DebugGroup::Source value);
 
 }
+#else
+#error this header is not available in WebGL build
+#endif
 
 #endif

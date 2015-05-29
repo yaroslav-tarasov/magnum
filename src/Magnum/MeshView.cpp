@@ -56,6 +56,7 @@ void MeshView::draw(AbstractShaderProgram& shader, std::initializer_list<std::re
     #endif
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void MeshView::multiDrawImplementationDefault(std::initializer_list<std::reference_wrapper<MeshView>> meshes) {
     CORRADE_INTERNAL_ASSERT(meshes.size());
 
@@ -96,7 +97,7 @@ void MeshView::multiDrawImplementationDefault(std::initializer_list<std::referen
     if(!original._indexBuffer) {
         #ifndef MAGNUM_TARGET_GLES
         glMultiDrawArrays(GLenum(original._primitive), baseVertex, count, meshes.size());
-        #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+        #elif !defined(CORRADE_TARGET_NACL)
         glMultiDrawArraysEXT(GLenum(original._primitive), baseVertex, count, meshes.size());
         #else
         CORRADE_ASSERT_UNREACHABLE();
@@ -115,7 +116,7 @@ void MeshView::multiDrawImplementationDefault(std::initializer_list<std::referen
         {
             #ifndef MAGNUM_TARGET_GLES
             glMultiDrawElements(GLenum(original._primitive), count, GLenum(original._indexType), indices, meshes.size());
-            #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+            #elif !defined(CORRADE_TARGET_NACL)
             glMultiDrawElementsEXT(GLenum(original._primitive), count, GLenum(original._indexType), indices, meshes.size());
             #else
             CORRADE_ASSERT_UNREACHABLE();
@@ -125,6 +126,7 @@ void MeshView::multiDrawImplementationDefault(std::initializer_list<std::referen
 
     (original.*state.unbindImplementation)();
 }
+#endif
 
 #ifdef MAGNUM_TARGET_GLES
 void MeshView::multiDrawImplementationFallback(std::initializer_list<std::reference_wrapper<MeshView>> meshes) {
@@ -155,17 +157,5 @@ void MeshView::draw(AbstractShaderProgram& shader) {
     _original.get().drawInternal(_count, _baseVertex, _instanceCount, _indexOffset);
     #endif
 }
-
-#ifdef MAGNUM_BUILD_DEPRECATED
-void MeshView::draw() {
-    #ifndef MAGNUM_TARGET_GLES
-    _original.get().drawInternal(_count, _baseVertex, _instanceCount, _baseInstance, _indexOffset, _indexStart, _indexEnd);
-    #elif !defined(MAGNUM_TARGET_GLES2)
-    _original.get().drawInternal(_count, _baseVertex, _instanceCount, _indexOffset, _indexStart, _indexEnd);
-    #else
-    _original.get().drawInternal(_count, _baseVertex, _instanceCount, _indexOffset);
-    #endif
-}
-#endif
 
 }

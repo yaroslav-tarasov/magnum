@@ -30,10 +30,6 @@
 #include "Magnum/Extensions.h"
 #include "Magnum/Test/AbstractOpenGLTester.h"
 
-#ifdef MAGNUM_BUILD_DEPRECATED
-#include "Magnum/DebugMarker.h"
-#endif
-
 namespace Magnum { namespace Test {
 
 struct DebugOutputGLTest: AbstractOpenGLTester {
@@ -49,10 +45,6 @@ struct DebugOutputGLTest: AbstractOpenGLTester {
     void groupNoOp();
     void group();
     void groupFallback();
-
-    #ifdef MAGNUM_BUILD_DEPRECATED
-    void deprecated();
-    #endif
 };
 
 DebugOutputGLTest::DebugOutputGLTest() {
@@ -65,12 +57,7 @@ DebugOutputGLTest::DebugOutputGLTest() {
 
               &DebugOutputGLTest::groupNoOp,
               &DebugOutputGLTest::group,
-              &DebugOutputGLTest::groupFallback,
-
-              #ifdef MAGNUM_BUILD_DEPRECATED
-              &DebugOutputGLTest::deprecated
-              #endif
-              });
+              &DebugOutputGLTest::groupFallback});
 }
 
 void DebugOutputGLTest::setCallback() {
@@ -185,21 +172,6 @@ void DebugOutputGLTest::groupFallback() {
 
     MAGNUM_VERIFY_NO_ERROR();
 }
-
-#ifdef MAGNUM_BUILD_DEPRECATED
-void DebugOutputGLTest::deprecated() {
-    #if defined(__GNUC__) && !defined(CORRADE_GCC45_COMPATIBILITY)
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    #endif
-    DebugMarker::mark("hello");
-    #if defined(__GNUC__) && !defined(CORRADE_GCC45_COMPATIBILITY)
-    #pragma GCC diagnostic pop
-    #endif
-
-    MAGNUM_VERIFY_NO_ERROR();
-}
-#endif
 
 }}
 

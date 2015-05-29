@@ -49,6 +49,12 @@ struct TextureGLTest: AbstractOpenGLTester {
     void construct3D();
 
     #ifndef MAGNUM_TARGET_GLES
+    void wrap1D();
+    #endif
+    void wrap2D();
+    void wrap3D();
+
+    #ifndef MAGNUM_TARGET_GLES
     void bind1D();
     #endif
     void bind2D();
@@ -162,6 +168,12 @@ TextureGLTest::TextureGLTest() {
         #endif
         &TextureGLTest::construct2D,
         &TextureGLTest::construct3D,
+
+        #ifndef MAGNUM_TARGET_GLES
+        &TextureGLTest::wrap1D,
+        #endif
+        &TextureGLTest::wrap2D,
+        &TextureGLTest::wrap3D,
 
         #ifndef MAGNUM_TARGET_GLES
         &TextureGLTest::bind1D,
@@ -307,6 +319,58 @@ void TextureGLTest::construct3D() {
     }
 
     MAGNUM_VERIFY_NO_ERROR();
+}
+
+#ifndef MAGNUM_TARGET_GLES
+void TextureGLTest::wrap1D() {
+    GLuint id;
+    glGenTextures(1, &id);
+
+    /* Releasing won't delete anything */
+    {
+        auto texture = Texture1D::wrap(id, ObjectFlag::DeleteOnDestruction);
+        CORRADE_COMPARE(texture.release(), id);
+    }
+
+    /* ...so we can wrap it again */
+    Texture1D::wrap(id);
+    glDeleteTextures(1, &id);
+}
+#endif
+
+void TextureGLTest::wrap2D() {
+    GLuint id;
+    glGenTextures(1, &id);
+
+    /* Releasing won't delete anything */
+    {
+        auto texture = Texture2D::wrap(id, ObjectFlag::DeleteOnDestruction);
+        CORRADE_COMPARE(texture.release(), id);
+    }
+
+    /* ...so we can wrap it again */
+    Texture2D::wrap(id);
+    glDeleteTextures(1, &id);
+}
+
+void TextureGLTest::wrap3D() {
+    #ifdef MAGNUM_TARGET_GLES2
+    if(!Context::current()->isExtensionSupported<Extensions::GL::OES::texture_3D>())
+        CORRADE_SKIP(Extensions::GL::OES::texture_3D::string() + std::string(" is not supported."));
+    #endif
+
+    GLuint id;
+    glGenTextures(1, &id);
+
+    /* Releasing won't delete anything */
+    {
+        auto texture = Texture3D::wrap(id, ObjectFlag::DeleteOnDestruction);
+        CORRADE_COMPARE(texture.release(), id);
+    }
+
+    /* ...so we can wrap it again */
+    Texture3D::wrap(id);
+    glDeleteTextures(1, &id);
 }
 
 #ifndef MAGNUM_TARGET_GLES
@@ -754,8 +818,8 @@ void TextureGLTest::image1D() {
 
     CORRADE_COMPARE(image.size(), 2);
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
-        Containers::ArrayReference<const UnsignedByte>{Data1D}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>{Data1D}, TestSuite::Compare::Container);
 }
 
 void TextureGLTest::image1DBuffer() {
@@ -771,7 +835,7 @@ void TextureGLTest::image1DBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), 2);
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{Data1D}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data1D}, TestSuite::Compare::Container);
 }
 #endif
 
@@ -797,8 +861,8 @@ void TextureGLTest::image2D() {
 
     CORRADE_COMPARE(image.size(), Vector2i(2));
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
-        Containers::ArrayReference<const UnsignedByte>{Data2D}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>{Data2D}, TestSuite::Compare::Container);
     #endif
 }
 
@@ -818,7 +882,7 @@ void TextureGLTest::image2DBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector2i(2));
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{Data2D}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data2D}, TestSuite::Compare::Container);
     #endif
 }
 #endif
@@ -854,8 +918,8 @@ void TextureGLTest::image3D() {
 
     CORRADE_COMPARE(image.size(), Vector3i(2));
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
-        Containers::ArrayReference<const UnsignedByte>{Data3D}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>{Data3D}, TestSuite::Compare::Container);
     #endif
 }
 
@@ -875,7 +939,7 @@ void TextureGLTest::image3DBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector3i(2));
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{Data3D}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data3D}, TestSuite::Compare::Container);
     #endif
 }
 #endif
@@ -903,8 +967,8 @@ void TextureGLTest::subImage1D() {
 
     CORRADE_COMPARE(image.size(), 4);
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
-        Containers::ArrayReference<const UnsignedByte>{SubData1DComplete}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>{SubData1DComplete}, TestSuite::Compare::Container);
 }
 
 void TextureGLTest::subImage1DBuffer() {
@@ -922,7 +986,7 @@ void TextureGLTest::subImage1DBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), 4);
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{SubData1DComplete}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{SubData1DComplete}, TestSuite::Compare::Container);
 }
 
 void TextureGLTest::subImage1DQuery() {
@@ -941,7 +1005,7 @@ void TextureGLTest::subImage1DQuery() {
 
     CORRADE_COMPARE(image.size(), 2);
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()), Containers::ArrayReference<const UnsignedByte>{Data1D}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()), Containers::ArrayView<const UnsignedByte>{Data1D}, TestSuite::Compare::Container);
 }
 
 void TextureGLTest::subImage1DQueryBuffer() {
@@ -960,7 +1024,7 @@ void TextureGLTest::subImage1DQueryBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), 2);
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{Data1D}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data1D}, TestSuite::Compare::Container);
 }
 #endif
 
@@ -991,8 +1055,8 @@ void TextureGLTest::subImage2D() {
 
     CORRADE_COMPARE(image.size(), Vector2i(4));
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
-        Containers::ArrayReference<const UnsignedByte>{SubData2DComplete}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>{SubData2DComplete}, TestSuite::Compare::Container);
     #endif
 }
 
@@ -1014,7 +1078,7 @@ void TextureGLTest::subImage2DBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector2i(4));
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{SubData2DComplete}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{SubData2DComplete}, TestSuite::Compare::Container);
     #endif
 }
 #endif
@@ -1036,7 +1100,7 @@ void TextureGLTest::subImage2DQuery() {
 
     CORRADE_COMPARE(image.size(), Vector2i{2});
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()), Containers::ArrayReference<const UnsignedByte>{Data2D}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()), Containers::ArrayView<const UnsignedByte>{Data2D}, TestSuite::Compare::Container);
 }
 
 void TextureGLTest::subImage2DQueryBuffer() {
@@ -1055,7 +1119,7 @@ void TextureGLTest::subImage2DQueryBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector2i{2});
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{Data2D}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data2D}, TestSuite::Compare::Container);
 }
 #endif
 
@@ -1106,8 +1170,8 @@ void TextureGLTest::subImage3D() {
 
     CORRADE_COMPARE(image.size(), Vector3i(4));
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
-        Containers::ArrayReference<const UnsignedByte>{SubData3DComplete}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>{SubData3DComplete}, TestSuite::Compare::Container);
     #endif
 }
 
@@ -1129,7 +1193,7 @@ void TextureGLTest::subImage3DBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector3i(4));
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{SubData3DComplete}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{SubData3DComplete}, TestSuite::Compare::Container);
     #endif
 }
 #endif
@@ -1151,7 +1215,7 @@ void TextureGLTest::subImage3DQuery() {
 
     CORRADE_COMPARE(image.size(), Vector3i{2});
     CORRADE_COMPARE_AS(
-        Containers::ArrayReference<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()), Containers::ArrayReference<const UnsignedByte>{Data3D}, TestSuite::Compare::Container);
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()), Containers::ArrayView<const UnsignedByte>{Data3D}, TestSuite::Compare::Container);
 }
 
 void TextureGLTest::subImage3DQueryBuffer() {
@@ -1170,7 +1234,7 @@ void TextureGLTest::subImage3DQueryBuffer() {
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector3i{2});
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayReference<const UnsignedByte>{Data3D}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data3D}, TestSuite::Compare::Container);
 }
 
 void TextureGLTest::generateMipmap1D() {

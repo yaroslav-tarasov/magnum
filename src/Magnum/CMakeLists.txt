@@ -31,7 +31,6 @@ set(Magnum_SRCS
     AbstractFramebuffer.cpp
     AbstractImage.cpp
     AbstractObject.cpp
-    AbstractQuery.cpp
     AbstractTexture.cpp
     AbstractShaderProgram.cpp
     Attribute.cpp
@@ -39,7 +38,6 @@ set(Magnum_SRCS
     ColorFormat.cpp
     CubeMapTexture.cpp
     Context.cpp
-    DebugOutput.cpp
     DefaultFramebuffer.cpp
     Framebuffer.cpp
     Image.cpp
@@ -56,10 +54,8 @@ set(Magnum_SRCS
     Version.cpp
 
     Implementation/BufferState.cpp
-    Implementation/DebugState.cpp
     Implementation/FramebufferState.cpp
     Implementation/MeshState.cpp
-    Implementation/QueryState.cpp
     Implementation/RendererState.cpp
     Implementation/ShaderProgramState.cpp
     Implementation/State.cpp
@@ -85,7 +81,6 @@ set(Magnum_HEADERS
     AbstractFramebuffer.h
     AbstractImage.h
     AbstractObject.h
-    AbstractQuery.h
     AbstractResourceLoader.h
     AbstractShaderProgram.h
     AbstractTexture.h
@@ -96,7 +91,6 @@ set(Magnum_HEADERS
     ColorFormat.h
     Context.h
     CubeMapTexture.h
-    DebugOutput.h
     DefaultFramebuffer.h
     DimensionTraits.h
     Extensions.h
@@ -113,13 +107,11 @@ set(Magnum_HEADERS
     Resource.h
     ResourceManager.h
     ResourceManager.hpp
-    SampleQuery.h
     Sampler.h
     Shader.h
     Texture.h
     TextureFormat.h
     Timeline.h
-    TimeQuery.h
     Types.h
     Version.h
 
@@ -128,42 +120,39 @@ set(Magnum_HEADERS
 # Header files to display in project view of IDEs only
 set(Magnum_PRIVATE_HEADERS
     Implementation/BufferState.h
-    Implementation/DebugState.h
     Implementation/FramebufferState.h
     Implementation/maxTextureSize.h
     Implementation/MeshState.h
-    Implementation/QueryState.h
     Implementation/RendererState.h
     Implementation/ShaderProgramState.h
     Implementation/ShaderState.h
     Implementation/State.h
     Implementation/TextureState.h)
 
-# Deprecated headers
-if(BUILD_DEPRECATED)
-    set(Magnum_HEADERS ${Magnum_HEADERS}
-        DebugMarker.h
-        DebugMessage.h
-        Query.h)
-endif()
-
 # Desktop-only stuff
 if(NOT TARGET_GLES)
-    set(Magnum_HEADERS ${Magnum_HEADERS}
-        BufferTexture.h
-        CubeMapTextureArray.h
-        RectangleTexture.h)
-    set(Magnum_SRCS ${Magnum_SRCS}
+    list(APPEND Magnum_SRCS
         BufferTexture.cpp
         CubeMapTextureArray.cpp
         RectangleTexture.cpp)
+
+    list(APPEND Magnum_HEADERS
+        BufferTexture.h
+        CubeMapTextureArray.h
+        RectangleTexture.h)
 endif()
 
-# Non-ES2 stuff
+# OpenGL ES 3.0 and WebGL 2.0 stuff
 if(NOT TARGET_GLES2)
-    set(Magnum_HEADERS ${Magnum_HEADERS}
+    list(APPEND Magnum_SRCS
+        BufferImage.cpp
+        TextureArray.cpp
+        TransformFeedback.cpp
+
+        Implementation/TransformFeedbackState.cpp)
+
+    list(APPEND Magnum_HEADERS
         BufferImage.h
-        MultisampleTexture.h
         PrimitiveQuery.h
         TextureArray.h
         TransformFeedback.h)
@@ -171,13 +160,51 @@ if(NOT TARGET_GLES2)
     list(APPEND Magnum_PRIVATE_HEADES
         Implementation/TransformFeedbackState.h)
 
-    set(Magnum_SRCS ${Magnum_SRCS}
-        BufferImage.cpp
-        MultisampleTexture.cpp
-        TextureArray.cpp
-        TransformFeedback.cpp
+endif()
 
-        Implementation/TransformFeedbackState.cpp)
+# Desktop and OpenGL ES stuff that is not available in WebGL
+if(NOT TARGET_WEBGL)
+    list(APPEND Magnum_SRCS
+        DebugOutput.cpp
+
+        Implementation/DebugState.cpp)
+
+    list(APPEND Magnum_HEADERS
+        DebugOutput.h
+        TimeQuery.h)
+
+    list(APPEND Magnum_PRIVATE_HEADERS
+        Implementation/DebugState.h)
+
+    if(NOT TARGET_GLES2)
+        list(APPEND Magnum_SRCS MultisampleTexture.cpp)
+        list(APPEND Magnum_HEADERS MultisampleTexture.h)
+    endif()
+
+    if(BUILD_DEPRECATED)
+        list(APPEND Magnum_HEADERS
+            DebugMessage.h)
+    endif()
+endif()
+
+# Desktop, OpenGL ES and WebGL 2.0 stuff that is not available in WebGL 1.0
+if(NOT (TARGET_WEBGL AND TARGET_GLES2))
+    list(APPEND Magnum_SRCS
+        AbstractQuery.cpp
+
+        Implementation/QueryState.cpp)
+
+    list(APPEND Magnum_HEADERS
+        AbstractQuery.h
+        SampleQuery.h)
+
+    list(APPEND Magnum_PRIVATE_HEADERS
+        Implementation/QueryState.h)
+
+    if(BUILD_DEPRECATED)
+        list(APPEND Magnum_HEADERS
+            Query.h)
+    endif()
 endif()
 
 # Link in GL function pointer variables on platforms that support it

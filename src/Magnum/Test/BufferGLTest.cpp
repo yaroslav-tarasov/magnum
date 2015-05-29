@@ -40,6 +40,7 @@ struct BufferGLTest: AbstractOpenGLTester {
     void construct();
     void constructCopy();
     void constructMove();
+    void wrap();
 
     void label();
 
@@ -50,7 +51,7 @@ struct BufferGLTest: AbstractOpenGLTester {
 
     void data();
     void map();
-    #ifdef MAGNUM_TARGET_GLES2
+    #ifdef CORRADE_TARGET_NACL
     void mapSub();
     #endif
     void mapRange();
@@ -65,6 +66,7 @@ BufferGLTest::BufferGLTest() {
     addTests({&BufferGLTest::construct,
               &BufferGLTest::constructCopy,
               &BufferGLTest::constructMove,
+              &BufferGLTest::wrap,
 
               &BufferGLTest::label,
 
@@ -75,7 +77,7 @@ BufferGLTest::BufferGLTest() {
 
               &BufferGLTest::data,
               &BufferGLTest::map,
-              #ifdef MAGNUM_TARGET_GLES2
+              #ifdef CORRADE_TARGET_NACL
               &BufferGLTest::mapSub,
               #endif
               &BufferGLTest::mapRange,
@@ -131,6 +133,21 @@ void BufferGLTest::constructMove() {
     CORRADE_VERIFY(cId > 0);
     CORRADE_COMPARE(b.id(), cId);
     CORRADE_COMPARE(c.id(), id);
+}
+
+void BufferGLTest::wrap() {
+    GLuint id;
+    glGenBuffers(1, &id);
+
+    /* Releasing won't delete anything */
+    {
+        auto buffer = Buffer::wrap(id, ObjectFlag::DeleteOnDestruction);
+        CORRADE_COMPARE(buffer.release(), id);
+    }
+
+    /* ...so we can wrap it again */
+    Buffer::wrap(id);
+    glDeleteBuffers(1, &id);
 }
 
 void BufferGLTest::label() {
@@ -273,9 +290,9 @@ void BufferGLTest::map() {
     buffer.setData(data, BufferUsage::StaticDraw);
 
     #ifndef MAGNUM_TARGET_GLES
-    char* contents = reinterpret_cast<char*>(buffer.map(Buffer::MapAccess::ReadWrite));
+    char* contents = buffer.map<char>(Buffer::MapAccess::ReadWrite);
     #else
-    char* contents = reinterpret_cast<char*>(buffer.map(Buffer::MapAccess::WriteOnly));
+    char* contents = buffer.map<char>(Buffer::MapAccess::WriteOnly);
     #endif
     MAGNUM_VERIFY_NO_ERROR();
 
@@ -296,7 +313,7 @@ void BufferGLTest::map() {
     #endif
 }
 
-#ifdef MAGNUM_TARGET_GLES2
+#ifdef CORRADE_TARGET_NACL
 void BufferGLTest::mapSub() {
     if(!Context::current()->isExtensionSupported<Extensions::GL::CHROMIUM::map_sub>())
         CORRADE_SKIP(Extensions::GL::CHROMIUM::map_sub::string() + std::string(" is not supported"));
@@ -306,7 +323,7 @@ void BufferGLTest::mapSub() {
     constexpr char data[] = {2, 7, 5, 13, 25};
     buffer.setData(data, BufferUsage::StaticDraw);
 
-    char* contents = reinterpret_cast<char*>(buffer.mapSub(1, 4, Buffer::MapAccess::WriteOnly));
+    char* contents = buffer.mapSub<char>(1, 4, Buffer::MapAccess::WriteOnly);
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_VERIFY(contents);
@@ -332,7 +349,7 @@ void BufferGLTest::mapRange() {
     Buffer buffer;
     buffer.setData(data, BufferUsage::StaticDraw);
 
-    char* contents = reinterpret_cast<char*>(buffer.map(1, 4, Buffer::MapFlag::Read|Buffer::MapFlag::Write));
+    char* contents = buffer.map<char>(1, 4, Buffer::MapFlag::Read|Buffer::MapFlag::Write);
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_VERIFY(contents);
@@ -364,7 +381,7 @@ void BufferGLTest::mapRangeExplicitFlush() {
     buffer.setData(data, BufferUsage::StaticDraw);
 
     /* Map, set byte, don't flush and unmap */
-    char* contents = reinterpret_cast<char*>(buffer.map(1, 4, Buffer::MapFlag::Write|Buffer::MapFlag::FlushExplicit));
+    char* contents = buffer.map<char>(1, 4, Buffer::MapFlag::Write|Buffer::MapFlag::FlushExplicit);
     CORRADE_VERIFY(contents);
     contents[2] = 99;
     CORRADE_VERIFY(buffer.unmap());
@@ -373,7 +390,7 @@ void BufferGLTest::mapRangeExplicitFlush() {
     /* Unflushed range _might_ not be changed, thus nothing to test */
 
     /* Map, set byte, flush and unmap */
-    contents = reinterpret_cast<char*>(buffer.map(1, 4, Buffer::MapFlag::Write|Buffer::MapFlag::FlushExplicit));
+    contents = buffer.map<char>(1, 4, Buffer::MapFlag::Write|Buffer::MapFlag::FlushExplicit);
     CORRADE_VERIFY(contents);
     contents[3] = 107;
     buffer.flushMappedRange(3, 1);

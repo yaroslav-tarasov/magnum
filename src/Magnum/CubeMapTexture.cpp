@@ -49,7 +49,7 @@ Vector2i CubeMapTexture::maxSize() {
     return Vector2i{Implementation::maxCubeMapTextureSideSize()};
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 Vector2i CubeMapTexture::imageSize(const Int level) {
     return (this->*Context::current()->state().texture->getCubeImageSizeImplementation)(level);
 }
@@ -153,7 +153,7 @@ CubeMapTexture& CubeMapTexture::setSubImage(const Coordinate coordinate, const I
 }
 #endif
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 Vector2i CubeMapTexture::getImageSizeImplementationDefault(const Int level) {
     Vector2i size;
     bindInternal();
@@ -171,7 +171,7 @@ Vector2i CubeMapTexture::getImageSizeImplementationDSA(const Int level) {
 }
 
 Vector2i CubeMapTexture::getImageSizeImplementationDSAEXT(const Int level) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     Vector2i size;
     glGetTextureLevelParameterivEXT(_id, GL_TEXTURE_CUBE_MAP_POSITIVE_X, level, GL_TEXTURE_WIDTH, &size.x());
     glGetTextureLevelParameterivEXT(_id, GL_TEXTURE_CUBE_MAP_POSITIVE_X, level, GL_TEXTURE_HEIGHT, &size.y());
@@ -191,7 +191,7 @@ void CubeMapTexture::getImageImplementationDSA(const Coordinate coordinate, cons
 }
 
 void CubeMapTexture::getImageImplementationDSAEXT(const Coordinate coordinate, const GLint level, const Vector2i&, const ColorFormat format, const ColorType type, std::size_t, GLvoid* const data) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glGetTextureImageEXT(_id, GLenum(coordinate), level, GLenum(format), GLenum(type), data);
 }
 
@@ -212,7 +212,7 @@ void CubeMapTexture::subImageImplementationDSA(const Coordinate coordinate, cons
 }
 
 void CubeMapTexture::subImageImplementationDSAEXT(const Coordinate coordinate, const GLint level, const Vector2i& offset, const Vector2i& size, const ColorFormat format, const ColorType type, const GLvoid* const data) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glTextureSubImage2DEXT(_id, GLenum(coordinate), level, offset.x(), offset.y(), size.x(), size.y(), GLenum(format), GLenum(type), data);
 }
 #endif

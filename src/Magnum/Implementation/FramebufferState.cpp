@@ -39,7 +39,10 @@ constexpr const Range2Di FramebufferState::DisengagedViewport;
 const Range2Di FramebufferState::DisengagedViewport{{}, {-1, -1}};
 #endif
 
-FramebufferState::FramebufferState(Context& context, std::vector<std::string>& extensions): readBinding{0}, drawBinding{0}, renderbufferBinding{0}, maxDrawBuffers{0}, maxColorAttachments{0}, maxRenderbufferSize{0}, maxSamples{0},
+FramebufferState::FramebufferState(Context& context, std::vector<std::string>& extensions): readBinding{0}, drawBinding{0}, renderbufferBinding{0}, maxDrawBuffers{0}, maxColorAttachments{0}, maxRenderbufferSize{0},
+    #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
+    maxSamples{0},
+    #endif
     #ifndef MAGNUM_TARGET_GLES
     maxDualSourceDrawBuffers{0},
     #endif
@@ -94,16 +97,24 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
     #endif
     {
         checkStatusImplementation = &AbstractFramebuffer::checkStatusImplementationDefault;
+        #ifndef MAGNUM_TARGET_GLES2
         drawBuffersImplementation = &AbstractFramebuffer::drawBuffersImplementationDefault;
+        #endif
+        #ifndef MAGNUM_TARGET_GLES
         drawBufferImplementation = &AbstractFramebuffer::drawBufferImplementationDefault;
+        #endif
+        #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
         readBufferImplementation = &AbstractFramebuffer::readBufferImplementationDefault;
+        #endif
 
         renderbufferImplementation = &Framebuffer::renderbufferImplementationDefault;
         #ifndef MAGNUM_TARGET_GLES
         texture1DImplementation = &Framebuffer::texture1DImplementationDefault;
         #endif
         texture2DImplementation = &Framebuffer::texture2DImplementationDefault;
+        #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
         textureLayerImplementation = &Framebuffer::textureLayerImplementationDefault;
+        #endif
 
         renderbufferStorageImplementation = &Renderbuffer::storageImplementationDefault;
     }
@@ -112,10 +123,13 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
     /* Framebuffer binding and checking on ES2 */
     /* Optimistically set separate binding targets and check if one of the
        extensions providing them is available */
+    #ifndef MAGNUM_TARGET_WEBGL
     bindImplementation = &Framebuffer::bindImplementationDefault;
     bindInternalImplementation = &Framebuffer::bindImplementationDefault;
+    #endif
     checkStatusImplementation = &Framebuffer::checkStatusImplementationDefault;
 
+    #ifndef MAGNUM_TARGET_WEBGL
     if(context.isExtensionSupported<Extensions::GL::ANGLE::framebuffer_blit>()) {
         extensions.push_back(Extensions::GL::ANGLE::framebuffer_blit::string());
 
@@ -140,7 +154,28 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
     }
     #endif
 
-    /* Framebuffer reading implementation */
+    #ifndef MAGNUM_TARGET_WEBGL
+    /* Framebuffer draw mapping on ES2 */
+    if(context.isExtensionSupported<Extensions::GL::EXT::draw_buffers>()) {
+        extensions.push_back(Extensions::GL::EXT::draw_buffers::string());
+
+        drawBuffersImplementation = &AbstractFramebuffer::drawBuffersImplementationEXT;
+    } else if(context.isExtensionSupported<Extensions::GL::NV::draw_buffers>()) {
+        extensions.push_back(Extensions::GL::NV::draw_buffers::string());
+
+        drawBuffersImplementation = &AbstractFramebuffer::drawBuffersImplementationNV;
+    } else drawBuffersImplementation = nullptr;
+    #else
+    if(context.isExtensionSupported<Extensions::GL::WEBGL::draw_buffers>()) {
+        extensions.push_back(Extensions::GL::WEBGL::draw_buffers::string());
+        /* The EXT implementation is exposed in Emscripten */
+        drawBuffersImplementation = &AbstractFramebuffer::drawBuffersImplementationEXT;
+    } else drawBuffersImplementation = nullptr;
+    #endif
+    #endif
+
+    /* Framebuffer reading implementation in desktop/ES */
+    #ifndef MAGNUM_TARGET_WEBGL
     #ifndef MAGNUM_TARGET_GLES
     if(context.isExtensionSupported<Extensions::GL::ARB::robustness>())
     #else
@@ -156,6 +191,11 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
         readImplementation = &AbstractFramebuffer::readImplementationRobustness;
     } else readImplementation = &AbstractFramebuffer::readImplementationDefault;
 
+    /* Framebuffer reading in WebGL */
+    #else
+    readImplementation = &AbstractFramebuffer::readImplementationDefault;
+    #endif
+
     /* Multisample renderbuffer storage implementation */
     #ifndef MAGNUM_TARGET_GLES
     if(context.isExtensionSupported<Extensions::GL::ARB::direct_state_access>()) {
@@ -170,7 +210,7 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
     } else
     #endif
     {
-        #ifdef MAGNUM_TARGET_GLES2
+        #if defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         if(context.isExtensionSupported<Extensions::GL::ANGLE::framebuffer_multisample>()) {
             extensions.push_back(Extensions::GL::ANGLE::framebuffer_multisample::string());
 
@@ -180,7 +220,7 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
 
             renderbufferStorageMultisampleImplementation = &Renderbuffer::storageMultisampleImplementationNV;
         } else renderbufferStorageMultisampleImplementation = nullptr;
-        #else
+        #elif !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
         renderbufferStorageMultisampleImplementation = &Renderbuffer::storageMultisampleImplementationDefault;
         #endif
     }
@@ -205,7 +245,7 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
     }
 
     /* Framebuffer invalidation implementation on ES2 */
-    #elif defined(MAGNUM_TARGET_GLES2)
+    #elif defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     if(context.isExtensionSupported<Extensions::GL::EXT::discard_framebuffer>()) {
         extensions.push_back(Extensions::GL::EXT::discard_framebuffer::string());
 
@@ -215,7 +255,7 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
     }
 
     /* Always available on ES3 */
-    #else
+    #elif !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
     invalidateImplementation = &AbstractFramebuffer::invalidateImplementationDefault;
     invalidateSubImplementation = &AbstractFramebuffer::invalidateImplementationDefault;
     #endif
@@ -229,7 +269,7 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
     } else blitImplementation = &AbstractFramebuffer::blitImplementationDefault;
 
     /* Blit implementation on ES2 */
-    #elif defined(MAGNUM_TARGET_GLES2)
+    #elif defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     if(context.isExtensionSupported<Extensions::GL::ANGLE::framebuffer_blit>()) {
         extensions.push_back(Extensions::GL::ANGLE::framebuffer_blit::string());
         blitImplementation = &AbstractFramebuffer::blitImplementationANGLE;
@@ -241,8 +281,13 @@ FramebufferState::FramebufferState(Context& context, std::vector<std::string>& e
     } else blitImplementation = nullptr;
 
     /* Always available on ES3 */
-    #else
+    #elif !defined(MAGNUM_TARGET_WEBGL)
     blitImplementation = &AbstractFramebuffer::blitImplementationDefault;
+    #endif
+
+    #if defined(MAGNUM_TARGET_WEBGL) && !defined(MAGNUM_TARGET_GLES2)
+    static_cast<void>(context);
+    static_cast<void>(extensions);
     #endif
 }
 

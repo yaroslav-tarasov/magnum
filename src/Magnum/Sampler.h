@@ -57,9 +57,12 @@ class MAGNUM_EXPORT Sampler {
              * @requires_gles30 Extension @es_extension{OES,texture_float_linear} /
              *      @es_extension2{OES,texture_half_float_linear,OES_texture_float_linear}
              *      for linear interpolation of textures with
-             *      @ref Magnum::TextureFormat "TextureFormat::HalfFloat" /
-             *      @ref Magnum::TextureFormat "TextureFormat::Float" in OpenGL
-             *      ES 2.0
+             *      @ref TextureFormat::HalfFloat / @ref TextureFormat::Float
+             *      in OpenGL ES 2.0.
+             * @requires_webgl20 Extension @webgl_extension{OES,texture_float_linear}
+             *      / @webgl_extension{OES,texture_half_float_linear} for
+             *      linear interpolation of textures with @ref TextureFormat::HalfFloat
+             *      / @ref TextureFormat::Float in WebGL 1.0.
              */
             Linear = GL_LINEAR
         };
@@ -83,9 +86,12 @@ class MAGNUM_EXPORT Sampler {
              * @requires_gles30 Extension @es_extension{OES,texture_float_linear} /
              *      @es_extension2{OES,texture_half_float_linear,OES_texture_float_linear}
              *      for linear interpolation of textures with
-             *      @ref Magnum::TextureFormat "TextureFormat::HalfFloat" /
-             *      @ref Magnum::TextureFormat "TextureFormat::Float" in OpenGL
-             *      ES 2.0
+             *      @ref TextureFormat::HalfFloat / @ref TextureFormat::Float
+             *      in OpenGL ES 2.0.
+             * @requires_webgl20 Extension @webgl_extension{OES,texture_float_linear}
+             *      / @webgl_extension{OES,texture_half_float_linear} for
+             *      linear interpolation of textures with @ref TextureFormat::HalfFloat
+             *      / @ref TextureFormat::Float in WebGL 1.0.
              */
             Linear = GL_NEAREST_MIPMAP_LINEAR & ~GL_NEAREST
         };
@@ -110,16 +116,19 @@ class MAGNUM_EXPORT Sampler {
              */
             ClampToEdge = GL_CLAMP_TO_EDGE,
 
+            #ifndef MAGNUM_TARGET_WEBGL
             /**
              * Clamp to border color. Coordinates out of range will be clamped
              * to border color (set with
              * @ref Texture::setBorderColor() "*Texture::setBorderColor()").
              * @requires_es_extension Extension @es_extension{NV,texture_border_clamp}
+             * @requires_gles Border clamp is not available in WebGL.
              */
             #ifndef MAGNUM_TARGET_GLES
             ClampToBorder = GL_CLAMP_TO_BORDER,
             #else
             ClampToBorder = GL_CLAMP_TO_BORDER_NV,
+            #endif
             #endif
 
             #ifndef MAGNUM_TARGET_GLES
@@ -128,20 +137,24 @@ class MAGNUM_EXPORT Sampler {
              * edge after that. **Unavailable on rectangle textures.**
              * @requires_gl44 Extension @extension{ARB,texture_mirror_clamp_to_edge},
              *      @extension{ATI,texture_mirror_once} or @extension{EXT,texture_mirror_clamp}
-             * @requires_gl Only separate @ref Magnum::Sampler::Wrapping "Wrapping::MirroredRepeat"
-             *      or @ref Magnum::Sampler::Wrapping "Wrapping::ClampToEdge"
-             *      is available in OpenGL ES.
+             * @requires_gl Only separate @ref Wrapping::MirroredRepeat or
+             *      @ref Wrapping::ClampToEdge is available in OpenGL ES and
+             *      WebGL.
              */
             MirrorClampToEdge = GL_MIRROR_CLAMP_TO_EDGE
             #endif
         };
 
+        #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
         /**
          * @brief Depth texture comparison mode
          *
          * @see @ref CompareFunction,
          *      @ref Texture::setCompareMode() "*Texture::setCompareMode()"
-         * @requires_gles30 Extension @es_extension{EXT,shadow_samplers}
+         * @requires_gles30 Extension @es_extension{EXT,shadow_samplers} in
+         *      OpenGL ES 2.0.
+         * @requires_webgl20 Depth texture comparison is not available in WebGL
+         *      1.0.
          */
         enum class CompareMode: GLenum {
             /** Directly output the depth value */
@@ -163,7 +176,10 @@ class MAGNUM_EXPORT Sampler {
          * @ref CompareMode::CompareRefToTexture.
          * @see @ref Texture::setCompareFunction() "*Texture::setCompareFunction()",
          *      @ref Texture::setCompareMode() "*Texture::setCompareMode()"
-         * @requires_gles30 Extension @es_extension{EXT,shadow_samplers}
+         * @requires_gles30 Extension @es_extension{EXT,shadow_samplers} in
+         *      OpenGL ES 2.0.
+         * @requires_webgl20 Depth texture comparison is not available in WebGL
+         *      1.0.
          */
         enum class CompareFunction: GLenum {
             Never = GL_NEVER,           /**< Always `0.0` */
@@ -205,15 +221,17 @@ class MAGNUM_EXPORT Sampler {
              */
             Greater = GL_GREATER
         };
+        #endif
 
-        #ifndef MAGNUM_TARGET_GLES2
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         /**
          * @brief Depth/stencil texture mode
          *
          * @see @ref Texture::setDepthStencilMode() "*Texture::setDepthStencilMode()"
          * @requires_gl43 Extension @extension{ARB,stencil_texturing}
          * @requires_gles31 Stencil texturing is not available in OpenGL ES 3.0
-         *      and older
+         *      and older.
+         * @requires_gles Stencil texturing is not available in WebGL.
          */
         enum class DepthStencilMode: GLenum {
             /** Sample depth component */
@@ -244,11 +262,13 @@ Debug MAGNUM_EXPORT operator<<(Debug debug, Sampler::Mipmap value);
 /** @debugoperatorclassenum{Magnum::Sampler,Magnum::Sampler::Wrapping} */
 Debug MAGNUM_EXPORT operator<<(Debug debug, Sampler::Wrapping value);
 
+#if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
 /** @debugoperatorclassenum{Magnum::Sampler,Magnum::Sampler::CompareMode} */
 Debug MAGNUM_EXPORT operator<<(Debug debug, Sampler::CompareMode value);
 
 /** @debugoperatorclassenum{Magnum::Sampler,Magnum::Sampler::CompareFunction} */
 Debug MAGNUM_EXPORT operator<<(Debug debug, Sampler::CompareFunction value);
+#endif
 
 #ifndef MAGNUM_TARGET_GLES
 /** @debugoperatorclassenum{Magnum::Sampler,Magnum::Sampler::DepthStencilMode} */

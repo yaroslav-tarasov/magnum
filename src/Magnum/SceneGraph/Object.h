@@ -296,24 +296,6 @@ template<class Transformation> class Object: public AbstractObject<Transformatio
          */
         std::vector<MatrixType> transformationMatrices(const std::vector<std::reference_wrapper<Object<Transformation>>>& objects, const MatrixType& initialTransformationMatrix = MatrixType()) const;
 
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        /**
-         * @copybrief transformationMatrices()
-         * @deprecated Use @ref Magnum::SceneGraph::Object::transformationMatrices() "transformationMatrices(const std::vector<std::reference_wrapper<Object<Transformation>>>&, const MatrixType&)" instead.
-         */
-        CORRADE_DEPRECATED("use transformationMatrices(const std::vector<std::reference_wrapper<Object<Transformation>>>&, const MatrixType&) instead") std::vector<MatrixType> transformationMatrices(const std::vector<Object<Transformation>*>& objects, const MatrixType& initialTransformationMatrix = MatrixType()) const;
-
-        #ifdef CORRADE_GCC47_COMPATIBILITY
-        /* Workarounds to avoid ambiguous overload errors on GCC < 4.8. And I
-           thought 4.7 was bug-free. */
-        std::vector<MatrixType> transformationMatrices(std::initializer_list<std::reference_wrapper<Object<Transformation>>> objects, const MatrixType& initialTransformationMatrix = MatrixType()) const {
-            /* GCC 4.5 doesn't like {} here */
-            return transformationMatrices(std::vector<std::reference_wrapper<Object<Transformation>>>(objects), initialTransformationMatrix);
-        }
-        CORRADE_DEPRECATED("use transformationMatrices(const std::vector<std::reference_wrapper<Object<Transformation>>>&, const MatrixType&) instead") std::vector<MatrixType> transformationMatrices(std::initializer_list<Object<Transformation>*> objects, const MatrixType& initialTransformationMatrix = MatrixType()) const;
-        #endif
-        #endif
-
         /**
          * @brief Transformations of given group of objects relative to this object
          *
@@ -324,32 +306,6 @@ template<class Transformation> class Object: public AbstractObject<Transformatio
         /* `objects` passed by copy intentionally (to allow move from
            transformationMatrices() and avoid copy in the function itself) */
         std::vector<typename Transformation::DataType> transformations(std::vector<std::reference_wrapper<Object<Transformation>>> objects, const typename Transformation::DataType& initialTransformation = typename Transformation::DataType()) const;
-
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        /**
-         * @copybrief transformations()
-         * @deprecated Use @ref Magnum::SceneGraph::Object::transformations() "transformations(std::vector<std::reference_wrapper<Object<Transformation>>>, const typename Transformation::DataType&)" instead.
-         */
-        CORRADE_DEPRECATED("use transformations(std::vector<std::reference_wrapper<Object<Transformation>>>, const typename Transformation::DataType&) instead") std::vector<typename Transformation::DataType> transformations(const std::vector<Object<Transformation>*>& objects, const typename Transformation::DataType& initialTransformation = typename Transformation::DataType()) const;
-
-        #if defined(CORRADE_GCC47_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
-        /* Workarounds to avoid ambiguous overload errors on GCC < 4.8. And I
-           thought 4.7 was bug-free. This issue is somehow also in MSVC 2013,
-           but only here and not with setClean() and others. */
-        std::vector<typename Transformation::DataType> transformations(std::initializer_list<std::reference_wrapper<Object<Transformation>>> objects, const typename Transformation::DataType& initialTransformation =
-            #ifndef CORRADE_MSVC2013_COMPATIBILITY
-            typename Transformation::DataType()
-            #else
-            Transformation::DataType()
-            #endif
-            ) const
-        {
-            /* GCC 4.5 doesn't like {} here */
-            return transformations(std::vector<std::reference_wrapper<Object<Transformation>>>(objects), initialTransformation);
-        }
-        CORRADE_DEPRECATED("use transformations(std::vector<std::reference_wrapper<Object<Transformation>>>, const typename Transformation::DataType&) instead") std::vector<typename Transformation::DataType> transformations(std::initializer_list<Object<Transformation>*> objects, const typename Transformation::DataType& initialTransformation = typename Transformation::DataType()) const;
-        #endif
-        #endif
 
         /*@}*/
 
@@ -367,24 +323,6 @@ template<class Transformation> class Object: public AbstractObject<Transformatio
          */
         /* `objects` passed by copy intentionally (to avoid copy internally) */
         static void setClean(std::vector<std::reference_wrapper<Object<Transformation>>> objects);
-
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        /**
-         * @copybrief setClean(std::vector<std::reference_wrapper<Object<Transformation>>>)
-         * @deprecated Use @ref Magnum::SceneGraph::Object::setClean(std::vector<std::reference_wrapper<Object<Transformation>>>) "setClean(std::vector<std::reference_wrapper<Object<Transformation>>>)" instead.
-         */
-        CORRADE_DEPRECATED("use setClean(std::vector<std::reference_wrapper<Object<Transformation>>>) instead") static void setClean(const std::vector<Object<Transformation>*>& objects);
-
-        #ifdef CORRADE_GCC47_COMPATIBILITY
-        /* Workarounds to avoid ambiguous overload errors on GCC < 4.8. And I
-           thought 4.7 was bug-free. */
-        static void setClean(std::initializer_list<std::reference_wrapper<Object<Transformation>>> objects) {
-            /* GCC 4.5 doesn't like {} here */
-            setClean(std::vector<std::reference_wrapper<Object<Transformation>>>(objects));
-        }
-        static CORRADE_DEPRECATED("use setClean(std::vector<std::reference_wrapper<Object<Transformation>>>) instead") void setClean(std::initializer_list<Object<Transformation>*> objects);
-        #endif
-        #endif
 
         /** @copydoc AbstractObject::isDirty() */
         bool isDirty() const { return !!(flags & Flag::Dirty); }

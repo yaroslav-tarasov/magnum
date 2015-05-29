@@ -103,10 +103,13 @@ class MAGNUM_EXPORT Context {
     friend class Platform::Context;
 
     public:
+        #ifndef MAGNUM_TARGET_WEBGL
         /**
          * @brief Context flag
          *
-         * @see @ref Flags, @ref flags(), @ref Platform::Sdl2Application::Configuration::setFlags() "Platform::*Application::Configuration::setFlags()"
+         * @see @ref Flags, @ref flags(),
+         *      @ref Platform::Sdl2Application::Configuration::setFlags() "Platform::*Application::Configuration::setFlags()"
+         * @requires_gles Context flags are not available in WebGL.
          */
         enum class Flag: GLint {
             /**
@@ -128,15 +131,7 @@ class MAGNUM_EXPORT Context {
              * @todo In ES available under glGetIntegerv(CONTEXT_ROBUST_ACCESS_EXT),
              *      how to make it compatible?
              */
-            RobustAccess = GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT_ARB,
-
-            #ifdef MAGNUM_BUILD_DEPRECATED
-            /**
-             * @copybrief Context::Flag::RobustAccess
-             * @deprecated Use @ref Magnum::Context::Flag::RobustAccess "Context::Flag::RobustAccess" instead.
-             */
-            Robustness = GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT_ARB
-            #endif
+            RobustAccess = GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT_ARB
             #endif
         };
 
@@ -144,8 +139,10 @@ class MAGNUM_EXPORT Context {
          * @brief Context flags
          *
          * @see @ref flags()
+         * @requires_gles Context flags are not available in WebGL.
          */
         typedef Containers::EnumSet<Flag, GLint> Flags;
+        #endif
 
         /**
          * @brief State to reset
@@ -236,26 +233,9 @@ class MAGNUM_EXPORT Context {
         /**
          * @brief OpenGL version
          *
-         * @see @ref majorVersion(), @ref minorVersion(), @ref versionString(),
-         *      @ref shadingLanguageVersionString()
+         * @see @ref versionString(), @ref shadingLanguageVersionString()
          */
         Version version() const { return _version; }
-
-        /**
-         * @brief Major OpenGL version (e.g. `4`)
-         *
-         * @see @ref minorVersion(), @ref version(), @ref versionString(),
-         *      @ref shadingLanguageVersionString()
-         */
-        Int majorVersion() const { return _majorVersion; }
-
-        /**
-         * @brief Minor OpenGL version (e.g. `3`)
-         *
-         * @see @ref majorVersion(), @ref version(), @ref versionString(),
-         *      @ref shadingLanguageVersionString()
-         */
-        Int minorVersion() const { return _minorVersion; }
 
         /**
          * @brief Vendor string
@@ -327,8 +307,14 @@ class MAGNUM_EXPORT Context {
          */
         std::vector<std::string> extensionStrings() const;
 
-        /** @brief Context flags */
+        #ifndef MAGNUM_TARGET_WEBGL
+        /**
+         * @brief Context flags
+         *
+         * @requires_gles Context flags are not available in WebGL.
+         */
         Flags flags() const { return _flags; }
+        #endif
 
         /**
          * @brief Supported extensions
@@ -485,9 +471,9 @@ class MAGNUM_EXPORT Context {
         MAGNUM_LOCAL void setupDriverWorkarounds();
 
         Version _version;
-        Int _majorVersion;
-        Int _minorVersion;
+        #ifndef MAGNUM_TARGET_WEBGL
         Flags _flags;
+        #endif
 
         std::array<Version, 160> _extensionRequiredVersion;
         std::bitset<160> extensionStatus;
@@ -498,8 +484,10 @@ class MAGNUM_EXPORT Context {
         std::optional<DetectedDrivers> _detectedDrivers;
 };
 
+#ifndef MAGNUM_TARGET_WEBGL
 /** @debugoperatorclassenum{Magnum::Context,Magnum::Context::Flag} */
 MAGNUM_EXPORT Debug operator<<(Debug debug, Context::Flag value);
+#endif
 
 /** @hideinitializer
 @brief Assert that given OpenGL version is supported

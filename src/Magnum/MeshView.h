@@ -36,9 +36,6 @@
 #include "Magnum/OpenGL.h"
 #include "Magnum/visibility.h"
 
-#ifdef MAGNUM_BUILD_DEPRECATED
-#include <Corrade/Utility/Macros.h>
-#endif
 #ifdef CORRADE_MSVC2013_COMPATIBILITY
 #include "Magnum/Mesh.h" /* std::reference_wrapper needs full definition uhh */
 #endif
@@ -76,7 +73,8 @@ class MAGNUM_EXPORT MeshView {
          * @ref draw(AbstractShaderProgram&) calls.
          *
          * If @extension{ARB,vertex_array_object} (part of OpenGL 3.0), OpenGL
-         * ES 3.0 or @es_extension{OES,vertex_array_object} in OpenGL ES 2.0 is
+         * ES 3.0, WebGL 2.0, @es_extension{OES,vertex_array_object} in OpenGL
+         * ES 2.0 or @webgl_extension{OES,vertex_array_object} in WebGL 1.0 is
          * available, the associated vertex array object is bound instead of
          * setting up the mesh from scratch.
          * @attention All meshes must be views of the same original mesh and
@@ -132,27 +130,12 @@ class MAGNUM_EXPORT MeshView {
          * @requires_gl32 Extension @extension{ARB,draw_elements_base_vertex}
          *      for indexed meshes
          * @requires_gl Base vertex cannot be specified for indexed meshes in
-         *      OpenGL ES.
+         *      OpenGL ES or WebGL.
          */
         MeshView& setBaseVertex(Int baseVertex) {
             _baseVertex = baseVertex;
             return *this;
         }
-
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        /**
-         * @brief Set vertex range
-         * @param first     First vertex
-         * @param count     Vertex count
-         *
-         * @deprecated Use @ref Magnum::MeshView::setCount() "setCount()" and
-         *      @ref Magnum::MeshView::setBaseVertex() "setBaseVertex()"
-         *      instead.
-         */
-        CORRADE_DEPRECATED("use setCount() and setBaseVertex() instead") MeshView& setVertexRange(Int first, Int count) {
-            return setCount(count), setBaseVertex(first);
-        }
-        #endif
 
         /**
          * @brief Set index range
@@ -171,23 +154,6 @@ class MAGNUM_EXPORT MeshView {
         /* MinGW/MSVC needs inline also here to avoid linkage conflicts */
         inline MeshView& setIndexRange(Int first, UnsignedInt start, UnsignedInt end);
 
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        /**
-         * @brief Set index range
-         * @param first     First index
-         * @param count     Index count
-         * @param start     Minimum array index contained in the buffer
-         * @param end       Maximum array index contained in the buffer
-         *
-         * @deprecated Use @ref Magnum::MeshView::setCount() "setCount()" and
-         *      @ref Magnum::MeshView::setIndexRange(Int, UnsignedInt, UnsignedInt) "setIndexRange(Int, UnsignedInt, UnsignedInt)"
-         *      instead.
-         */
-        CORRADE_DEPRECATED("use setCount() and setIndexRange(Int, UnsignedInt, UnsignedInt) instead") MeshView& setIndexRange(Int first, Int count, UnsignedInt start, UnsignedInt end) {
-            return setCount(count), setIndexRange(first, start, end);
-        }
-        #endif
-
         /**
          * @brief Set index range
          * @param first     First index
@@ -198,21 +164,6 @@ class MAGNUM_EXPORT MeshView {
          * @see @ref setCount()
          */
         MeshView& setIndexRange(Int first);
-
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        /**
-         * @brief Set index range
-         * @param first     First index
-         * @param count     Index count
-         *
-         * @deprecated Use @ref Magnum::MeshView::setCount() "setCount()" and
-         *      @ref Magnum::MeshView::setIndexRange(Int) "setIndexRange(Int)"
-         *      instead.
-         */
-        CORRADE_DEPRECATED("use setCount() and setIndexRange(Int) instead") MeshView& setIndexRange(Int first, Int count) {
-            return setCount(count), setIndexRange(first);
-        }
-        #endif
 
         /** @brief Instance count */
         Int instanceCount() const { return _instanceCount; }
@@ -226,6 +177,8 @@ class MAGNUM_EXPORT MeshView {
          * @requires_gles30 Extension @es_extension{ANGLE,instanced_arrays},
          *      @es_extension2{EXT,draw_instanced,draw_instanced} or
          *      @es_extension{NV,draw_instanced} in OpenGL ES 2.0.
+         * @requires_webgl20 Extension @webgl_extension{ANGLE,instanced_arrays}
+         *      in WebGL 1.0.
          */
         MeshView& setInstanceCount(Int count) {
             _instanceCount = count;
@@ -242,7 +195,8 @@ class MAGNUM_EXPORT MeshView {
          *
          * Default is `0`.
          * @requires_gl42 Extension @extension{ARB,base_instance}
-         * @requires_gl Base instance cannot be specified in OpenGL ES.
+         * @requires_gl Base instance cannot be specified in OpenGL ES or
+         *      WebGL.
          */
         MeshView& setBaseInstance(UnsignedInt baseInstance) {
             _baseInstance = baseInstance;
@@ -259,17 +213,10 @@ class MAGNUM_EXPORT MeshView {
         void draw(AbstractShaderProgram& shader);
         void draw(AbstractShaderProgram&& shader) { draw(shader); } /**< @overload */
 
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        /**
-         * @copybrief draw(AbstractShaderProgram&)
-         * @deprecated Use @ref Magnum::MeshView::draw(AbstractShaderProgram&) "draw(AbstractShaderProgram&)"
-         *      instead.
-         */
-        CORRADE_DEPRECATED("use draw(AbstractShaderProgram&) instead") void draw();
-        #endif
-
     private:
+        #ifndef MAGNUM_TARGET_WEBGL
         static MAGNUM_LOCAL void multiDrawImplementationDefault(std::initializer_list<std::reference_wrapper<MeshView>> meshes);
+        #endif
         static MAGNUM_LOCAL void multiDrawImplementationFallback(std::initializer_list<std::reference_wrapper<MeshView>> meshes);
 
         std::reference_wrapper<Mesh> _original;

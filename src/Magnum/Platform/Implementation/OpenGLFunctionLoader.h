@@ -68,7 +68,7 @@ class OpenGLFunctionLoader {
 
         /* Otherwise unsupported */
         #else
-        #error Unsupported platform
+        #error unsupported platform
         #endif
 };
 

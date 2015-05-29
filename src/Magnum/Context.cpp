@@ -50,7 +50,9 @@
 #include "Implementation/MeshState.h"
 #include "Implementation/ShaderProgramState.h"
 #include "Implementation/TextureState.h"
+#ifndef MAGNUM_TARGET_GLES2
 #include "Implementation/TransformFeedbackState.h"
+#endif
 
 namespace Magnum {
 
@@ -216,11 +218,32 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,ARB,texture_barrier),
         _extension(GL,KHR,context_flush_control),
         _extension(GL,KHR,robustness)};
-    #undef _extension
+    #elif defined(MAGNUM_TARGET_WEBGL)
+    static const std::vector<Extension> extensions{
+        _extension(GL,EXT,texture_filter_anisotropic),
+        _extension(GL,EXT,sRGB),
+        _extension(GL,EXT,disjoint_timer_query)};
+    #ifdef MAGNUM_TARGET_GLES2
+    static const std::vector<Extension> extensionsES300{
+        _extension(GL,ANGLE,instanced_arrays),
+        _extension(GL,EXT,blend_minmax),
+        _extension(GL,EXT,shader_texture_lod),
+        _extension(GL,OES,texture_float),
+        _extension(GL,OES,texture_half_float),
+        _extension(GL,OES,standard_derivatives),
+        _extension(GL,OES,vertex_array_object),
+        _extension(GL,OES,element_index_uint),
+        _extension(GL,OES,texture_float_linear),
+        _extension(GL,OES,texture_half_float_linear),
+        _extension(GL,WEBGL,depth_texture),
+        _extension(GL,WEBGL,draw_buffers)};
+    #endif
     #else
     static const std::vector<Extension> extensions{
         _extension(GL,APPLE,texture_format_BGRA8888),
+        #ifdef CORRADE_TARGET_NACL
         _extension(GL,CHROMIUM,map_sub),
+        #endif
         _extension(GL,EXT,texture_filter_anisotropic),
         _extension(GL,EXT,texture_format_BGRA8888),
         _extension(GL,EXT,read_format_bgra),
@@ -266,6 +289,7 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,EXT,texture_rg),
         _extension(GL,EXT,texture_storage),
         _extension(GL,EXT,map_buffer_range),
+        _extension(GL,EXT,draw_buffers),
         _extension(GL,EXT,instanced_arrays),
         _extension(GL,EXT,draw_instanced),
         _extension(GL,NV,draw_buffers),
@@ -295,6 +319,7 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,OES,surfaceless_context)};
     #endif
     #endif
+    #undef _extension
 
     switch(version) {
         case Version::None:  return extensions;
@@ -315,12 +340,14 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         #else
         case Version::GLES200: return empty;
         case Version::GLES300:
-        case Version::GLES310:
             #ifdef MAGNUM_TARGET_GLES2
             return extensionsES300;
             #else
             return empty;
             #endif
+        #ifndef MAGNUM_TARGET_WEBGL
+        case Version::GLES310: return empty;
+        #endif
         #endif
     }
 
@@ -333,21 +360,37 @@ Context::Context(void functionLoader()) {
     /* Load GL function pointers */
     if(functionLoader) functionLoader();
 
-    /* Get version */
+    GLint majorVersion, minorVersion;
+
+    /* Get version on ES 3.0+/WebGL 2.0+ */
     #if defined(MAGNUM_TARGET_GLES) && !defined(MAGNUM_TARGET_GLES2)
-    glGetIntegerv(GL_MAJOR_VERSION, &_majorVersion);
-    glGetIntegerv(GL_MINOR_VERSION, &_minorVersion);
+
+    /* ES 3.0+ */
+    #ifndef MAGNUM_TARGET_WEBGL
+    glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
+    glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
+
+    /* WebGL 2.0, treat it as ES 3.0 */
     #else
+    const std::string version = versionString();
+    if(version.find("WebGL 2") == std::string::npos) {
+        Error() << "Context: unsupported version string:" << version;
+        std::exit(65);
+    }
+    majorVersion = 3;
+    minorVersion = 0;
+    #endif
 
     /* On GL 2.1 and ES 2.0 there is no GL_{MAJOR,MINOR}_VERSION, we have to
        parse version string. On desktop GL we have no way to check version
        without version (duh) so we work around that by checking for invalid
        enum error. */
+    #else
     #ifndef MAGNUM_TARGET_GLES2
-    glGetIntegerv(GL_MAJOR_VERSION, &_majorVersion);
+    glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
     const auto versionNumberError = Renderer::error();
     if(versionNumberError == Renderer::Error::NoError)
-        glGetIntegerv(GL_MINOR_VERSION, &_minorVersion);
+        glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
     else
     #endif
     {
@@ -367,11 +410,11 @@ Context::Context(void functionLoader()) {
            version.find("OpenGL ES 3.") != std::string::npos)
         #endif
         {
-            _majorVersion = 2;
+            majorVersion = 2;
             #ifndef MAGNUM_TARGET_GLES
-            _minorVersion = 1;
+            minorVersion = 1;
             #else
-            _minorVersion = 0;
+            minorVersion = 0;
             #endif
         } else {
             Error() << "Context: unsupported version string:" << version;
@@ -381,7 +424,7 @@ Context::Context(void functionLoader()) {
     #endif
 
     /* Compose the version enum */
-    _version = Magnum::version(_majorVersion, _minorVersion);
+    _version = Magnum::version(majorVersion, minorVersion);
 
     /* Check that version retrieval went right */
     #ifndef CORRADE_NO_ASSERT
@@ -400,9 +443,9 @@ Context::Context(void functionLoader()) {
     #endif
     {
         #ifndef MAGNUM_TARGET_GLES
-        Error() << "Context: unsupported OpenGL version" << Magnum::version(_version);
+        Error() << "Context: unsupported OpenGL version" << std::make_pair(majorVersion, minorVersion);
         #else
-        Error() << "Context: unsupported OpenGL ES version" << Magnum::version(_version);
+        Error() << "Context: unsupported OpenGL ES version" << std::make_pair(majorVersion, minorVersion);
         #endif
         std::exit(66);
     }
@@ -432,7 +475,9 @@ Context::Context(void functionLoader()) {
         #else
         Version::GLES200,
         Version::GLES300,
+        #ifndef MAGNUM_TARGET_WEBGL
         Version::GLES310,
+        #endif
         #endif
         Version::None
     };
@@ -529,7 +574,8 @@ std::vector<std::string> Context::shadingLanguageVersionStrings() const {
 std::vector<std::string> Context::extensionStrings() const {
     std::vector<std::string> extensions;
 
-    #ifndef MAGNUM_TARGET_GLES2
+    /** @todo remove workaround when Emscripten has glGetStringi() etc. */
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     GLint extensionCount = 0;
     glGetIntegerv(GL_NUM_EXTENSIONS, &extensionCount);
     #ifndef MAGNUM_TARGET_GLES3
@@ -592,6 +638,7 @@ void Context::resetState(const States states) {
     #endif
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Debug operator<<(Debug debug, const Context::Flag value) {
     switch(value) {
@@ -605,6 +652,7 @@ Debug operator<<(Debug debug, const Context::Flag value) {
 
     return debug << "Context::Flag::(invalid)";
 }
+#endif
 #endif
 
 }

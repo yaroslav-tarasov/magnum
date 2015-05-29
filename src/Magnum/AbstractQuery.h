@@ -25,16 +25,19 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
 /** @file
  * @brief Class @ref Magnum::AbstractQuery
  */
+#endif
 
-#include <Corrade/Containers/Array.h>
+#include <Corrade/Containers/ArrayView.h>
 #include <Corrade/Utility/Assert.h>
 
 #include "Magnum/AbstractObject.h"
 #include "Magnum/configure.h"
 
+#if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
 namespace Magnum {
 
 namespace Implementation { struct QueryState; }
@@ -44,6 +47,7 @@ namespace Implementation { struct QueryState; }
 
 See @ref PrimitiveQuery, @ref SampleQuery and @ref TimeQuery documentation for
 more information.
+@requires_webgl20 Queries are not available in WebGL 1.0.
 @todo `QUERY_COUNTER_BITS` (not sure since when this is supported)
 */
 class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
@@ -67,6 +71,18 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
         GLuint id() const { return _id; }
 
         /**
+         * @brief Release OpenGL object
+         *
+         * Releases ownership of OpenGL query object and returns its ID so it
+         * is not deleted on destruction. The internal state is then equivalent
+         * to moved-from state.
+         * @see @ref PrimitiveQuery::wrap(), @ref SampleQuery::wrap(),
+         *      @ref TimeQuery::wrap()
+         */
+        GLuint release();
+
+        #ifndef MAGNUM_TARGET_WEBGL
+        /**
          * @brief Query label
          *
          * The result is *not* cached, repeated queries will result in repeated
@@ -76,6 +92,7 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
          * @see @fn_gl{GetObjectLabel} with @def_gl{QUERY} or
          *      @fn_gl_extension2{GetObjectLabel,EXT,debug_label} with
          *      @def_gl{QUERY_OBJECT_EXT}
+         * @requires_gles Debug output is not available in WebGL.
          */
         std::string label() const;
 
@@ -89,6 +106,7 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
          * @see @ref maxLabelLength(), @fn_gl{ObjectLabel} with
          *      @def_gl{QUERY} or @fn_gl_extension2{LabelObject,EXT,debug_label}
          *      with @def_gl{QUERY_OBJECT_EXT}
+         * @requires_gles Debug output is not available in WebGL.
          */
         AbstractQuery& setLabel(const std::string& label) {
             return setLabelInternal({label.data(), label.size()});
@@ -98,6 +116,7 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
         template<std::size_t size> AbstractQuery& setLabel(const char(&label)[size]) {
             return setLabelInternal({label, size - 1});
         }
+        #endif
 
         /**
          * @brief Whether the result is available
@@ -113,8 +132,6 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
          *
          * Note that this function is blocking until the result is available.
          * See @ref resultAvailable().
-         * @attention @ref Magnum::UnsignedLong "UnsignedLong" and @ref Magnum::Long "Long"
-         *      result type is not available in @ref MAGNUM_TARGET_WEBGL "WebGL".
          * @see @fn_gl{GetQueryObject} with @def_gl{QUERY_RESULT}
          * @requires_gl33 Extension @extension{ARB,timer_query} for result
          *      type @ref Magnum::UnsignedInt "UnsignedInt" and @ref Magnum::Long
@@ -122,6 +139,8 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
          * @requires_es_extension Extension @es_extension{EXT,disjoint_timer_query}
          *      for result types @ref Magnum::Int "Int", @ref Magnum::UnsignedLong "UnsignedLong"
          *      @ref Magnum::Long "Long".
+         * @requires_gles Only @ref Magnum::UnsignedInt "UnsignedInt" result
+         *      type is available in WebGL.
          */
         template<class T> T result();
 
@@ -146,7 +165,8 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
          * @brief Destructor
          *
          * Deletes assigned OpenGL query.
-         * @see @fn_gl{DeleteQueries}
+         * @see @ref PrimitiveQuery::wrap(), @ref SampleQuery::wrap(),
+         *      @ref TimeQuery::wrap(), @ref release(), @fn_gl{DeleteQueries}
          */
         ~AbstractQuery();
 
@@ -154,6 +174,7 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
     private:
     #endif
         explicit AbstractQuery(GLenum target);
+        explicit AbstractQuery(GLuint id, GLenum target, ObjectFlags flags) noexcept: _id{id}, _target{target}, _flags{flags} {}
 
         #ifdef MAGNUM_BUILD_DEPRECATED
         explicit AbstractQuery();
@@ -161,7 +182,9 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
         #endif
 
     private:
-        AbstractQuery& setLabelInternal(Containers::ArrayReference<const char> label);
+        #ifndef MAGNUM_TARGET_WEBGL
+        AbstractQuery& setLabelInternal(Containers::ArrayView<const char> label);
+        #endif
 
         void MAGNUM_LOCAL createImplementationDefault();
         #ifndef MAGNUM_TARGET_GLES
@@ -170,6 +193,7 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
 
         GLuint _id;
         GLenum _target;
+        ObjectFlags _flags;
 };
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -193,6 +217,15 @@ inline AbstractQuery& AbstractQuery::operator=(AbstractQuery&& other) noexcept {
     return *this;
 }
 
+inline GLuint AbstractQuery::release() {
+    const GLuint id = _id;
+    _id = 0;
+    return id;
 }
+
+}
+#else
+#error this header is not available in WebGL 1.0 build
+#endif
 
 #endif

@@ -37,10 +37,6 @@
 #include "Magnum/Magnum.h"
 #include "Magnum/visibility.h"
 
-#ifdef MAGNUM_BUILD_DEPRECATED
-#include <Corrade/Utility/Macros.h>
-#endif
-
 namespace Magnum {
 
 /**
@@ -207,17 +203,6 @@ class Resource {
             CORRADE_ASSERT(data, "Resource: accessing not loaded data with key" << key(), *static_cast<U*>(data));
             return *static_cast<U*>(data);
         }
-
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        /**
-         * @overload
-         * @deprecated Use the explicit @ref Magnum::Resource::operator*() "operator*()"
-         *      or @ref Magnum::Resource::operator->() "operator->()" instead.
-         *      Implicit conversion is no longer allowed if it might throw an
-         *      assertion.
-         */
-        CORRADE_DEPRECATED("use operator*() or operator->() instead") operator U&() { return **this; }
-        #endif
 
         /**
          * @brief Access to resource data

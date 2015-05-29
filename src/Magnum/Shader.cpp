@@ -28,12 +28,15 @@
 #include <algorithm> /* std::max(), needed by MSVC */
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/Assert.h>
+#include <Corrade/Utility/Debug.h>
 #include <Corrade/Utility/Directory.h>
 
 #include "Magnum/Context.h"
 #include "Magnum/Extensions.h"
 
+#ifndef MAGNUM_TARGET_WEBGL
 #include "Implementation/DebugState.h"
+#endif
 #include "Implementation/State.h"
 #include "Implementation/ShaderState.h"
 
@@ -58,7 +61,7 @@ std::string shaderName(const Shader::Type type) {
         case Shader::Type::TessellationControl:     return "tessellation control";
         case Shader::Type::TessellationEvaluation:  return "tessellation evaluation";
         #endif
-        #ifndef MAGNUM_TARGET_GLES2
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         case Shader::Type::Compute:                 return "compute";
         #endif
         case Shader::Type::Fragment:                return "fragment";
@@ -71,7 +74,7 @@ UnsignedInt typeToIndex(const Shader::Type type) {
     switch(type) {
         case Shader::Type::Vertex:                  return 0;
         case Shader::Type::Fragment:                return 1;
-        #ifndef MAGNUM_TARGET_GLES2
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         case Shader::Type::Compute:                 return 2;
         #endif
         #ifndef MAGNUM_TARGET_GLES
@@ -253,7 +256,7 @@ Int Shader::maxFragmentInputComponents() {
     return value;
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 Int Shader::maxAtomicCounterBuffers(const Type type) {
     if(
         #ifndef MAGNUM_TARGET_GLES
@@ -470,7 +473,7 @@ Int Shader::maxTextureImageUnits(const Type type) {
     constexpr static GLenum what[] = {
         GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS,
         GL_MAX_TEXTURE_IMAGE_UNITS,
-        #ifndef MAGNUM_TARGET_GLES2
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS,
         #endif
         #ifndef MAGNUM_TARGET_GLES
@@ -511,7 +514,7 @@ Int Shader::maxUniformBlocks(const Type type) {
     constexpr static GLenum what[] = {
         GL_MAX_VERTEX_UNIFORM_BLOCKS,
         GL_MAX_FRAGMENT_UNIFORM_BLOCKS,
-        #ifndef MAGNUM_TARGET_GLES2
+        #ifndef MAGNUM_TARGET_WEBGL
         GL_MAX_COMPUTE_UNIFORM_BLOCKS,
         #endif
         #ifndef MAGNUM_TARGET_GLES
@@ -554,7 +557,9 @@ Int Shader::maxUniformComponents(const Type type) {
     constexpr static GLenum what[] = {
         GL_MAX_VERTEX_UNIFORM_COMPONENTS,
         GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,
+        #ifndef MAGNUM_TARGET_WEBGL
         GL_MAX_COMPUTE_UNIFORM_COMPONENTS,
+        #endif
         #ifndef MAGNUM_TARGET_GLES
         GL_MAX_GEOMETRY_UNIFORM_COMPONENTS,
         GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS,
@@ -595,7 +600,7 @@ Int Shader::maxCombinedUniformComponents(const Type type) {
     constexpr static GLenum what[] = {
         GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS,
         GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS,
-        #ifndef MAGNUM_TARGET_GLES2
+        #ifndef MAGNUM_TARGET_WEBGL
         GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS,
         #endif
         #ifndef MAGNUM_TARGET_GLES
@@ -630,7 +635,9 @@ Shader::Shader(const Version version, const Type type): _type(type), _id(0) {
         #else
         case Version::GLES200: _sources.push_back("#version 100\n"); return;
         case Version::GLES300: _sources.push_back("#version 300 es\n"); return;
+        #ifndef MAGNUM_TARGET_WEBGL
         case Version::GLES310: _sources.push_back("#version 310 es\n"); return;
+        #endif
         #endif
 
         /* The user is responsible for (not) adding #version directive */
@@ -647,6 +654,7 @@ Shader::~Shader() {
     glDeleteShader(_id);
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 std::string Shader::label() const {
     #ifndef MAGNUM_TARGET_GLES
     return Context::current()->state().debug->getLabelImplementation(GL_SHADER, _id);
@@ -655,7 +663,7 @@ std::string Shader::label() const {
     #endif
 }
 
-Shader& Shader::setLabelInternal(const Containers::ArrayReference<const char> label) {
+Shader& Shader::setLabelInternal(const Containers::ArrayView<const char> label) {
     #ifndef MAGNUM_TARGET_GLES
     Context::current()->state().debug->labelImplementation(GL_SHADER, _id, label);
     #else
@@ -663,6 +671,7 @@ Shader& Shader::setLabelInternal(const Containers::ArrayReference<const char> la
     #endif
     return *this;
 }
+#endif
 
 std::vector<std::string> Shader::sources() const { return _sources; }
 
@@ -713,6 +722,7 @@ bool Shader::compile(std::initializer_list<std::reference_wrapper<Shader>> shade
         CORRADE_ASSERT(shader._sources.size() > 1, "Shader::compile(): no files added", false);
         maxSourceCount = std::max(shader._sources.size(), maxSourceCount);
     }
+    /** @todo ArrayTuple/VLAs */
     Containers::Array<const GLchar*> pointers(maxSourceCount);
     Containers::Array<GLint> sizes(maxSourceCount);
 
@@ -813,7 +823,7 @@ Debug operator<<(Debug debug, const Shader::Type value) {
         _c(TessellationEvaluation)
         _c(Geometry)
         #endif
-        #ifndef MAGNUM_TARGET_GLES2
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         _c(Compute)
         #endif
         _c(Fragment)

@@ -28,13 +28,16 @@
 #ifdef CORRADE_MSVC2013_COMPATIBILITY
 #include <algorithm> /* std::max() */
 #endif
+#include <Corrade/Containers/Array.h>
 
 #include "Magnum/Context.h"
 #include "Magnum/Extensions.h"
 #include "Magnum/Shader.h"
 #include "Magnum/Math/RectangularMatrix.h"
 
+#ifndef MAGNUM_TARGET_WEBGL
 #include "Implementation/DebugState.h"
+#endif
 #include "Implementation/ShaderProgramState.h"
 #include "Implementation/State.h"
 
@@ -54,7 +57,7 @@ Int AbstractShaderProgram::maxVertexAttributes() {
     return value;
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 Int AbstractShaderProgram::maxAtomicCounterBufferSize() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::shader_atomic_counters>())
@@ -135,6 +138,7 @@ Int AbstractShaderProgram::maxImageSamples() {
 #endif
 
 #ifndef MAGNUM_TARGET_GLES2
+#ifndef MAGNUM_TARGET_WEBGL
 Int AbstractShaderProgram::maxCombinedShaderOutputResources() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::shader_storage_buffer_object>() || !Context::current()->isExtensionSupported<Extensions::GL::ARB::shader_image_load_store>())
@@ -168,7 +172,6 @@ Long AbstractShaderProgram::maxShaderStorageBlockSize() {
 }
 #endif
 
-#ifndef MAGNUM_TARGET_GLES2
 Int AbstractShaderProgram::maxUniformBlockSize() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::uniform_buffer_object>())
@@ -182,9 +185,8 @@ Int AbstractShaderProgram::maxUniformBlockSize() {
 
     return value;
 }
-#endif
 
-#ifndef MAGNUM_TARGET_GLES2
+#ifndef MAGNUM_TARGET_WEBGL
 Int AbstractShaderProgram::maxUniformLocations() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::explicit_uniform_location>())
@@ -202,7 +204,6 @@ Int AbstractShaderProgram::maxUniformLocations() {
 }
 #endif
 
-#ifndef MAGNUM_TARGET_GLES2
 Int AbstractShaderProgram::minTexelOffset() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::gpu_shader4>())
@@ -254,6 +255,7 @@ AbstractShaderProgram& AbstractShaderProgram::operator=(AbstractShaderProgram&& 
     return *this;
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 std::string AbstractShaderProgram::label() const {
     #ifndef MAGNUM_TARGET_GLES
     return Context::current()->state().debug->getLabelImplementation(GL_PROGRAM, _id);
@@ -262,7 +264,7 @@ std::string AbstractShaderProgram::label() const {
     #endif
 }
 
-AbstractShaderProgram& AbstractShaderProgram::setLabelInternal(const Containers::ArrayReference<const char> label) {
+AbstractShaderProgram& AbstractShaderProgram::setLabelInternal(const Containers::ArrayView<const char> label) {
     #ifndef MAGNUM_TARGET_GLES
     Context::current()->state().debug->labelImplementation(GL_PROGRAM, _id, label);
     #else
@@ -270,6 +272,7 @@ AbstractShaderProgram& AbstractShaderProgram::setLabelInternal(const Containers:
     #endif
     return *this;
 }
+#endif
 
 std::pair<bool, std::string> AbstractShaderProgram::validate() {
     glValidateProgram(_id);
@@ -303,21 +306,22 @@ void AbstractShaderProgram::attachShaders(std::initializer_list<std::reference_w
     for(auto it = shaders.begin(); it != shaders.end(); ++it) attachShader(it->get());
 }
 
-void AbstractShaderProgram::bindAttributeLocationInternal(const UnsignedInt location, const Containers::ArrayReference<const char> name) {
+void AbstractShaderProgram::bindAttributeLocationInternal(const UnsignedInt location, const Containers::ArrayView<const char> name) {
     glBindAttribLocation(_id, location, name);
 }
 
 #ifndef MAGNUM_TARGET_GLES
-void AbstractShaderProgram::bindFragmentDataLocationInternal(const UnsignedInt location, const Containers::ArrayReference<const char> name) {
+void AbstractShaderProgram::bindFragmentDataLocationInternal(const UnsignedInt location, const Containers::ArrayView<const char> name) {
     glBindFragDataLocation(_id, location, name);
 }
-void AbstractShaderProgram::bindFragmentDataLocationIndexedInternal(const UnsignedInt location, UnsignedInt index, const Containers::ArrayReference<const char> name) {
+void AbstractShaderProgram::bindFragmentDataLocationIndexedInternal(const UnsignedInt location, UnsignedInt index, const Containers::ArrayView<const char> name) {
     glBindFragDataLocationIndexed(_id, location, index, name);
 }
 #endif
 
 #ifndef MAGNUM_TARGET_GLES2
 void AbstractShaderProgram::setTransformFeedbackOutputs(const std::initializer_list<std::string> outputs, const TransformFeedbackBufferMode bufferMode) {
+    /** @todo VLAs */
     Containers::Array<const char*> names{outputs.size()};
 
     Int i = 0;
@@ -405,7 +409,7 @@ bool AbstractShaderProgram::link(std::initializer_list<std::reference_wrapper<Ab
     return allSuccess;
 }
 
-Int AbstractShaderProgram::uniformLocationInternal(const Containers::ArrayReference<const char> name) {
+Int AbstractShaderProgram::uniformLocationInternal(const Containers::ArrayView<const char> name) {
     GLint location = glGetUniformLocation(_id, name);
     if(location == -1)
         /* GCC 4.5 takes {} as initialization from list of chars */
@@ -422,14 +426,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform1fv(location, count, values);
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const GLfloat* const values) {
     glProgramUniform1fv(_id, location, count, values);
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const GLfloat* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniform1fvEXT(_id, location, count, values);
     #else
     static_cast<void>(location);
@@ -438,6 +443,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<2, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform2fvImplementation)(location, count, values);
@@ -448,14 +454,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform2fv(location, count, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<2, GLfloat>* const values) {
     glProgramUniform2fv(_id, location, count, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<2, GLfloat>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniform2fvEXT(_id, location, count, values[0].data());
     #else
     static_cast<void>(location);
@@ -464,6 +471,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<3, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform3fvImplementation)(location, count, values);
@@ -474,14 +482,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform3fv(location, count, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<3, GLfloat>* const values) {
     glProgramUniform3fv(_id, location, count, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<3, GLfloat>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniform3fvEXT(_id, location, count, values[0].data());
     #else
     static_cast<void>(location);
@@ -490,6 +499,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<4, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform4fvImplementation)(location, count, values);
@@ -500,14 +510,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform4fv(location, count, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<4, GLfloat>* const values) {
     glProgramUniform4fv(_id, location, count, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<4, GLfloat>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniform4fvEXT(_id, location, count, values[0].data());
     #else
     static_cast<void>(location);
@@ -516,6 +527,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Int* const values) {
     (this->*Context::current()->state().shaderProgram->uniform1ivImplementation)(location, count, values);
@@ -526,14 +538,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform1iv(location, count, values);
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const GLint* const values) {
     glProgramUniform1iv(_id, location, count, values);
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const GLint* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniform1ivEXT(_id, location, count, values);
     #else
     static_cast<void>(location);
@@ -542,6 +555,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<2, Int>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform2ivImplementation)(location, count, values);
@@ -552,14 +566,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform2iv(location, count, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<2, GLint>* const values) {
     glProgramUniform2iv(_id, location, count, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<2, GLint>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniform2ivEXT(_id, location, count, values[0].data());
     #else
     static_cast<void>(location);
@@ -568,6 +583,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<3, Int>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform3ivImplementation)(location, count, values);
@@ -578,14 +594,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform3iv(location, count, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<3, GLint>* const values) {
     glProgramUniform3iv(_id, location, count, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<3, GLint>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniform3ivEXT(_id, location, count, values[0].data());
     #else
     static_cast<void>(location);
@@ -594,6 +611,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<4, Int>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform4ivImplementation)(location, count, values);
@@ -604,14 +622,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform4iv(location, count, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<4, GLint>* const values) {
     glProgramUniform4iv(_id, location, count, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<4, GLint>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniform4ivEXT(_id, location, count, values[0].data());
     #else
     static_cast<void>(location);
@@ -620,6 +639,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 #ifndef MAGNUM_TARGET_GLES2
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const UnsignedInt* const values) {
@@ -631,6 +651,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform1uiv(location, count, values);
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const GLuint* const values) {
     glProgramUniform1uiv(_id, location, count, values);
 }
@@ -638,6 +659,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const GLuint* const values) {
     glProgramUniform1uivEXT(_id, location, count, values);
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<2, UnsignedInt>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform2uivImplementation)(location, count, values);
@@ -648,6 +670,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform2uiv(location, count, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<2, GLuint>* const values) {
     glProgramUniform2uiv(_id, location, count, values[0].data());
 }
@@ -655,6 +678,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<2, GLuint>* const values) {
     glProgramUniform2uivEXT(_id, location, count, values[0].data());
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<3, UnsignedInt>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform3uivImplementation)(location, count, values);
@@ -665,6 +689,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform3uiv(location, count, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<3, GLuint>* const values) {
     glProgramUniform3uiv(_id, location, count, values[0].data());
 }
@@ -672,6 +697,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<3, GLuint>* const values) {
     glProgramUniform3uivEXT(_id, location, count, values[0].data());
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<4, UnsignedInt>* const values) {
     (this->*Context::current()->state().shaderProgram->uniform4uivImplementation)(location, count, values);
@@ -682,6 +708,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniform4uiv(location, count, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::Vector<4, GLuint>* const values) {
     glProgramUniform4uiv(_id, location, count, values[0].data());
 }
@@ -689,6 +716,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::Vector<4, GLuint>* const values) {
     glProgramUniform4uivEXT(_id, location, count, values[0].data());
 }
+#endif
 #endif
 
 #ifndef MAGNUM_TARGET_GLES
@@ -770,14 +798,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix2fv(location, count, GL_FALSE, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 2, GLfloat>* const values) {
     glProgramUniformMatrix2fv(_id, location, count, GL_FALSE, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 2, GLfloat>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniformMatrix2fvEXT(_id, location, count, GL_FALSE, values[0].data());
     #else
     static_cast<void>(location);
@@ -786,6 +815,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 3, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniformMatrix3fvImplementation)(location, count, values);
@@ -796,14 +826,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix3fv(location, count, GL_FALSE, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 3, GLfloat>* const values) {
     glProgramUniformMatrix3fv(_id, location, count, GL_FALSE, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 3, GLfloat>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniformMatrix3fvEXT(_id, location, count, GL_FALSE, values[0].data());
     #else
     static_cast<void>(location);
@@ -812,6 +843,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 4, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniformMatrix4fvImplementation)(location, count, values);
@@ -822,14 +854,15 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix4fv(location, count, GL_FALSE, values[0].data());
 }
 
-#ifndef MAGNUM_TARGET_GLES2
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 4, GLfloat>* const values) {
     glProgramUniformMatrix4fv(_id, location, count, GL_FALSE, values[0].data());
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 4, GLfloat>* const values) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glProgramUniformMatrix4fvEXT(_id, location, count, GL_FALSE, values[0].data());
     #else
     static_cast<void>(location);
@@ -838,6 +871,7 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 #ifndef MAGNUM_TARGET_GLES2
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<2, 3, Float>* const values) {
@@ -849,6 +883,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix2x3fv(location, count, GL_FALSE, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 3, GLfloat>* const values) {
     glProgramUniformMatrix2x3fv(_id, location, count, GL_FALSE, values[0].data());
 }
@@ -856,6 +891,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 3, GLfloat>* const values) {
     glProgramUniformMatrix2x3fvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 2, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniformMatrix3x2fvImplementation)(location, count, values);
@@ -866,6 +902,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix3x2fv(location, count, GL_FALSE, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 2, GLfloat>* const values) {
     glProgramUniformMatrix3x2fv(_id, location, count, GL_FALSE, values[0].data());
 }
@@ -873,6 +910,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 2, GLfloat>* const values) {
     glProgramUniformMatrix3x2fvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<2, 4, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniformMatrix2x4fvImplementation)(location, count, values);
@@ -883,6 +921,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix2x4fv(location, count, GL_FALSE, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 4, GLfloat>* const values) {
     glProgramUniformMatrix2x4fv(_id, location, count, GL_FALSE, values[0].data());
 }
@@ -890,6 +929,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 4, GLfloat>* const values) {
     glProgramUniformMatrix2x4fvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 2, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniformMatrix4x2fvImplementation)(location, count, values);
@@ -900,6 +940,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix4x2fv(location, count, GL_FALSE, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 2, GLfloat>* const values) {
     glProgramUniformMatrix4x2fv(_id, location, count, GL_FALSE, values[0].data());
 }
@@ -907,6 +948,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 2, GLfloat>* const values) {
     glProgramUniformMatrix4x2fvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 4, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniformMatrix3x4fvImplementation)(location, count, values);
@@ -917,6 +959,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix3x4fv(location, count, GL_FALSE, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 4, GLfloat>* const values) {
     glProgramUniformMatrix3x4fv(_id, location, count, GL_FALSE, values[0].data());
 }
@@ -924,6 +967,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 4, GLfloat>* const values) {
     glProgramUniformMatrix3x4fvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
+#endif
 
 void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 3, Float>* const values) {
     (this->*Context::current()->state().shaderProgram->uniformMatrix4x3fvImplementation)(location, count, values);
@@ -934,6 +978,7 @@ void AbstractShaderProgram::uniformImplementationDefault(const GLint location, c
     glUniformMatrix4x3fv(location, count, GL_FALSE, values[0].data());
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 3, GLfloat>* const values) {
     glProgramUniformMatrix4x3fv(_id, location, count, GL_FALSE, values[0].data());
 }
@@ -941,6 +986,7 @@ void AbstractShaderProgram::uniformImplementationSSO(const GLint location, const
 void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 3, GLfloat>* const values) {
     glProgramUniformMatrix4x3fvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
+#endif
 #endif
 
 #ifndef MAGNUM_TARGET_GLES

@@ -80,18 +80,44 @@ the six sides of the cube map, fourth part is layer in the array. See
     @ref Texture, @ref TextureArray, @ref RectangleTexture, @ref BufferTexture,
     @ref MultisampleTexture
 @requires_gl40 Extension @extension{ARB,texture_cube_map_array}
-@requires_gl Cube map texture arrays are not available in OpenGL ES.
+@requires_gl Cube map texture arrays are not available in OpenGL ES or WebGL.
 */
 class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
     public:
         /**
+         * @brief Max supported size of one side of cube map texture array
+         *
+         * The result is cached, repeated queries don't result in repeated
+         * OpenGL calls. If @extension{ARB,texture_cube_map_array} (part of
+         * OpenGL 4.0) is not available, returns zero vector.
+         * @see @fn_gl{Get} with @def_gl{MAX_CUBE_MAP_TEXTURE_SIZE} and
+         *      @def_gl{MAX_ARRAY_TEXTURE_LAYERS}
+         */
+        static Vector3i maxSize();
+
+        /**
+         * @brief Wrap existing OpenGL cube map array texture object
+         * @param id            OpenGL cube map array texture ID
+         * @param flags         Object creation flags
+         *
+         * The @p id is expected to be of an existing OpenGL texture object
+         * with target @def_gl{TEXTURE_CUBE_MAP_ARRAY}. Unlike texture created
+         * using constructor, the OpenGL object is by default not deleted on
+         * destruction, use @p flags for different behavior.
+         * @see @ref release()
+         */
+        static CubeMapTextureArray wrap(GLuint id, ObjectFlags flags = {}) {
+            return CubeMapTextureArray{id, flags};
+        }
+
+        /**
          * @brief Constructor
          *
          * Creates new OpenGL texture object. If @extension{ARB,direct_state_access}
-         * (part of OpenGL 4.5) is not supported, the texture is created on
+         * (part of OpenGL 4.5) is not available, the texture is created on
          * first use.
-         * @see @fn_gl{CreateTextures} with @def_gl{TEXTURE_CUBE_MAP_ARRAY},
-         *      eventually @fn_gl{GenTextures}
+         * @see @ref wrap(), @fn_gl{CreateTextures} with
+         *      @def_gl{TEXTURE_CUBE_MAP_ARRAY}, eventually @fn_gl{GenTextures}
          */
         explicit CubeMapTextureArray(): AbstractTexture(GL_TEXTURE_CUBE_MAP_ARRAY) {}
 
@@ -104,17 +130,6 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
             return *this;
         }
         #endif
-
-        /**
-         * @brief Max supported size of one side of cube map texture array
-         *
-         * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If @extension{ARB,texture_cube_map_array} (part of
-         * OpenGL 4.0) is not available, returns zero vector.
-         * @see @fn_gl{Get} with @def_gl{MAX_CUBE_MAP_TEXTURE_SIZE} and
-         *      @def_gl{MAX_ARRAY_TEXTURE_LAYERS}
-         */
-        static Vector3i maxSize();
 
         /**
          * @copybrief Texture::setBaseLevel()
@@ -199,8 +214,8 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          *
          * See @ref Texture::setWrapping() for more information.
          */
-        CubeMapTextureArray& setWrapping(const Array3D<Sampler::Wrapping>& wrapping) {
-            DataHelper<3>::setWrapping(*this, wrapping);
+        CubeMapTextureArray& setWrapping(const Array2D<Sampler::Wrapping>& wrapping) {
+            DataHelper<2>::setWrapping(*this, wrapping);
             return *this;
         }
 
@@ -417,8 +432,7 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          *
          * See @ref Texture::setImage() for more information.
          * @see @ref maxSize()
-         * @deprecated_gl Prefer to use @ref Magnum::CubeMapTextureArray::setStorage() "setStorage()"
-         *      and @ref Magnum::CubeMapTextureArray::setSubImage() "setSubImage()"
+         * @deprecated_gl Prefer to use @ref setStorage() and @ref setSubImage()
          *      instead.
          */
         CubeMapTextureArray& setImage(Int level, TextureFormat internalFormat, const ImageReference3D& image) {
@@ -427,8 +441,7 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
         }
 
         /** @overload
-         * @deprecated_gl Prefer to use @ref Magnum::CubeMapTextureArray::setStorage() "setStorage()"
-         *      and @ref Magnum::CubeMapTextureArray::setSubImage() "setSubImage()"
+         * @deprecated_gl Prefer to use @ref setStorage() and @ref setSubImage()
          *      instead.
          */
         CubeMapTextureArray& setImage(Int level, TextureFormat internalFormat, BufferImage3D& image) {
@@ -437,8 +450,7 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
         }
 
         /** @overload
-         * @deprecated_gl Prefer to use @ref Magnum::CubeMapTextureArray::setStorage() "setStorage()"
-         *      and @ref Magnum::CubeMapTextureArray::setSubImage() "setSubImage()"
+         * @deprecated_gl Prefer to use @ref setStorage() and @ref setSubImage()
          *      instead.
          */
         CubeMapTextureArray& setImage(Int level, TextureFormat internalFormat, BufferImage3D&& image) {
@@ -512,11 +524,14 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
             return *this;
         }
         #endif
+
+    private:
+        explicit CubeMapTextureArray(GLuint id, ObjectFlags flags) noexcept: AbstractTexture{id, GL_TEXTURE_CUBE_MAP_ARRAY, flags} {}
 };
 
 }
 #else
-#error this header is available only on desktop OpenGL build
+#error this header is not available in OpenGL ES build
 #endif
 
 #endif

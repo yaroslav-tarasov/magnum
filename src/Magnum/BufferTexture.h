@@ -187,9 +187,9 @@ documentation for more information about usage in shaders.
 
 ## Performance optimizations
 
-If on desktop GL and either @extension{ARB,direct_state_access} (part of OpenGL
-4.5) or @extension{EXT,direct_state_access} is available, @ref setBuffer()
-functions use DSA to avoid unnecessary calls to @fn_gl{ActiveTexture} and
+If either @extension{ARB,direct_state_access} (part of OpenGL 4.5) or
+@extension{EXT,direct_state_access} is available, @ref setBuffer() functions
+use DSA to avoid unnecessary calls to @fn_gl{ActiveTexture} and
 @fn_gl{BindTexture}. See
 @ref AbstractTexture-performance-optimization "relevant section in AbstractTexture documentation"
 and respective function documentation for more information.
@@ -197,7 +197,7 @@ and respective function documentation for more information.
 @see @ref Texture, @ref TextureArray, @ref CubeMapTexture,
     @ref CubeMapTextureArray, @ref RectangleTexture, @ref MultisampleTexture
 @requires_gl31 Extension @extension{ARB,texture_buffer_object}
-@requires_gl Texture buffers are not available in OpenGL ES.
+@requires_gl Texture buffers are not available in OpenGL ES or WebGL.
 */
 class MAGNUM_EXPORT BufferTexture: public AbstractTexture {
     /* GCC 4.6 needs the struct keyword */
@@ -225,13 +225,28 @@ class MAGNUM_EXPORT BufferTexture: public AbstractTexture {
         static Int offsetAlignment();
 
         /**
+         * @brief Wrap existing OpenGL buffer texture object
+         * @param id            OpenGL buffer texture ID
+         * @param flags         Object creation flags
+         *
+         * The @p id is expected to be of an existing OpenGL texture object
+         * with target @def_gl{TEXTURE_BUFFER}. Unlike texture created using
+         * constructor, the OpenGL object is by default not deleted on
+         * destruction, use @p flags for different behavior.
+         * @see @ref release()
+         */
+        static BufferTexture wrap(GLuint id, ObjectFlags flags = {}) {
+            return BufferTexture{id, flags};
+        }
+
+        /**
          * @brief Constructor
          *
          * Creates new OpenGL texture object. If @extension{ARB,direct_state_access}
-         * (part of OpenGL 4.5) is not supported, the texture is created on
+         * (part of OpenGL 4.5) is not available, the texture is created on
          * first use.
-         * @see @fn_gl{CreateTextures} with @def_gl{TEXTURE_BUFFER}, eventually
-         *      @fn_gl{GenTextures}
+         * @see @ref wrap(), @fn_gl{CreateTextures} with @def_gl{TEXTURE_BUFFER},
+         *      eventually @fn_gl{GenTextures}
          */
         explicit BufferTexture(): AbstractTexture(GL_TEXTURE_BUFFER) {}
 
@@ -299,6 +314,8 @@ class MAGNUM_EXPORT BufferTexture: public AbstractTexture {
         #endif
 
     private:
+        explicit BufferTexture(GLuint id, ObjectFlags flags): AbstractTexture{id, GL_TEXTURE_BUFFER, flags} {}
+
         void MAGNUM_LOCAL setBufferImplementationDefault(BufferTextureFormat internalFormat, Buffer& buffer);
         void MAGNUM_LOCAL setBufferImplementationDSA(BufferTextureFormat internalFormat, Buffer& buffer);
         void MAGNUM_LOCAL setBufferImplementationDSAEXT(BufferTextureFormat internalFormat, Buffer& buffer);
@@ -310,7 +327,7 @@ class MAGNUM_EXPORT BufferTexture: public AbstractTexture {
 
 }
 #else
-#error this header is available only on desktop OpenGL build
+#error this header is not available in OpenGL ES build
 #endif
 
 #endif

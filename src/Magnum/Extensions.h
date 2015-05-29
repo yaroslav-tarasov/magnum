@@ -43,10 +43,12 @@ desktop build, OpenGL ES 2.0 extensions which are part of ES 3.0 are available
 only on @ref MAGNUM_TARGET_GLES2 "OpenGL ES 2.0 build" and vendor OpenGL ES
 extensions are available only on @ref MAGNUM_TARGET_GLES "OpenGL ES builds".
 
-Each struct has the same public methods as Extension class (requiredVersion(),
-coreVersion() and string(), but these structs are better suited for
-compile-time decisions rather than Extension instances. See
-@ref Context::isExtensionSupported() for example usage.
+Each struct has the same public methods as @ref Extension class
+(@ref Extension::requiredVersion() "requiredVersion()",
+@ref Extension::coreVersion() "coreVersion()" and @ref Extension::string() "string()"),
+but these structs are better suited for compile-time decisions rather than
+@ref Extension instances. See @ref Context::isExtensionSupported() for example
+usage.
 
 This namespace is built by default. To use it, you need to add `${MAGNUM_INCLUDE_DIRS}`
 to include path and link to `${MAGNUM_LIBRARIES}`. See @ref building and
@@ -227,6 +229,38 @@ namespace GL {
         /* NV_draw_texture not supported */                           // #430
     }
     /* IMPORTANT: if this line is > 233 (73 + size), don't forget to update array size in Context.h */
+    #elif defined(MAGNUM_TARGET_WEBGL)
+    #line 1
+    namespace ANGLE {
+        #ifdef MAGNUM_TARGET_GLES2
+        _extension(GL,ANGLE,instanced_arrays,       GLES200, GLES300) // #19
+        #endif
+    } namespace EXT {
+        _extension(GL,EXT,texture_filter_anisotropic, GLES200,  None) // #11
+        _extension(GL,EXT,sRGB,                     GLES200,    None) // #17
+        #ifdef MAGNUM_TARGET_GLES2
+        _extension(GL,EXT,blend_minmax,             GLES200, GLES300) // #25
+        #endif
+        _extension(GL,EXT,disjoint_timer_query,     GLES200,    None) // #26
+        #ifdef MAGNUM_TARGET_GLES2
+        _extension(GL,EXT,shader_texture_lod,       GLES200, GLES300) // #27
+        #endif
+    } namespace OES {
+        #ifdef MAGNUM_TARGET_GLES2
+        _extension(GL,OES,texture_float,            GLES200, GLES300) // #1
+        _extension(GL,OES,texture_half_float,       GLES200, GLES300) // #2
+        _extension(GL,OES,standard_derivatives,     GLES200, GLES300) // #4
+        _extension(GL,OES,vertex_array_object,      GLES200, GLES300) // #5
+        _extension(GL,OES,element_index_uint,       GLES200, GLES300) // #10
+        _extension(GL,OES,texture_float_linear,     GLES200, GLES300) // #20
+        _extension(GL,OES,texture_half_float_linear, GLES200, GLES300) // #21
+        #endif
+    } namespace WEBGL {
+        #ifdef MAGNUM_TARGET_GLES2
+        _extension(GL,WEBGL,depth_texture,          GLES200, GLES300) // #9
+        _extension(GL,WEBGL,draw_buffers,           GLES200, GLES300) // #18
+        #endif
+    }
     #else
     #line 1
     namespace ANGLE {
@@ -249,7 +283,9 @@ namespace GL {
         _extension(GL,ARM,rgba8,                    GLES200, GLES300) // #82
         #endif
     } namespace CHROMIUM {
+        #ifdef CORRADE_TARGET_NACL
         _extension(GL,CHROMIUM,map_sub,             GLES200,    None)
+        #endif
     } namespace EXT {
         _extension(GL,EXT,texture_filter_anisotropic, GLES200,  None) // #41
         #ifdef MAGNUM_TARGET_GLES2
@@ -283,6 +319,9 @@ namespace GL {
         _extension(GL,EXT,map_buffer_range,         GLES200, GLES300) // #121
         #endif
         _extension(GL,EXT,disjoint_timer_query,     GLES200,    None) // #150
+        #ifdef MAGNUM_TARGET_GLES2
+        _extension(GL,EXT,draw_buffers,             GLES200, GLES300) // #151
+        #endif
         _extension(GL,EXT,texture_sRGB_decode,      GLES200,    None) // #152
         #ifdef MAGNUM_TARGET_GLES2
         _extension(GL,EXT,instanced_arrays,         GLES200, GLES300) // #156

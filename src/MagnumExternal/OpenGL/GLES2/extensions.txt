@@ -18,6 +18,7 @@ extension EXT_shadow_samplers                   optional
 extension EXT_texture_rg                        optional
 extension EXT_texture_storage                   optional
 extension EXT_map_buffer_range                  optional
+extension EXT_draw_buffers                      optional
 extension EXT_instanced_arrays                  optional
 extension EXT_draw_instanced                    optional
 extension NV_draw_buffers                       optional
@@ -46,7 +47,6 @@ extension OES_required_internalformat           optional
 extension OES_surfaceless_context               optional
 
 extension APPLE_texture_format_BGRA8888         optional
-extension CHROMIUM_map_sub                      optional
 extension EXT_texture_filter_anisotropic        optional
 extension EXT_texture_format_BGRA8888           optional
 extension EXT_read_format_bgra                  optional

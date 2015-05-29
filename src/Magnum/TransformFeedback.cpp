@@ -32,7 +32,9 @@
 #include "Magnum/Buffer.h"
 #include "Magnum/Context.h"
 #include "Magnum/Extensions.h"
+#ifndef MAGNUM_TARGET_WEBGL
 #include "Magnum/Implementation/DebugState.h"
+#endif
 #include "Magnum/Implementation/State.h"
 #include "Magnum/Implementation/TransformFeedbackState.h"
 
@@ -94,25 +96,25 @@ Int TransformFeedback::maxBuffers() {
 }
 #endif
 
-TransformFeedback::TransformFeedback() {
+TransformFeedback::TransformFeedback(): _flags{ObjectFlag::DeleteOnDestruction} {
     (this->*Context::current()->state().transformFeedback->createImplementation)();
     CORRADE_INTERNAL_ASSERT(_id != Implementation::State::DisengagedBinding);
 }
 
 void TransformFeedback::createImplementationDefault() {
     glGenTransformFeedbacks(1, &_id);
-    _created = false;
 }
 
 #ifndef MAGNUM_TARGET_GLES
 void TransformFeedback::createImplementationDSA() {
     glCreateTransformFeedbacks(1, &_id);
-    _created = true;
+    _flags |= ObjectFlag::Created;
 }
 #endif
 
 TransformFeedback::~TransformFeedback() {
-    if(!_id) return;
+    /* Moved out or not deleting on destruction, nothing to do */
+    if(!_id || !(_flags & ObjectFlag::DeleteOnDestruction)) return;
 
     /* If bound, remove itself from state */
     GLuint& binding = Context::current()->state().transformFeedback->binding;
@@ -129,31 +131,33 @@ void TransformFeedback::bindInternal() {
 
     /* Bind the transform feedback otherwise, which will also finally create it */
     bound = _id;
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, _id);
 }
 
 inline void TransformFeedback::createIfNotAlready() {
-    if(_created) return;
+    if(_flags & ObjectFlag::Created) return;
 
     /* glGen*() does not create the object, just reserves the name. Some
        commands (such as glObjectLabel()) operate with IDs directly and they
        require the object to be created. Binding the transform feedback finally
        creates it. Also all EXT DSA functions implicitly create it. */
     bindInternal();
-    CORRADE_INTERNAL_ASSERT(_created);
+    CORRADE_INTERNAL_ASSERT(_flags & ObjectFlag::Created);
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 std::string TransformFeedback::label() {
     createIfNotAlready();
     return Context::current()->state().debug->getLabelImplementation(GL_TRANSFORM_FEEDBACK, _id);
 }
 
-TransformFeedback& TransformFeedback::setLabelInternal(const Containers::ArrayReference<const char> label) {
+TransformFeedback& TransformFeedback::setLabelInternal(const Containers::ArrayView<const char> label) {
     createIfNotAlready();
     Context::current()->state().debug->labelImplementation(GL_TRANSFORM_FEEDBACK, _id, label);
     return *this;
 }
+#endif
 
 TransformFeedback& TransformFeedback::attachBuffer(const UnsignedInt index, Buffer& buffer, const GLintptr offset, const GLsizeiptr size) {
     (this->*Context::current()->state().transformFeedback->attachRangeImplementation)(index, buffer, offset, size);
@@ -206,7 +210,7 @@ void TransformFeedback::attachImplementationFallback(const GLuint firstIndex, st
 }
 
 #ifndef MAGNUM_TARGET_GLES
-/** @todoc const Containers::ArrayReference makes Doxygen grumpy */
+/** @todoc const Containers::ArrayView makes Doxygen grumpy */
 void TransformFeedback::attachImplementationDSA(const GLuint firstIndex, std::initializer_list<std::tuple<Buffer*, GLintptr, GLsizeiptr>> buffers) {
     for(std::size_t i = 0; i != buffers.size(); ++i) {
         Buffer* buffer;
@@ -219,14 +223,14 @@ void TransformFeedback::attachImplementationDSA(const GLuint firstIndex, std::in
 }
 #endif
 
-/** @todoc const Containers::ArrayReference makes Doxygen grumpy */
+/** @todoc const Containers::ArrayView makes Doxygen grumpy */
 void TransformFeedback::attachImplementationFallback(const GLuint firstIndex, std::initializer_list<Buffer*> buffers) {
     bindInternal();
     Buffer::bind(Buffer::Target(GL_TRANSFORM_FEEDBACK_BUFFER), firstIndex, buffers);
 }
 
 #ifndef MAGNUM_TARGET_GLES
-/** @todoc const Containers::ArrayReference makes Doxygen grumpy */
+/** @todoc const Containers::ArrayView makes Doxygen grumpy */
 void TransformFeedback::attachImplementationDSA(const GLuint firstIndex, std::initializer_list<Buffer*> buffers) {
     for(std::size_t i = 0; i != buffers.size(); ++i)
         glTransformFeedbackBufferBase(_id, firstIndex + i, *(buffers.begin() + i) ? (*(buffers.begin() + i))->id() : 0);

@@ -25,20 +25,17 @@
 
 #include "TgaImporter.h"
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <Corrade/Utility/Endianness.h>
-#include <Corrade/Containers/Array.h>
+#include <Corrade/Containers/ArrayView.h>
 
 #include "Magnum/ColorFormat.h"
-#include "Magnum/Trade/ImageData.h"
-#include "MagnumPlugins/TgaImporter/TgaHeader.h"
-
-#ifdef MAGNUM_TARGET_GLES
-#include <algorithm>
 #include "Magnum/Math/Swizzle.h"
 #include "Magnum/Math/Vector4.h"
-#endif
+#include "Magnum/Trade/ImageData.h"
+#include "MagnumPlugins/TgaImporter/TgaHeader.h"
 
 #ifdef MAGNUM_TARGET_GLES2
 #include "Magnum/Context.h"
@@ -47,7 +44,6 @@
 
 namespace Magnum { namespace Trade {
 
-#ifdef MAGNUM_TARGET_GLES
 namespace {
     constexpr Math::Vector3<UnsignedByte> bgr(const Math::Vector3<UnsignedByte>& vec) {
         return Math::swizzle<'b', 'g', 'r'>(vec);
@@ -57,7 +53,6 @@ namespace {
         return Math::swizzle<'b', 'g', 'r', 'a'>(vec);
     }
 }
-#endif
 
 TgaImporter::TgaImporter(): in(nullptr) {}
 
@@ -69,7 +64,7 @@ auto TgaImporter::doFeatures() const -> Features { return Feature::OpenData; }
 
 bool TgaImporter::doIsOpened() const { return in; }
 
-void TgaImporter::doOpenData(const Containers::ArrayReference<const char> data) {
+void TgaImporter::doOpenData(const Containers::ArrayView<const char> data) {
     /* GCC 4.5 can't handle {} here */
     in = new std::istringstream{std::string(data, data.size())};
 }
@@ -117,18 +112,10 @@ std::optional<ImageData2D> TgaImporter::doImage2D(UnsignedInt) {
     if(header.imageType == 2) {
         switch(header.bpp) {
             case 24:
-                #ifndef MAGNUM_TARGET_GLES
-                format = ColorFormat::BGR;
-                #else
                 format = ColorFormat::RGB;
-                #endif
                 break;
             case 32:
-                #ifndef MAGNUM_TARGET_GLES
-                format = ColorFormat::BGRA;
-                #else
                 format = ColorFormat::RGBA;
-                #endif
                 break;
             default:
                 Error() << "Trade::TgaImporter::image2D(): unsupported color bits-per-pixel:" << header.bpp;
@@ -137,11 +124,13 @@ std::optional<ImageData2D> TgaImporter::doImage2D(UnsignedInt) {
 
     /* Grayscale */
     } else if(header.imageType == 3) {
-        #ifdef MAGNUM_TARGET_GLES2
+        #if defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         format = Context::current() && Context::current()->isExtensionSupported<Extensions::GL::EXT::texture_rg>() ?
             ColorFormat::Red : ColorFormat::Luminance;
-        #else
+        #elif !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
         format = ColorFormat::Red;
+        #else
+        format = ColorFormat::Luminance;
         #endif
         if(header.bpp != 8) {
             Error() << "Trade::TgaImporter::image2D(): unsupported grayscale bits-per-pixel:" << header.bpp;
@@ -160,7 +149,6 @@ std::optional<ImageData2D> TgaImporter::doImage2D(UnsignedInt) {
 
     Vector2i size(header.width, header.height);
 
-    #ifdef MAGNUM_TARGET_GLES
     if(format == ColorFormat::RGB) {
         auto pixels = reinterpret_cast<Math::Vector3<UnsignedByte>*>(data);
         std::transform(pixels, pixels + size.product(), pixels, bgr);
@@ -168,7 +156,6 @@ std::optional<ImageData2D> TgaImporter::doImage2D(UnsignedInt) {
         auto pixels = reinterpret_cast<Math::Vector4<UnsignedByte>*>(data);
         std::transform(pixels, pixels + size.product(), pixels, bgra);
     }
-    #endif
 
     return ImageData2D(format, ColorType::UnsignedByte, size, data);
 }

@@ -25,9 +25,11 @@
     DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef MAGNUM_TARGET_WEBGL
 /** @file
  * @brief Class @ref Magnum::TimeQuery
  */
+#endif
 
 #include "Magnum/AbstractQuery.h"
 
@@ -35,6 +37,7 @@
 #include <Corrade/Utility/Macros.h>
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 namespace Magnum {
 
 /**
@@ -68,6 +71,7 @@ UnsignedInt timeElapsed2 = q3.result<UnsignedInt>()-tmp;
 Using the latter results in fewer OpenGL calls when doing more measures.
 @requires_gl33 Extension @extension{ARB,timer_query}
 @requires_es_extension Extension @es_extension{EXT,disjoint_timer_query}
+@requires_gles Time query is not available in WebGL.
 
 @see @ref PrimitiveQuery, @ref SampleQuery
 @todo timestamp with glGet + example usage
@@ -95,19 +99,34 @@ class TimeQuery: public AbstractQuery {
         #ifdef MAGNUM_BUILD_DEPRECATED
         /**
          * @copybrief TimeQuery(Target)
-         * @deprecated Use @ref Magnum::TimeQuery::TimeQuery(Target) "TimeQuery(Target)"
-         *      instead.
+         * @deprecated Use @ref TimeQuery(Target) instead.
          */
         CORRADE_DEPRECATED("use TimeQuery(Target) instead") explicit TimeQuery() {}
         #endif
 
         /**
+         * @brief Wrap existing OpenGL time query object
+         * @param id            OpenGL time query ID
+         * @param target        Query target
+         * @param flags         Object creation flags
+         *
+         * The @p id is expected to be of an existing OpenGL query object.
+         * Unlike query created using constructor, the OpenGL object is by
+         * default not deleted on destruction, use @p flags for different
+         * behavior.
+         * @see @ref release()
+         */
+        static TimeQuery wrap(GLuint id, Target target, ObjectFlags flags = {}) {
+            return TimeQuery{id, target, flags};
+        }
+
+        /**
          * @brief Constructor
          *
          * Creates new OpenGL query object. If @extension{ARB,direct_state_access}
-         * (part of OpenGL 4.5) is not supported, the query is created on first
+         * (part of OpenGL 4.5) is not available, the query is created on first
          * use.
-         * @see @fn_gl{CreateQueries}, eventually @fn_gl{GenQueries}
+         * @see @ref wrap(), @fn_gl{CreateQueries}, eventually @fn_gl{GenQueries}
          */
         explicit TimeQuery(Target target): AbstractQuery(GLenum(target)) {}
 
@@ -140,8 +159,7 @@ class TimeQuery: public AbstractQuery {
         #ifdef MAGNUM_BUILD_DEPRECATED
         /**
          * @copybrief AbstractQuery::begin()
-         * @deprecated Use @ref Magnum::AbstractQuery::begin() "begin()"
-         *      instead.
+         * @deprecated Use @ref AbstractQuery::begin() instead.
          */
         CORRADE_DEPRECATED("use begin() instead") void begin(Target target) {
             AbstractQuery::begin(GLenum(target));
@@ -151,7 +169,7 @@ class TimeQuery: public AbstractQuery {
         #endif
 
         /* Overloads to remove WTF-factor from method chaining order */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
+        #if !defined(DOXYGEN_GENERATING_OUTPUT) && !defined(MAGNUM_TARGET_WEBGL)
         TimeQuery& setLabel(const std::string& label) {
             AbstractQuery::setLabel(label);
             return *this;
@@ -161,8 +179,14 @@ class TimeQuery: public AbstractQuery {
             return *this;
         }
         #endif
+
+    private:
+        explicit TimeQuery(GLuint id, Target target, ObjectFlags flags) noexcept: AbstractQuery{id, GLenum(target), flags} {}
 };
 
 }
+#else
+#error this header is not available in WebGL 1.0 build
+#endif
 
 #endif

@@ -169,14 +169,14 @@ typedef std::int32_t Int;
 /**
 @brief Unsigned long (64bit)
 
-@attention 64-bit integers are not available in @ref MAGNUM_TARGET_WEBGL "WebGL".
+@requires_gles 64-bit integers are not available in WebGL.
 */
 typedef std::uint64_t UnsignedLong;
 
 /**
 @brief Signed long (64bit)
 
-@attention 64-bit integers are not available in @ref MAGNUM_TARGET_WEBGL "WebGL".
+@requires_gles 64-bit integers are not available in WebGL.
 */
 typedef std::int64_t Long;
 #endif
@@ -351,7 +351,7 @@ typedef Math::Range3D<Int> Range3Di;
 /** @{ @name Double-precision types
 
 See @ref types for more information.
-@requires_gl Only single-precision types are available in OpenGL ES.
+@requires_gl Only single-precision types are available in OpenGL ES and WebGL.
 */
 
 /** @brief Double (64bit) */
@@ -508,6 +508,7 @@ using Math::operator "" _radf;
 class AbstractFramebuffer;
 
 class AbstractImage;
+/* AbstractQuery is not used directly */
 class AbstractShaderProgram;
 class AbstractTexture;
 
@@ -556,7 +557,7 @@ class CubeMapTexture;
 class CubeMapTextureArray;
 #endif
 
-/* DebugMessage used only statically */
+/* DebugOutput, DebugMessage, DebugGroup used only statically */
 /* DefaultFramebuffer is available only through global instance */
 /* DimensionTraits forward declaration is not needed */
 
@@ -589,7 +590,8 @@ typedef MultisampleTexture<3> MultisampleTexture2DArray;
 #endif
 #endif
 
-/* AbstractQuery is not used directly */
+/* ObjectFlag, ObjectFlags are used only in conjunction with *::wrap() function */
+
 class PrimitiveQuery;
 class SampleQuery;
 class TimeQuery;

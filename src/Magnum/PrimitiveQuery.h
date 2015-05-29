@@ -59,10 +59,10 @@ if(!q.resultAvailable()) {
 // ...or block until the result is available
 UnsignedInt primitiveCount = q.result<UnsignedInt>();
 @endcode
-@requires_gl30 Extension @extension{EXT,transform_feedback}
-@requires_gles30 Only sample queries are available on OpenGL ES 2.0.
-
 @see @ref SampleQuery, @ref TimeQuery, @ref TransformFeedback
+@requires_gl30 Extension @extension{EXT,transform_feedback}
+@requires_gles30 Only sample queries are available in OpenGL ES 2.0.
+@requires_webgl20 Queries are not available in WebGL 1.0.
 @todo glBeginQueryIndexed
 @todo @extension{ARB,transform_feedback_overflow_query}
 */
@@ -75,7 +75,7 @@ class PrimitiveQuery: public AbstractQuery {
              * Count of primitives generated from vertex shader or geometry
              * shader.
              * @requires_gl Only transform feedback query is available in
-             *      OpenGL ES.
+             *      OpenGL ES and WebGL.
              */
             PrimitivesGenerated = GL_PRIMITIVES_GENERATED,
             #endif
@@ -84,11 +84,26 @@ class PrimitiveQuery: public AbstractQuery {
             TransformFeedbackPrimitivesWritten = GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN
         };
 
+        /**
+         * @brief Wrap existing OpenGL primitive query object
+         * @param id            OpenGL primitive query ID
+         * @param target        Query target
+         * @param flags         Object creation flags
+         *
+         * The @p id is expected to be of an existing OpenGL query object.
+         * Unlike query created using constructor, the OpenGL object is by
+         * default not deleted on destruction, use @p flags for different
+         * behavior.
+         * @see @ref release()
+         */
+        static PrimitiveQuery wrap(GLuint id, Target target, ObjectFlags flags = {}) {
+            return PrimitiveQuery{id, target, flags};
+        }
+
         #ifdef MAGNUM_BUILD_DEPRECATED
         /**
          * @copybrief PrimitiveQuery(Target)
-         * @deprecated Use @ref Magnum::PrimitiveQuery::PrimitiveQuery(Target) "PrimitiveQuery(Target)"
-         *      instead.
+         * @deprecated Use @ref PrimitiveQuery(Target) instead.
          */
         CORRADE_DEPRECATED("use PrimitiveQuery(Target) instead") explicit PrimitiveQuery() {}
         #endif
@@ -97,9 +112,9 @@ class PrimitiveQuery: public AbstractQuery {
          * @brief Constructor
          *
          * Creates new OpenGL query object. If @extension{ARB,direct_state_access}
-         * (part of OpenGL 4.5) is not supported, the query is created on first
+         * (part of OpenGL 4.5) is not available, the query is created on first
          * use.
-         * @see @fn_gl{CreateQueries}, eventually @fn_gl{GenQueries}
+         * @see @ref wrap(), @fn_gl{CreateQueries}, eventually @fn_gl{GenQueries}
          */
         explicit PrimitiveQuery(Target target): AbstractQuery(GLenum(target)) {}
 
@@ -117,8 +132,7 @@ class PrimitiveQuery: public AbstractQuery {
         #ifdef MAGNUM_BUILD_DEPRECATED
         /**
          * @copybrief AbstractQuery::begin()
-         * @deprecated Use @ref Magnum::AbstractQuery::begin() "begin()"
-         *      instead.
+         * @deprecated Use @ref begin() instead.
          */
         CORRADE_DEPRECATED("use begin() instead") void begin(Target target) {
             AbstractQuery::begin(GLenum(target));
@@ -128,7 +142,7 @@ class PrimitiveQuery: public AbstractQuery {
         #endif
 
         /* Overloads to remove WTF-factor from method chaining order */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
+        #if !defined(DOXYGEN_GENERATING_OUTPUT) && !defined(MAGNUM_TARGET_WEBGL)
         PrimitiveQuery& setLabel(const std::string& label) {
             AbstractQuery::setLabel(label);
             return *this;
@@ -138,9 +152,14 @@ class PrimitiveQuery: public AbstractQuery {
             return *this;
         }
         #endif
+
+    private:
+        explicit PrimitiveQuery(GLuint id, Target target, ObjectFlags flags) noexcept: AbstractQuery{id, GLenum(target), flags} {}
 };
 
 }
+#else
+#error this header is not available in OpenGL ES 2.0 build
 #endif
 
 #endif

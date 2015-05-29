@@ -57,7 +57,7 @@ struct TextureState {
     void reset();
 
     void(*unbindImplementation)(GLint);
-    void(*bindMultiImplementation)(GLint, Containers::ArrayReference<AbstractTexture* const>);
+    void(*bindMultiImplementation)(GLint, Containers::ArrayView<AbstractTexture* const>);
     void(AbstractTexture::*createImplementation)();
     void(AbstractTexture::*bindImplementation)(GLint);
     void(AbstractTexture::*parameteriImplementation)(GLenum, GLint);
@@ -71,7 +71,7 @@ struct TextureState {
     void(AbstractTexture::*parameterIivImplementation)(GLenum, const GLint*);
     #endif
     void(AbstractTexture::*setMaxAnisotropyImplementation)(GLfloat);
-    #ifndef MAGNUM_TARGET_GLES2
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     void(AbstractTexture::*getLevelParameterivImplementation)(GLint, GLenum, GLint*);
     #endif
     void(AbstractTexture::*mipmapImplementation)();
@@ -79,8 +79,10 @@ struct TextureState {
     void(AbstractTexture::*storage1DImplementation)(GLsizei, TextureFormat, const Math::Vector<1, GLsizei>&);
     #endif
     void(AbstractTexture::*storage2DImplementation)(GLsizei, TextureFormat, const Vector2i&);
+    #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
     void(AbstractTexture::*storage3DImplementation)(GLsizei, TextureFormat, const Vector3i&);
-    #ifndef MAGNUM_TARGET_GLES2
+    #endif
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     void(AbstractTexture::*storage2DMultisampleImplementation)(GLsizei, TextureFormat, const Vector2i&, GLboolean);
     #endif
     #ifndef MAGNUM_TARGET_GLES
@@ -91,7 +93,9 @@ struct TextureState {
     void(AbstractTexture::*subImage1DImplementation)(GLint, const Math::Vector<1, GLint>&, const Math::Vector<1, GLsizei>&, ColorFormat, ColorType, const GLvoid*);
     #endif
     void(AbstractTexture::*subImage2DImplementation)(GLint, const Vector2i&, const Vector2i&, ColorFormat, ColorType, const GLvoid*);
+    #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
     void(AbstractTexture::*subImage3DImplementation)(GLint, const Vector3i&, const Vector3i&, ColorFormat, ColorType, const GLvoid*);
+    #endif
     void(AbstractTexture::*invalidateImageImplementation)(GLint);
     void(AbstractTexture::*invalidateSubImageImplementation)(GLint, const Vector3i&, const Vector3i&);
 
@@ -100,7 +104,7 @@ struct TextureState {
     void(BufferTexture::*setBufferRangeImplementation)(BufferTextureFormat, Buffer&, GLintptr, GLsizeiptr);
     #endif
 
-    #ifndef MAGNUM_TARGET_GLES2
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     Vector2i(CubeMapTexture::*getCubeImageSizeImplementation)(Int);
     #endif
     #ifndef MAGNUM_TARGET_GLES
@@ -109,7 +113,9 @@ struct TextureState {
     void(CubeMapTexture::*cubeSubImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, const Vector2i&, ColorFormat, ColorType, const GLvoid*);
 
     GLint maxSize,
+        #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
         max3DSize,
+        #endif
         maxCubeMapSize;
     #ifndef MAGNUM_TARGET_GLES2
     GLint maxArrayLayers;

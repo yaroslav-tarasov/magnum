@@ -48,6 +48,7 @@ struct MeshGLTest: AbstractOpenGLTester {
     void construct();
     void constructCopy();
     void constructMove();
+    void wrap();
 
     void label();
 
@@ -139,6 +140,7 @@ MeshGLTest::MeshGLTest() {
     addTests({&MeshGLTest::construct,
               &MeshGLTest::constructCopy,
               &MeshGLTest::constructMove,
+              &MeshGLTest::wrap,
 
               &MeshGLTest::label,
 
@@ -296,6 +298,37 @@ void MeshGLTest::constructMove() {
     CORRADE_COMPARE(c.id(), id);
 }
 
+void MeshGLTest::wrap() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::vertex_array_object>())
+        CORRADE_SKIP(Extensions::GL::ARB::vertex_array_object::string() + std::string{" is not supported."});
+    #elif defined(MAGNUM_TARGET_GLES2)
+    if(!Context::current()->isExtensionSupported<Extensions::GL::OES::vertex_array_object>())
+        CORRADE_SKIP(Extensions::GL::OES::vertex_array_object::string() + std::string{" is not supported."});
+    #endif
+
+    GLuint id;
+    #ifndef MAGNUM_TARGET_GLES2
+    glGenVertexArrays(1, &id);
+    #else
+    glGenVertexArraysOES(1, &id);
+    #endif
+
+    /* Releasing won't delete anything */
+    {
+        auto mesh = Mesh::wrap(id, ObjectFlag::DeleteOnDestruction);
+        CORRADE_COMPARE(mesh.release(), id);
+    }
+
+    /* ...so we can wrap it again */
+    Mesh::wrap(id);
+    #ifndef MAGNUM_TARGET_GLES2
+    glDeleteVertexArrays(1, &id);
+    #else
+    glDeleteVertexArraysOES(1, &id);
+    #endif
+}
+
 void MeshGLTest::label() {
     /* No-Op version is tested in AbstractObjectGLTest */
     if(!Context::current()->isExtensionSupported<Extensions::GL::KHR::debug>() &&
@@ -356,7 +389,7 @@ FloatShader::FloatShader(const std::string& type, const std::string& conversion)
     #endif
 
     vert.addSource(
-        #ifndef MAGNUM_TARGET_GLES3
+        #if !defined(MAGNUM_TARGET_GLES) || defined(MAGNUM_TARGET_GLES2)
         "attribute mediump " + type + " value;\n"
         "varying mediump " + type + " valueInterpolated;\n"
         #else
@@ -368,7 +401,7 @@ FloatShader::FloatShader(const std::string& type, const std::string& conversion)
         "    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);\n"
         "}\n");
 
-    #ifndef MAGNUM_TARGET_GLES3
+    #if !defined(MAGNUM_TARGET_GLES) || defined(MAGNUM_TARGET_GLES2)
     frag.addSource("varying mediump " + type + " valueInterpolated;\n"
                    "void main() { gl_FragColor = " + conversion + "; }\n");
     #else
@@ -567,7 +600,7 @@ void MeshGLTest::addVertexBufferDouble() {
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    const auto value = Checker(DoubleShader("double", "float", "vec4(value, 0.0, 0.0, 0.0)"),
+    const auto value = Checker(DoubleShader("double", "float", "float(value)"),
         RenderbufferFormat::R16, mesh).get<UnsignedShort>(ColorFormat::Red, ColorType::UnsignedShort);
 
     MAGNUM_VERIFY_NO_ERROR();
@@ -1711,7 +1744,7 @@ void MeshGLTest::addVertexBufferInstancedDouble() {
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    const auto value = Checker(DoubleShader("double", "float", "vec4(value, 0.0, 0.0, 0.0)"),
+    const auto value = Checker(DoubleShader("double", "float", "float(value)"),
         RenderbufferFormat::R16, mesh).get<UnsignedShort>(ColorFormat::Red, ColorType::UnsignedShort);
 
     MAGNUM_VERIFY_NO_ERROR();

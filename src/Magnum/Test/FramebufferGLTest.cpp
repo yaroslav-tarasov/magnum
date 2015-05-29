@@ -55,6 +55,7 @@ struct FramebufferGLTest: AbstractOpenGLTester {
     void construct();
     void constructCopy();
     void constructMove();
+    void wrap();
 
     void label();
 
@@ -105,6 +106,7 @@ FramebufferGLTest::FramebufferGLTest() {
     addTests({&FramebufferGLTest::construct,
               &FramebufferGLTest::constructCopy,
               &FramebufferGLTest::constructMove,
+              &FramebufferGLTest::wrap,
 
               &FramebufferGLTest::label,
 
@@ -212,6 +214,26 @@ void FramebufferGLTest::constructMove() {
     CORRADE_COMPARE(b.id(), cId);
     CORRADE_COMPARE(c.id(), id);
     CORRADE_COMPARE(c.viewport(), Range2Di({32, 16}, {128, 256}));
+}
+
+void FramebufferGLTest::wrap() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::framebuffer_object>())
+        CORRADE_SKIP(Extensions::GL::ARB::framebuffer_object::string() + std::string(" is not available."));
+    #endif
+
+    GLuint id;
+    glGenFramebuffers(1, &id);
+
+    /* Releasing won't delete anything */
+    {
+        auto framebuffer = Framebuffer::wrap(id, {}, ObjectFlag::DeleteOnDestruction);
+        CORRADE_COMPARE(framebuffer.release(), id);
+    }
+
+    /* ...so we can wrap it again */
+    Framebuffer::wrap(id, {});
+    glDeleteFramebuffers(1, &id);
 }
 
 void FramebufferGLTest::label() {
@@ -620,8 +642,9 @@ void FramebufferGLTest::multipleColorOutputs() {
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::framebuffer_object>())
         CORRADE_SKIP(Extensions::GL::ARB::framebuffer_object::string() + std::string(" is not available."));
     #elif defined(MAGNUM_TARGET_GLES2)
-    if(!Context::current()->isExtensionSupported<Extensions::GL::NV::draw_buffers>())
-        CORRADE_SKIP(Extensions::GL::NV::draw_buffers::string() + std::string(" is not available."));
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::draw_buffers>() &&
+       !Context::current()->isExtensionSupported<Extensions::GL::NV::draw_buffers>())
+        CORRADE_SKIP("No required extension available.");
     #endif
 
     Texture2D color1;

@@ -97,8 +97,7 @@ class TranslationTransformation: public AbstractTranslation<dimensions, T, Trans
         #ifdef MAGNUM_BUILD_DEPRECATED
         /**
          * @copybrief transform()
-         * @deprecated Use @ref Magnum::SceneGraph::TranslationTransformation::transform() "transform()"
-         *      instead.
+         * @deprecated Use @ref transform() instead.
          */
         CORRADE_DEPRECATED("use transform() instead") Object<TranslationTransformation<dimensions, T, TranslationType>>& transform(const typename DimensionTraits<dimensions, TranslationType>::VectorType& transformation, TransformationType) {
             return transform(transformation);
@@ -122,8 +121,7 @@ class TranslationTransformation: public AbstractTranslation<dimensions, T, Trans
         #ifdef MAGNUM_BUILD_DEPRECATED
         /**
          * @copybrief translate()
-         * @deprecated Use @ref Magnum::SceneGraph::TranslationTransformation::translate() "translate()"
-         *      instead.
+         * @deprecated Use @ref translate() instead.
          */
         CORRADE_DEPRECATED("use translate() instead") Object<TranslationTransformation<dimensions, T, TranslationType>>& translate(const typename DimensionTraits<dimensions, TranslationType>::VectorType& vector, TransformationType) {
             return translate(vector);

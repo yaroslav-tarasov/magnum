@@ -25,7 +25,9 @@
 
 #include "DebugOutput.h"
 
+#ifndef MAGNUM_TARGET_WEBGL
 #include <Corrade/Utility/Assert.h>
+#include <Corrade/Utility/Debug.h>
 
 #include "Magnum/Context.h"
 #include "Magnum/Extensions.h"
@@ -40,7 +42,7 @@ namespace Magnum {
 
 namespace {
 
-#if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+#ifndef CORRADE_TARGET_NACL
 void
 #ifdef CORRADE_TARGET_WINDOWS
 APIENTRY
@@ -174,7 +176,7 @@ void DebugOutput::setEnabledInternal(const GLenum source, const GLenum type, con
 void DebugOutput::controlImplementationNoOp(GLenum, GLenum, GLenum, std::initializer_list<UnsignedInt>, bool) {}
 
 void DebugOutput::controlImplementationKhr(const GLenum source, const GLenum type, const GLenum severity, const std::initializer_list<UnsignedInt> ids, const bool enabled) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     #ifndef MAGNUM_TARGET_GLES
     glDebugMessageControl
     #else
@@ -200,7 +202,7 @@ void DebugOutput::callbackImplementationKhr(const Callback callback, const void*
 
     /* Adding callback */
     if(!original && callback) {
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+        #ifndef CORRADE_TARGET_NACL
         #ifndef MAGNUM_TARGET_GLES
         glDebugMessageCallback
         #else
@@ -214,7 +216,7 @@ void DebugOutput::callbackImplementationKhr(const Callback callback, const void*
 
     /* Deleting callback */
     } else if(original && !callback) {
-        #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+        #ifndef CORRADE_TARGET_NACL
         #ifndef MAGNUM_TARGET_GLES
         glDebugMessageCallback
         #else
@@ -275,14 +277,14 @@ Debug operator<<(Debug debug, const DebugOutput::Severity value) {
 }
 #endif
 
-void DebugMessage::insertInternal(const Source source, const Type type, const UnsignedInt id, const DebugOutput::Severity severity, const Containers::ArrayReference<const char> string) {
+void DebugMessage::insertInternal(const Source source, const Type type, const UnsignedInt id, const DebugOutput::Severity severity, const Containers::ArrayView<const char> string) {
     Context::current()->state().debug->messageInsertImplementation(source, type, id, severity, string);
 }
 
-void DebugMessage::insertImplementationNoOp(Source, Type, UnsignedInt, DebugOutput::Severity, const Containers::ArrayReference<const char>) {}
+void DebugMessage::insertImplementationNoOp(Source, Type, UnsignedInt, DebugOutput::Severity, const Containers::ArrayView<const char>) {}
 
-void DebugMessage::insertImplementationKhr(const Source source, const Type type, const UnsignedInt id, const DebugOutput::Severity severity, const Containers::ArrayReference<const char> string) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+void DebugMessage::insertImplementationKhr(const Source source, const Type type, const UnsignedInt id, const DebugOutput::Severity severity, const Containers::ArrayView<const char> string) {
+    #ifndef CORRADE_TARGET_NACL
     #ifndef MAGNUM_TARGET_GLES
     glDebugMessageInsert
     #else
@@ -299,8 +301,8 @@ void DebugMessage::insertImplementationKhr(const Source source, const Type type,
     #endif
 }
 
-void DebugMessage::insertImplementationExt(Source, Type, UnsignedInt, DebugOutput::Severity, const Containers::ArrayReference<const char> string) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+void DebugMessage::insertImplementationExt(Source, Type, UnsignedInt, DebugOutput::Severity, const Containers::ArrayView<const char> string) {
+    #ifndef CORRADE_TARGET_NACL
     glInsertEventMarkerEXT(string.size(), string.data());
     #else
     static_cast<void>(string);
@@ -309,7 +311,7 @@ void DebugMessage::insertImplementationExt(Source, Type, UnsignedInt, DebugOutpu
 }
 
 #ifndef MAGNUM_TARGET_GLES
-void DebugMessage::insertImplementationGremedy(Source, Type, UnsignedInt, DebugOutput::Severity, const Containers::ArrayReference<const char> string) {
+void DebugMessage::insertImplementationGremedy(Source, Type, UnsignedInt, DebugOutput::Severity, const Containers::ArrayView<const char> string) {
     glStringMarkerGREMEDY(string.size(), string.data());
 }
 #endif
@@ -367,7 +369,7 @@ Int DebugGroup::maxStackDepth() {
     return value;
 }
 
-void DebugGroup::pushInternal(const Source source, const UnsignedInt id, const Containers::ArrayReference<const char> message) {
+void DebugGroup::pushInternal(const Source source, const UnsignedInt id, const Containers::ArrayView<const char> message) {
     CORRADE_ASSERT(!_active, "DebugGroup::push(): group is already active", );
     Context::current()->state().debug->pushGroupImplementation(source, id, message);
     _active = true;
@@ -379,10 +381,10 @@ void DebugGroup::pop() {
     _active = false;
 }
 
-void DebugGroup::pushImplementationNoOp(Source, UnsignedInt, Containers::ArrayReference<const char>) {}
+void DebugGroup::pushImplementationNoOp(Source, UnsignedInt, Containers::ArrayView<const char>) {}
 
-void DebugGroup::pushImplementationKhr(const Source source, const UnsignedInt id, const Containers::ArrayReference<const char> message) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+void DebugGroup::pushImplementationKhr(const Source source, const UnsignedInt id, const Containers::ArrayView<const char> message) {
+    #ifndef CORRADE_TARGET_NACL
     #ifndef MAGNUM_TARGET_GLES
     glPushDebugGroup
     #else
@@ -397,8 +399,8 @@ void DebugGroup::pushImplementationKhr(const Source source, const UnsignedInt id
     #endif
 }
 
-void DebugGroup::pushImplementationExt(Source, UnsignedInt, const Containers::ArrayReference<const char> message) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+void DebugGroup::pushImplementationExt(Source, UnsignedInt, const Containers::ArrayView<const char> message) {
+    #ifndef CORRADE_TARGET_NACL
     glPushGroupMarkerEXT(message.size(), message.data());
     #else
     static_cast<void>(message);
@@ -411,7 +413,7 @@ void DebugGroup::popImplementationNoOp() {}
 void DebugGroup::popImplementationKhr() {
     #ifndef MAGNUM_TARGET_GLES
     glPopDebugGroup();
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     glPopDebugGroupKHR();
     #else
     CORRADE_ASSERT_UNREACHABLE();
@@ -419,7 +421,7 @@ void DebugGroup::popImplementationKhr() {
 }
 
 void DebugGroup::popImplementationExt() {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     glPopGroupMarkerEXT();
     #else
     CORRADE_ASSERT_UNREACHABLE();
@@ -440,3 +442,4 @@ Debug operator<<(Debug debug, const DebugGroup::Source value) {
 #endif
 
 }
+#endif

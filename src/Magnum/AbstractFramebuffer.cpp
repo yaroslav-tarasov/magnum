@@ -49,8 +49,14 @@ Vector2i AbstractFramebuffer::maxViewportSize() {
 
 Int AbstractFramebuffer::maxDrawBuffers() {
     #ifdef MAGNUM_TARGET_GLES2
-    if(!Context::current()->isExtensionSupported<Extensions::GL::NV::draw_buffers>())
+    #ifndef MAGNUM_TARGET_WEBGL
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::draw_buffers>() &&
+       !Context::current()->isExtensionSupported<Extensions::GL::NV::draw_buffers>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::WEBGL::draw_buffers>())
+        return 0;
+    #endif
     #endif
 
     GLint& value = Context::current()->state().framebuffer->maxDrawBuffers;
@@ -60,7 +66,7 @@ Int AbstractFramebuffer::maxDrawBuffers() {
         #ifndef MAGNUM_TARGET_GLES2
         glGetIntegerv(GL_MAX_DRAW_BUFFERS, &value);
         #else
-        glGetIntegerv(GL_MAX_DRAW_BUFFERS_NV, &value);
+        glGetIntegerv(GL_MAX_DRAW_BUFFERS_EXT, &value);
         #endif
     }
 
@@ -83,14 +89,14 @@ Int AbstractFramebuffer::maxDualSourceDrawBuffers() {
 #endif
 
 void AbstractFramebuffer::createIfNotAlready() {
-    if(_created) return;
+    if(_flags & ObjectFlag::Created) return;
 
     /* glGen*() does not create the object, just reserves the name. Some
        commands (such as glObjectLabel()) operate with IDs directly and they
        require the object to be created. Binding the framebuffer finally
        creates it. Also all EXT DSA functions implicitly create it. */
     bindInternal();
-    CORRADE_INTERNAL_ASSERT(_created);
+    CORRADE_INTERNAL_ASSERT(_flags & ObjectFlag::Created);
 }
 
 void AbstractFramebuffer::bind() {
@@ -115,7 +121,7 @@ void AbstractFramebuffer::bindImplementationSingle(FramebufferTarget) {
     state.readBinding = state.drawBinding = _id;
 
     /* Binding the framebuffer finally creates it */
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
 }
 #endif
@@ -135,7 +141,7 @@ void AbstractFramebuffer::bindImplementationDefault(FramebufferTarget target) {
     } else CORRADE_ASSERT_UNREACHABLE();
 
     /* Binding the framebuffer finally creates it */
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glBindFramebuffer(GLenum(target), _id);
 }
 
@@ -157,7 +163,7 @@ FramebufferTarget AbstractFramebuffer::bindImplementationSingle() {
         state.readBinding = state.drawBinding = _id;
 
         /* Binding the framebuffer finally creates it */
-        _created = true;
+        _flags |= ObjectFlag::Created;
         glBindFramebuffer(GL_FRAMEBUFFER, _id);
     }
 
@@ -182,14 +188,16 @@ FramebufferTarget AbstractFramebuffer::bindImplementationDefault() {
     state.readBinding = _id;
 
     /* Binding the framebuffer finally creates it */
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glBindFramebuffer(GLenum(FramebufferTarget::Read), _id);
     return FramebufferTarget::Read;
 }
 
+#if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
 void AbstractFramebuffer::blit(AbstractFramebuffer& source, AbstractFramebuffer& destination, const Range2Di& sourceRectangle, const Range2Di& destinationRectangle, const FramebufferBlitMask mask, const FramebufferBlitFilter filter) {
     Context::current()->state().framebuffer->blitImplementation(source, destination, sourceRectangle, destinationRectangle, mask, filter);
 }
+#endif
 
 #ifndef MAGNUM_TARGET_GLES2
 void AbstractFramebuffer::blitImplementationDefault(AbstractFramebuffer& source, AbstractFramebuffer& destination, const Range2Di& sourceRectangle, const Range2Di& destinationRectangle, const FramebufferBlitMask mask, const FramebufferBlitFilter filter) {
@@ -204,9 +212,9 @@ void AbstractFramebuffer::blitImplementationDSA(AbstractFramebuffer& source, Abs
 }
 #endif
 
-#else
+#elif !defined(MAGNUM_TARGET_WEBGL)
 void AbstractFramebuffer::blitImplementationANGLE(AbstractFramebuffer& source, AbstractFramebuffer& destination, const Range2Di& sourceRectangle, const Range2Di& destinationRectangle, const FramebufferBlitMask mask, const FramebufferBlitFilter filter) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     source.bindInternal(FramebufferTarget::Read);
     destination.bindInternal(FramebufferTarget::Draw);
     glBlitFramebufferANGLE(sourceRectangle.left(), sourceRectangle.bottom(), sourceRectangle.right(), sourceRectangle.top(), destinationRectangle.left(), destinationRectangle.bottom(), destinationRectangle.right(), destinationRectangle.top(), GLbitfield(mask), GLenum(filter));
@@ -222,7 +230,7 @@ void AbstractFramebuffer::blitImplementationANGLE(AbstractFramebuffer& source, A
 }
 
 void AbstractFramebuffer::blitImplementationNV(AbstractFramebuffer& source, AbstractFramebuffer& destination, const Range2Di& sourceRectangle, const Range2Di& destinationRectangle, const FramebufferBlitMask mask, const FramebufferBlitFilter filter) {
-    #if !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #ifndef CORRADE_TARGET_NACL
     source.bindInternal(FramebufferTarget::Read);
     destination.bindInternal(FramebufferTarget::Draw);
     glBlitFramebufferNV(sourceRectangle.left(), sourceRectangle.bottom(), sourceRectangle.right(), sourceRectangle.top(), destinationRectangle.left(), destinationRectangle.bottom(), destinationRectangle.right(), destinationRectangle.top(), GLbitfield(mask), GLenum(filter));
@@ -355,23 +363,16 @@ GLenum AbstractFramebuffer::checkStatusImplementationDSA(const FramebufferTarget
 }
 
 GLenum AbstractFramebuffer::checkStatusImplementationDSAEXT(const FramebufferTarget target) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     return glCheckNamedFramebufferStatusEXT(_id, GLenum(target));
 }
 #endif
 
+#ifndef MAGNUM_TARGET_GLES2
 void AbstractFramebuffer::drawBuffersImplementationDefault(GLsizei count, const GLenum* buffers) {
     bindInternal(FramebufferTarget::Draw);
 
-    #ifndef MAGNUM_TARGET_GLES2
     glDrawBuffers(count, buffers);
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
-    glDrawBuffersNV(count, buffers);
-    #else
-    static_cast<void>(count);
-    static_cast<void>(buffers);
-    CORRADE_ASSERT_UNREACHABLE();
-    #endif
 }
 
 #ifndef MAGNUM_TARGET_GLES
@@ -380,49 +381,69 @@ void AbstractFramebuffer::drawBuffersImplementationDSA(const GLsizei count, cons
 }
 
 void AbstractFramebuffer::drawBuffersImplementationDSAEXT(GLsizei count, const GLenum* buffers) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glFramebufferDrawBuffersEXT(_id, count, buffers);
 }
 #endif
-
-void AbstractFramebuffer::drawBufferImplementationDefault(GLenum buffer) {
+#else
+void AbstractFramebuffer::drawBuffersImplementationEXT(GLsizei count, const GLenum* buffers) {
     bindInternal(FramebufferTarget::Draw);
 
-    #ifndef MAGNUM_TARGET_GLES
-    glDrawBuffer(buffer);
-    #elif !defined(MAGNUM_TARGET_GLES2)
-    glDrawBuffers(1, &buffer);
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
-    glDrawBuffersNV(1, &buffer);
+    #ifndef CORRADE_TARGET_NACL
+    glDrawBuffersEXT(count, buffers);
     #else
-    static_cast<void>(buffer);
+    static_cast<void>(count);
+    static_cast<void>(buffers);
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
+void AbstractFramebuffer::drawBuffersImplementationNV(GLsizei count, const GLenum* buffers) {
+    bindInternal(FramebufferTarget::Draw);
+
+    #ifndef CORRADE_TARGET_NACL
+    glDrawBuffersNV(count, buffers);
+    #else
+    static_cast<void>(count);
+    static_cast<void>(buffers);
+    CORRADE_ASSERT_UNREACHABLE();
+    #endif
+}
+#endif
+#endif
+
 #ifndef MAGNUM_TARGET_GLES
+void AbstractFramebuffer::drawBufferImplementationDefault(GLenum buffer) {
+    bindInternal(FramebufferTarget::Draw);
+
+    glDrawBuffer(buffer);
+}
+
 void AbstractFramebuffer::drawBufferImplementationDSA(const GLenum buffer) {
     glNamedFramebufferDrawBuffer(_id, buffer);
 }
 
 void AbstractFramebuffer::drawBufferImplementationDSAEXT(GLenum buffer) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glFramebufferDrawBufferEXT(_id, buffer);
 }
 #endif
 
+#if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
 void AbstractFramebuffer::readBufferImplementationDefault(GLenum buffer) {
     bindInternal(FramebufferTarget::Read);
 
     #ifndef MAGNUM_TARGET_GLES2
     glReadBuffer(buffer);
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     glReadBufferNV(buffer);
     #else
     static_cast<void>(buffer);
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 #ifndef MAGNUM_TARGET_GLES
 void AbstractFramebuffer::readBufferImplementationDSA(const GLenum buffer) {
@@ -430,7 +451,7 @@ void AbstractFramebuffer::readBufferImplementationDSA(const GLenum buffer) {
 }
 
 void AbstractFramebuffer::readBufferImplementationDSAEXT(GLenum buffer) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glFramebufferReadBufferEXT(_id, buffer);
 }
 #endif
@@ -439,10 +460,11 @@ void AbstractFramebuffer::readImplementationDefault(const Range2Di& rectangle, c
     glReadPixels(rectangle.min().x(), rectangle.min().y(), rectangle.sizeX(), rectangle.sizeY(), GLenum(format), GLenum(type), data);
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void AbstractFramebuffer::readImplementationRobustness(const Range2Di& rectangle, const ColorFormat format, const ColorType type, const std::size_t dataSize, GLvoid* const data) {
     #ifndef MAGNUM_TARGET_GLES
     glReadnPixelsARB(rectangle.min().x(), rectangle.min().y(), rectangle.sizeX(), rectangle.sizeY(), GLenum(format), GLenum(type), dataSize, data);
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     glReadnPixelsEXT(rectangle.min().x(), rectangle.min().y(), rectangle.sizeX(), rectangle.sizeY(), GLenum(format), GLenum(type), dataSize, data);
     #else
     static_cast<void>(rectangle);
@@ -453,5 +475,6 @@ void AbstractFramebuffer::readImplementationRobustness(const Range2Di& rectangle
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 }

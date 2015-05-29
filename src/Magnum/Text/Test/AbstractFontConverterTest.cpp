@@ -231,7 +231,7 @@ class SingleGlyphCacheDataImporter: public Text::AbstractFontConverter {
     private:
         Features doFeatures() const override { return Feature::ConvertData|Feature::ImportGlyphCache; }
 
-        std::unique_ptr<GlyphCache> doImportGlyphCacheFromSingleData(const Containers::ArrayReference<const char> data) const override {
+        std::unique_ptr<GlyphCache> doImportGlyphCacheFromSingleData(const Containers::ArrayView<const char> data) const override {
             if(data.size() == 1 && data[0] == '\xa5')
                 return std::unique_ptr<GlyphCache>(reinterpret_cast<GlyphCache*>(0xdeadbeef));
             return {};
@@ -245,7 +245,7 @@ void AbstractFontConverterTest::importGlyphCacheFromSingleData() {
     SingleGlyphCacheDataImporter importer;
     const char data[] = {'\xa5'};
     /* GCC 4.4 needs explicit typing */
-    std::unique_ptr<GlyphCache> cache = importer.importGlyphCacheFromData(std::vector<std::pair<std::string, Containers::ArrayReference<const char>>>{{{}, data}});
+    std::unique_ptr<GlyphCache> cache = importer.importGlyphCacheFromData(std::vector<std::pair<std::string, Containers::ArrayView<const char>>>{{{}, data}});
     CORRADE_COMPARE(cache.get(), reinterpret_cast<GlyphCache*>(0xdeadbeef));
 
     /* The pointer is invalid, avoid deletion */

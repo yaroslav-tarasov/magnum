@@ -26,7 +26,7 @@
 */
 
 #include <tuple>
-#include <Corrade/Containers/Array.h>
+#include <Corrade/Containers/ArrayView.h>
 
 #include "Magnum/AbstractObject.h"
 
@@ -51,14 +51,15 @@ to @fn_gl{BindTransformFeedback}. Transform feedback limits and
 implementation-defined values (such as @ref maxSeparateComponents()) are
 cached, so repeated queries don't result in repeated @fn_gl{Get} calls.
 
-If extension @extension{ARB,direct_state_access} (part of OpenGL 4.5) is
-available, functions @ref attachBuffer() and @ref attachBuffers() use DSA to
-avoid unnecessary call to @fn_gl{BindTransformFeedback}. See their respective
+If @extension{ARB,direct_state_access} (part of OpenGL 4.5) is available,
+functions @ref attachBuffer() and @ref attachBuffers() use DSA to avoid
+unnecessary calls to @fn_gl{BindTransformFeedback}. See their respective
 documentation for more information.
 
 @see @ref PrimitiveQuery
 @requires_gl40 Extension @extension{ARB,transform_feedback2}
-@requires_gles30 Transform feedback is not available in OpenGL ES 2.0
+@requires_gles30 Transform feedback is not available in OpenGL ES 2.0.
+@requires_webgl20 Transform feedback is not available in WebGL 1.0.
 @todo @extension{AMD,transform_feedback3_lines_triangles}?
 */
 class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
@@ -142,19 +143,34 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * (part of OpenGL 4.0) is not available, returns the same value as
          * @ref maxSeparateAttributes().
          * @see @fn_gl{Get} with @def_gl{MAX_TRANSFORM_FEEDBACK_BUFFERS}
-         * @requires_gl Use @ref Magnum::TransformFeedback::maxSeparateAttributes() "maxSeparateAttributes()"
-         *      in OpenGL ES.
+         * @requires_gl Use @ref maxSeparateAttributes() in OpenGL ES and
+         *      WebGL.
          */
         static Int maxBuffers();
         #endif
+
+        /**
+         * @brief Wrap existing OpenGL transform feedback object
+         * @param id            OpenGL transform feedback ID
+         * @param flags         Object creation flags
+         *
+         * The @p id is expected to be of an existing OpenGL transform feedback
+         * object. Unlike renderbuffer created using constructor, the OpenGL
+         * object is by default not deleted on destruction, use @p flags for
+         * different behavior.
+         * @see @ref release()
+         */
+        static TransformFeedback wrap(GLuint id, ObjectFlags flags = {}) {
+            return TransformFeedback{id, flags};
+        }
 
         /**
          * @brief Constructor
          *
          * Creates new OpenGL transform feedback object. If
          * @extension{ARB,direct_state_access} (part of OpenGL 4.5) is not
-         * supported, the transform feedback object is created on first use.
-         * @see @fn_gl{CreateTransformFeedbacks}, eventually
+         * available, the transform feedback object is created on first use.
+         * @see @ref wrap(), @fn_gl{CreateTransformFeedbacks}, eventually
          *      @fn_gl{GenTransformFeedbacks}
          */
         explicit TransformFeedback();
@@ -169,7 +185,7 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * @brief Destructor
          *
          * Deletes associated OpenGL transform feedback object.
-         * @see @fn_gl{DeleteTransformFeedbacks}
+         * @see @ref wrap(), @ref release(), @fn_gl{DeleteTransformFeedbacks}
          */
         ~TransformFeedback();
 
@@ -183,7 +199,18 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
         GLuint id() const { return _id; }
 
         /**
-         * @brief Buffer label
+         * @brief Release OpenGL object
+         *
+         * Releases ownership of OpenGL transform feedback object and returns
+         * its ID so it is not deleted on destruction. The internal state is
+         * then equivalent to moved-from state.
+         * @see @ref wrap()
+         */
+        GLuint release();
+
+        #ifndef MAGNUM_TARGET_WEBGL
+        /**
+         * @brief Transform feedback label
          *
          * The result is *not* cached, repeated queries will result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and neither
@@ -191,11 +218,12 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * extension is available, this function returns empty string.
          * @see @fn_gl{GetObjectLabel} or @fn_gl_extension2{GetObjectLabel,EXT,debug_label}
          *      with @def_gl{TRANSFORM_FEEDBACK}
+         * @requires_gles Debug output is not available in WebGL.
          */
         std::string label();
 
         /**
-         * @brief Set buffer label
+         * @brief Set transform feedback label
          * @return Reference to self (for method chaining)
          *
          * Default is empty string. If OpenGL 4.3 is not supported and neither
@@ -204,10 +232,12 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * @see @ref maxLabelLength(), @fn_gl{ObjectLabel} or
          *      @fn_gl_extension2{LabelObject,EXT,debug_label} with
          *      @def_gl{TRANSFORM_FEEDBACK}
+         * @requires_gles Debug output is not available in WebGL.
          */
         TransformFeedback& setLabel(const std::string& label) {
             return setLabelInternal({label.data(), label.size()});
         }
+        #endif
 
         /** @overload */
         template<std::size_t size> TransformFeedback& setLabel(const char(&label)[size]) {
@@ -218,8 +248,8 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * @brief Attach range of buffer
          * @return Reference to self (for method chaining)
          *
-         * The @p offset parameter must be aligned to 4 bytes. If on OpenGL ES
-         * or @extension{ARB,direct_state_access} (part of OpenGL 4.5) is not
+         * The @p offset parameter must be aligned to 4 bytes. If
+         * @extension{ARB,direct_state_access} (part of OpenGL 4.5) is not
          * available, the transform feedback object is bound (if not already)
          * and the operation is then done equivalently to
          * @ref Buffer::bind(Buffer::Target, UnsignedInt, GLintptr, GLsizeiptr).
@@ -237,9 +267,9 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * @brief Attach buffer
          * @return Reference to self (for method chaining)
          *
-         * If on OpenGL ES or @extension{ARB,direct_state_access} (part of
-         * OpenGL 4.5) is not available, the transform feedback object is bound
-         * (if not already) and the operation is then done equivalently to
+         * If @extension{ARB,direct_state_access} (part of OpenGL 4.5) is not
+         * available, the transform feedback object is bound (if not already)
+         * and the operation is then done equivalently to
          * @ref Buffer::bind(Buffer::Target, UnsignedInt).
          * @note This function is meant to be used only internally from
          *      @ref AbstractShaderProgram subclasses. See its documentation
@@ -261,10 +291,10 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * range of indices must respect @ref maxBuffers() (@ref maxSeparateComponents()
          * in OpenGL ES or if @extension{ARB,transform_feedback3} (part of
          * OpenGL 4.0) is not available). The offsets must be aligned to 4
-         * bytes. All the buffers must have allocated data store. If on OpenGL
-         * ES or @extension{ARB,direct_state_access} (part of OpenGL 4.5) is
-         * not available, the transform feedback object is bound (if not
-         * already) and the operation is then done equivalently to
+         * bytes. All the buffers must have allocated data store. If
+         * @extension{ARB,direct_state_access} (part of OpenGL 4.5) is not
+         * available, the transform feedback object is bound (if not already)
+         * and the operation is then done equivalently to
          * @ref Buffer::bind(Buffer::Target, UnsignedInt, std::initializer_list<std::tuple<Buffer*, GLintptr, GLsizeiptr>>).
          * @note This function is meant to be used only internally from
          *      @ref AbstractShaderProgram subclasses. See its documentation
@@ -284,10 +314,10 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * detached. The range of indices must respect @ref maxBuffers()
          * (@ref maxSeparateComponents() in OpenGL ES or if
          * @extension{ARB,transform_feedback3} (part of OpenGL 4.0) is not
-         * available). All the buffers must have allocated data store. If on
-         * OpenGL ES or @extension{ARB,direct_state_access} (part of OpenGL
-         * 4.5) is not available, the transform feedback object is bound (if
-         * not already) and the operation then is done equivalently to
+         * available). All the buffers must have allocated data store. If
+         * @extension{ARB,direct_state_access} (part of OpenGL 4.5) is not
+         * available, the transform feedback object is bound (if not already)
+         * and the operation then is done equivalently to
          * @ref Buffer::bind(Buffer::Target, UnsignedInt, std::initializer_list<Buffer*>).
          * @note This function is meant to be used only internally from
          *      @ref AbstractShaderProgram subclasses. See its documentation
@@ -344,6 +374,8 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
         void end();
 
     private:
+        explicit TransformFeedback(GLuint id, ObjectFlags flags) noexcept: _id{id}, _flags{flags} {}
+
         void bindInternal();
 
         void MAGNUM_LOCAL createIfNotAlready();
@@ -367,24 +399,34 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
         void MAGNUM_LOCAL attachImplementationDSA(GLuint firstIndex, std::initializer_list<Buffer*> buffers);
         #endif
 
-        TransformFeedback& setLabelInternal(Containers::ArrayReference<const char> label);
+        #ifndef MAGNUM_TARGET_WEBGL
+        TransformFeedback& setLabelInternal(Containers::ArrayView<const char> label);
+        #endif
 
         GLuint _id;
-        bool _created; /* see createIfNotAlready() for details */
+        ObjectFlags _flags;
 };
 
-inline TransformFeedback::TransformFeedback(TransformFeedback&& other) noexcept: _id{other._id}, _created{other._created} {
+inline TransformFeedback::TransformFeedback(TransformFeedback&& other) noexcept: _id{other._id}, _flags{other._flags} {
     other._id = 0;
 }
 
 inline TransformFeedback& TransformFeedback::operator=(TransformFeedback&& other) noexcept {
     using std::swap;
     swap(_id, other._id);
-    swap(_created, other._created);
+    swap(_flags, other._flags);
     return *this;
 }
 
+inline GLuint TransformFeedback::release() {
+    const GLuint id = _id;
+    _id = 0;
+    return id;
 }
+
+}
+#else
+#error this header is not available in OpenGL ES 2.0 build
 #endif
 
 #endif

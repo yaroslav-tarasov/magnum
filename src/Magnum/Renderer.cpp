@@ -167,6 +167,7 @@ void Renderer::setLogicOperation(const LogicOperation operation) {
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 Renderer::ResetNotificationStrategy Renderer::resetNotificationStrategy() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::robustness>())
@@ -191,6 +192,7 @@ Renderer::ResetNotificationStrategy Renderer::resetNotificationStrategy() {
 Renderer::GraphicsResetStatus Renderer::graphicsResetStatus() {
     return Context::current()->state().renderer->graphicsResetStatusImplementation();
 }
+#endif
 
 void Renderer::initializeContextBasedFunctionality() {
     /* Set some "corporate identity" */
@@ -207,6 +209,7 @@ void Renderer::clearDepthfImplementationES(const GLfloat depth) {
     glClearDepthf(depth);
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 Renderer::GraphicsResetStatus Renderer::graphicsResetStatusImplementationDefault() {
     return GraphicsResetStatus::NoError;
 }
@@ -214,12 +217,13 @@ Renderer::GraphicsResetStatus Renderer::graphicsResetStatusImplementationDefault
 Renderer::GraphicsResetStatus Renderer::graphicsResetStatusImplementationRobustness() {
     #ifndef MAGNUM_TARGET_GLES
     return GraphicsResetStatus(glGetGraphicsResetStatusARB());
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     return GraphicsResetStatus(glGetGraphicsResetStatusEXT());
     #else
     CORRADE_ASSERT_UNREACHABLE();
     #endif
 }
+#endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 Debug operator<<(Debug debug, const Renderer::Error value) {
@@ -231,14 +235,17 @@ Debug operator<<(Debug debug, const Renderer::Error value) {
         _c(InvalidOperation)
         _c(InvalidFramebufferOperation)
         _c(OutOfMemory)
+        #ifndef MAGNUM_TARGET_WEBGL
         _c(StackUnderflow)
         _c(StackOverflow)
+        #endif
         #undef _c
     }
 
     return debug << "Renderer::Error::(invalid)";
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 Debug operator<<(Debug debug, const Renderer::ResetNotificationStrategy value) {
     switch(value) {
         #define _c(value) case Renderer::ResetNotificationStrategy::value: return debug << "Renderer::ResetNotificationStrategy::" #value;
@@ -262,6 +269,7 @@ Debug operator<<(Debug debug, const Renderer::GraphicsResetStatus value) {
 
     return debug << "Renderer::ResetNotificationStrategy::(invalid)";
 }
+#endif
 #endif
 
 }

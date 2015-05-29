@@ -38,14 +38,13 @@ DefaultFramebuffer defaultFramebuffer;
 
 DefaultFramebuffer::DefaultFramebuffer() {
     _id = 0;
-    _created = true;
+    _flags |= ObjectFlag::Created;
 }
 
 DefaultFramebuffer::Status DefaultFramebuffer::checkStatus(const FramebufferTarget target) {
     return Status((this->*Context::current()->state().framebuffer->checkStatusImplementation)(target));
 }
 
-#ifndef MAGNUM_TARGET_GLES2
 DefaultFramebuffer& DefaultFramebuffer::mapForDraw(std::initializer_list<std::pair<UnsignedInt, DrawAttachment>> attachments) {
     /* Max attachment location */
     std::size_t max = 0;
@@ -64,11 +63,15 @@ DefaultFramebuffer& DefaultFramebuffer::mapForDraw(std::initializer_list<std::pa
 }
 
 DefaultFramebuffer& DefaultFramebuffer::mapForDraw(const DrawAttachment attachment) {
+    #ifndef MAGNUM_TARGET_GLES
     (this->*Context::current()->state().framebuffer->drawBufferImplementation)(GLenum(attachment));
+    #else
+    (this->*Context::current()->state().framebuffer->drawBuffersImplementation)(1, reinterpret_cast<const GLenum*>(&attachment));
+    #endif
     return *this;
 }
-#endif
 
+#if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
 DefaultFramebuffer& DefaultFramebuffer::mapForRead(const ReadAttachment attachment) {
     (this->*Context::current()->state().framebuffer->readBufferImplementation)(GLenum(attachment));
     return *this;
@@ -82,6 +85,7 @@ void DefaultFramebuffer::invalidate(std::initializer_list<InvalidationAttachment
 
     (this->*Context::current()->state().framebuffer->invalidateImplementation)(attachments.size(), _attachments);
 }
+#endif
 
 #ifndef MAGNUM_TARGET_GLES2
 void DefaultFramebuffer::invalidate(std::initializer_list<InvalidationAttachment> attachments, const Range2Di& rectangle) {
@@ -115,7 +119,9 @@ Debug operator<<(Debug debug, const DefaultFramebuffer::Status value) {
     switch(value) {
         #define _c(value) case DefaultFramebuffer::Status::value: return debug << "DefaultFramebuffer::Status::" #value;
         _c(Complete)
+        #ifndef MAGNUM_TARGET_WEBGL
         _c(Undefined)
+        #endif
         #undef _c
     }
 

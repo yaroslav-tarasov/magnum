@@ -31,13 +31,48 @@ namespace Magnum { namespace Test {
 struct TimeQueryGLTest: AbstractOpenGLTester {
     explicit TimeQueryGLTest();
 
+    void wrap();
+
     void queryTime();
     void queryTimestamp();
 };
 
 TimeQueryGLTest::TimeQueryGLTest() {
-    addTests({&TimeQueryGLTest::queryTime,
+    addTests({&TimeQueryGLTest::wrap,
+
+              &TimeQueryGLTest::queryTime,
               &TimeQueryGLTest::queryTimestamp});
+}
+
+void TimeQueryGLTest::wrap() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::timer_query>())
+        CORRADE_SKIP(Extensions::GL::ARB::timer_query::string() + std::string(" is not available"));
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::disjoint_timer_query>())
+        CORRADE_SKIP(Extensions::GL::EXT::disjoint_timer_query::string() + std::string(" is not available"));
+    #endif
+
+    GLuint id;
+    #ifndef MAGNUM_TARGET_GLES2
+    glGenQueries(1, &id);
+    #else
+    glGenQueriesEXT(1, &id);
+    #endif
+
+    /* Releasing won't delete anything */
+    {
+        auto query = TimeQuery::wrap(id, TimeQuery::Target::TimeElapsed, ObjectFlag::DeleteOnDestruction);
+        CORRADE_COMPARE(query.release(), id);
+    }
+
+    /* ...so we can wrap it again */
+    TimeQuery::wrap(id, TimeQuery::Target::TimeElapsed);
+    #ifndef MAGNUM_TARGET_GLES2
+    glDeleteQueries(1, &id);
+    #else
+    glDeleteQueriesEXT(1, &id);
+    #endif
 }
 
 void TimeQueryGLTest::queryTime() {

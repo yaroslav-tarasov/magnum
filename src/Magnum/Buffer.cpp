@@ -25,6 +25,7 @@
 
 #include "Buffer.h"
 
+#include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/Debug.h>
 
 #include "Magnum/Context.h"
@@ -32,7 +33,9 @@
 
 #include "Implementation/State.h"
 #include "Implementation/BufferState.h"
+#ifndef MAGNUM_TARGET_WEBGL
 #include "Implementation/DebugState.h"
+#endif
 
 namespace Magnum {
 
@@ -51,6 +54,7 @@ Int Buffer::minMapAlignment() {
 #endif
 
 #ifndef MAGNUM_TARGET_GLES2
+#ifndef MAGNUM_TARGET_WEBGL
 Int Buffer::maxAtomicCounterBindings() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::shader_atomic_counters>())
@@ -82,7 +86,23 @@ Int Buffer::maxShaderStorageBindings() {
 
     return value;
 }
+#endif
 
+Int Buffer::uniformOffsetAlignment() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::uniform_buffer_object>())
+        return 1;
+    #endif
+
+    GLint& value = Context::current()->state().buffer->uniformOffsetAlignment;
+
+    if(value == 0)
+        glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &value);
+
+    return value;
+}
+
+#ifndef MAGNUM_TARGET_WEBGL
 Int Buffer::shaderStorageOffsetAlignment() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::shader_storage_buffer_object>())
@@ -98,20 +118,7 @@ Int Buffer::shaderStorageOffsetAlignment() {
 
     return value;
 }
-
-Int Buffer::uniformOffsetAlignment() {
-    #ifndef MAGNUM_TARGET_GLES
-    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::uniform_buffer_object>())
-        return 1;
-    #endif
-
-    GLint& value = Context::current()->state().buffer->uniformOffsetAlignment;
-
-    if(value == 0)
-        glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &value);
-
-    return value;
-}
+#endif
 
 Int Buffer::maxUniformBindings() {
     #ifndef MAGNUM_TARGET_GLES
@@ -129,14 +136,22 @@ Int Buffer::maxUniformBindings() {
 
 void Buffer::unbind(const Target target, const UnsignedInt index) {
     #ifdef MAGNUM_BUILD_DEPRECATED
+    #ifndef MAGNUM_TARGET_WEBGL
     CORRADE_INTERNAL_ASSERT(target == Target::AtomicCounter || target == Target::ShaderStorage || target == Target::Uniform);
+    #else
+    CORRADE_INTERNAL_ASSERT(target == Target::Uniform);
+    #endif
     #endif
     glBindBufferBase(GLenum(target), index, 0);
 }
 
 void Buffer::unbind(const Target target, const UnsignedInt firstIndex, const std::size_t count) {
     #ifdef MAGNUM_BUILD_DEPRECATED
+    #ifndef MAGNUM_TARGET_WEBGL
     CORRADE_INTERNAL_ASSERT(target == Target::AtomicCounter || target == Target::ShaderStorage || target == Target::Uniform);
+    #else
+    CORRADE_INTERNAL_ASSERT(target == Target::Uniform);
+    #endif
     #endif
     Context::current()->state().buffer->bindBasesImplementation(target, firstIndex, {nullptr, count});
 }
@@ -144,7 +159,11 @@ void Buffer::unbind(const Target target, const UnsignedInt firstIndex, const std
 /** @todoc const std::initializer_list makes Doxygen grumpy */
 void Buffer::bind(const Target target, const UnsignedInt firstIndex, std::initializer_list<std::tuple<Buffer*, GLintptr, GLsizeiptr>> buffers) {
     #ifdef MAGNUM_BUILD_DEPRECATED
+    #ifndef MAGNUM_TARGET_WEBGL
     CORRADE_INTERNAL_ASSERT(target == Target::AtomicCounter || target == Target::ShaderStorage || target == Target::Uniform || GLenum(target) == GL_TRANSFORM_FEEDBACK_BUFFER);
+    #else
+    CORRADE_INTERNAL_ASSERT(target == Target::Uniform || GLenum(target) == GL_TRANSFORM_FEEDBACK_BUFFER);
+    #endif
     #endif
     Context::current()->state().buffer->bindRangesImplementation(target, firstIndex, {buffers.begin(), buffers.size()});
 }
@@ -152,7 +171,11 @@ void Buffer::bind(const Target target, const UnsignedInt firstIndex, std::initia
 /** @todoc const std::initializer_list makes Doxygen grumpy */
 void Buffer::bind(const Target target, const UnsignedInt firstIndex, std::initializer_list<Buffer*> buffers) {
     #ifdef MAGNUM_BUILD_DEPRECATED
+    #ifndef MAGNUM_TARGET_WEBGL
     CORRADE_INTERNAL_ASSERT(target == Target::AtomicCounter || target == Target::ShaderStorage || target == Target::Uniform || GLenum(target) == GL_TRANSFORM_FEEDBACK_BUFFER);
+    #else
+    CORRADE_INTERNAL_ASSERT(target == Target::Uniform || GLenum(target) == GL_TRANSFORM_FEEDBACK_BUFFER);
+    #endif
     #endif
     Context::current()->state().buffer->bindBasesImplementation(target, firstIndex, {buffers.begin(), buffers.size()});
 }
@@ -162,7 +185,7 @@ void Buffer::copy(Buffer& read, Buffer& write, const GLintptr readOffset, const 
 }
 #endif
 
-Buffer::Buffer(const TargetHint targetHint): _targetHint{targetHint}
+Buffer::Buffer(const TargetHint targetHint): _targetHint{targetHint}, _flags{ObjectFlag::DeleteOnDestruction}
     #ifdef CORRADE_TARGET_NACL
     , _mappedBuffer{nullptr}
     #endif
@@ -184,19 +207,18 @@ Buffer::Buffer(const Target targetHint): _targetHint{static_cast<TargetHint>(tar
 
 void Buffer::createImplementationDefault() {
     glGenBuffers(1, &_id);
-    _created = false;
 }
 
 #ifndef MAGNUM_TARGET_GLES
 void Buffer::createImplementationDSA() {
     glCreateBuffers(1, &_id);
-    _created = true;
+    _flags |= ObjectFlag::Created;
 }
 #endif
 
 Buffer::~Buffer() {
-    /* Moved out, nothing to do */
-    if(!_id) return;
+    /* Moved out or not deleting on destruction, nothing to do */
+    if(!_id || !(_flags & ObjectFlag::DeleteOnDestruction)) return;
 
     GLuint* bindings = Context::current()->state().buffer->bindings;
 
@@ -208,7 +230,7 @@ Buffer::~Buffer() {
 }
 
 inline void Buffer::createIfNotAlready() {
-    if(_created) return;
+    if(_flags & ObjectFlag::Created) return;
 
     /* glGen*() does not create the object, just reserves the name. Some
        commands (such as glInvalidateBufferData() or glObjectLabel()) operate
@@ -216,9 +238,10 @@ inline void Buffer::createIfNotAlready() {
        buffer finally creates it. Also all EXT DSA functions implicitly create
        it. */
     bindSomewhereInternal(_targetHint);
-    CORRADE_INTERNAL_ASSERT(_created);
+    CORRADE_INTERNAL_ASSERT(_flags & ObjectFlag::Created);
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 std::string Buffer::label() {
     createIfNotAlready();
     #ifndef MAGNUM_TARGET_GLES
@@ -228,7 +251,7 @@ std::string Buffer::label() {
     #endif
 }
 
-Buffer& Buffer::setLabelInternal(const Containers::ArrayReference<const char> label) {
+Buffer& Buffer::setLabelInternal(const Containers::ArrayView<const char> label) {
     createIfNotAlready();
     #ifndef MAGNUM_TARGET_GLES
     Context::current()->state().debug->labelImplementation(GL_BUFFER, _id, label);
@@ -237,6 +260,7 @@ Buffer& Buffer::setLabelInternal(const Containers::ArrayReference<const char> la
     #endif
     return *this;
 }
+#endif
 
 void Buffer::bindInternal(const TargetHint target, Buffer* const buffer) {
     const GLuint id = buffer ? buffer->_id : 0;
@@ -247,7 +271,7 @@ void Buffer::bindInternal(const TargetHint target, Buffer* const buffer) {
 
     /* Bind the buffer otherwise, which will also finally create it */
     bound = id;
-    if(buffer) buffer->_created = true;
+    if(buffer) buffer->_flags |= ObjectFlag::Created;
     glBindBuffer(GLenum(target), id);
 }
 
@@ -265,7 +289,7 @@ auto Buffer::bindSomewhereInternal(const TargetHint hint) -> TargetHint {
 
     /* Bind the buffer to hint target otherwise */
     hintBinding = _id;
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glBindBuffer(GLenum(hint), _id);
     return hint;
 }
@@ -273,7 +297,11 @@ auto Buffer::bindSomewhereInternal(const TargetHint hint) -> TargetHint {
 #ifndef MAGNUM_TARGET_GLES2
 Buffer& Buffer::bind(const Target target, const UnsignedInt index, const GLintptr offset, const GLsizeiptr size) {
     #ifdef MAGNUM_BUILD_DEPRECATED
+    #ifndef MAGNUM_TARGET_WEBGL
     CORRADE_INTERNAL_ASSERT(target == Target::AtomicCounter || target == Target::ShaderStorage || target == Target::Uniform || GLenum(target) == GL_TRANSFORM_FEEDBACK_BUFFER);
+    #else
+    CORRADE_INTERNAL_ASSERT(target == Target::Uniform || GLenum(target) == GL_TRANSFORM_FEEDBACK_BUFFER);
+    #endif
     #endif
     glBindBufferRange(GLenum(target), index, _id, offset, size);
     return *this;
@@ -281,7 +309,11 @@ Buffer& Buffer::bind(const Target target, const UnsignedInt index, const GLintpt
 
 Buffer& Buffer::bind(const Target target, const UnsignedInt index) {
     #ifdef MAGNUM_BUILD_DEPRECATED
+    #ifndef MAGNUM_TARGET_WEBGL
     CORRADE_INTERNAL_ASSERT(target == Target::AtomicCounter || target == Target::ShaderStorage || target == Target::Uniform || GLenum(target) == GL_TRANSFORM_FEEDBACK_BUFFER);
+    #else
+    CORRADE_INTERNAL_ASSERT(target == Target::Uniform || GLenum(target) == GL_TRANSFORM_FEEDBACK_BUFFER);
+    #endif
     #endif
     glBindBufferBase(GLenum(target), index, _id);
     return *this;
@@ -298,12 +330,12 @@ Int Buffer::size() {
     return size;
 }
 
-Buffer& Buffer::setData(const Containers::ArrayReference<const void> data, const BufferUsage usage) {
+Buffer& Buffer::setData(const Containers::ArrayView<const void> data, const BufferUsage usage) {
     (this->*Context::current()->state().buffer->dataImplementation)(data.size(), data, usage);
     return *this;
 }
 
-Buffer& Buffer::setSubData(const GLintptr offset, const Containers::ArrayReference<const void> data) {
+Buffer& Buffer::setSubData(const GLintptr offset, const Containers::ArrayView<const void> data) {
     (this->*Context::current()->state().buffer->subDataImplementation)(offset, data.size(), data);
     return *this;
 }
@@ -318,21 +350,15 @@ Buffer& Buffer::invalidateSubData(const GLintptr offset, const GLsizeiptr length
     return *this;
 }
 
+#ifndef MAGNUM_TARGET_WEBGL
 void* Buffer::map(const MapAccess access) {
     return (this->*Context::current()->state().buffer->mapImplementation)(access);
 }
 
-#ifdef MAGNUM_TARGET_GLES2
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_NACL)
 void* Buffer::mapSub(const GLintptr offset, const GLsizeiptr length, const MapAccess access) {
-    #ifdef CORRADE_TARGET_NACL
     CORRADE_ASSERT(!_mappedBuffer, "Buffer::mapSub(): the buffer is already mapped", nullptr);
     return _mappedBuffer = glMapBufferSubDataCHROMIUM(GLenum(bindSomewhereInternal(_targetHint)), offset, length, GLenum(access));
-    #else
-    static_cast<void>(offset);
-    static_cast<void>(length);
-    static_cast<void>(access);
-    CORRADE_ASSERT_UNREACHABLE();
-    #endif
 }
 #endif
 
@@ -347,16 +373,13 @@ Buffer& Buffer::flushMappedRange(const GLintptr offset, const GLsizeiptr length)
 
 bool Buffer::unmap() { return (this->*Context::current()->state().buffer->unmapImplementation)(); }
 
-#ifdef MAGNUM_TARGET_GLES2
+#if defined(DOXYGEN_GENERATING_OUTPUT) || defined(CORRADE_TARGET_NACL)
 void Buffer::unmapSub() {
-    #ifdef CORRADE_TARGET_NACL
     CORRADE_ASSERT(_mappedBuffer, "Buffer::unmapSub(): the buffer is not mapped", );
     glUnmapBufferSubDataCHROMIUM(_mappedBuffer);
     _mappedBuffer = nullptr;
-    #else
-    CORRADE_ASSERT_UNREACHABLE();
-    #endif
 }
+#endif
 #endif
 
 #ifndef MAGNUM_TARGET_GLES
@@ -366,7 +389,7 @@ void Buffer::subDataInternal(GLintptr offset, GLsizeiptr size, GLvoid* data) {
 #endif
 
 #ifndef MAGNUM_TARGET_GLES2
-void Buffer::bindImplementationFallback(const Target target, const GLuint firstIndex, Containers::ArrayReference<Buffer* const> buffers) {
+void Buffer::bindImplementationFallback(const Target target, const GLuint firstIndex, Containers::ArrayView<Buffer* const> buffers) {
     for(std::size_t i = 0; i != buffers.size(); ++i) {
         if(buffers && buffers[i]) buffers[i]->bind(target, firstIndex + i);
         else unbind(target, firstIndex + i);
@@ -374,7 +397,8 @@ void Buffer::bindImplementationFallback(const Target target, const GLuint firstI
 }
 
 #ifndef MAGNUM_TARGET_GLES
-void Buffer::bindImplementationMulti(const Target target, const GLuint firstIndex, Containers::ArrayReference<Buffer* const> buffers) {
+void Buffer::bindImplementationMulti(const Target target, const GLuint firstIndex, Containers::ArrayView<Buffer* const> buffers) {
+    /** @todo C++1z: VLAs? */
     Containers::Array<GLuint> ids{buffers ? buffers.size() : 0};
     if(buffers) for(std::size_t i = 0; i != buffers.size(); ++i) {
         if(buffers[i]) {
@@ -389,8 +413,8 @@ void Buffer::bindImplementationMulti(const Target target, const GLuint firstInde
 }
 #endif
 
-/** @todoc const Containers::ArrayReference makes Doxygen grumpy */
-void Buffer::bindImplementationFallback(const Target target, const GLuint firstIndex, Containers::ArrayReference<const std::tuple<Buffer*, GLintptr, GLsizeiptr>> buffers) {
+/** @todoc const Containers::ArrayView makes Doxygen grumpy */
+void Buffer::bindImplementationFallback(const Target target, const GLuint firstIndex, Containers::ArrayView<const std::tuple<Buffer*, GLintptr, GLsizeiptr>> buffers) {
     for(std::size_t i = 0; i != buffers.size(); ++i) {
         if(buffers && std::get<0>(buffers[i]))
             std::get<0>(buffers[i])->bind(target, firstIndex + i, std::get<1>(buffers[i]), std::get<2>(buffers[i]));
@@ -399,8 +423,8 @@ void Buffer::bindImplementationFallback(const Target target, const GLuint firstI
 }
 
 #ifndef MAGNUM_TARGET_GLES
-/** @todoc const Containers::ArrayReference makes Doxygen grumpy */
-void Buffer::bindImplementationMulti(const Target target, const GLuint firstIndex, Containers::ArrayReference<const std::tuple<Buffer*, GLintptr, GLsizeiptr>> buffers) {
+/** @todoc const Containers::ArrayView makes Doxygen grumpy */
+void Buffer::bindImplementationMulti(const Target target, const GLuint firstIndex, Containers::ArrayView<const std::tuple<Buffer*, GLintptr, GLsizeiptr>> buffers) {
     /** @todo use ArrayTuple */
     Containers::Array<GLuint> ids{buffers ? buffers.size() : 0};
     Containers::Array<GLintptr> offsetsSizes{buffers ? buffers.size()*2 : 0};
@@ -431,7 +455,8 @@ void Buffer::copyImplementationDSA(Buffer& read, Buffer& write, const GLintptr r
 }
 
 void Buffer::copyImplementationDSAEXT(Buffer& read, Buffer& write, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size) {
-    read._created = write._created = true;
+    read._flags |= ObjectFlag::Created;
+    write._flags |= ObjectFlag::Created;
     glNamedCopyBufferSubDataEXT(read._id, write._id, readOffset, writeOffset, size);
 }
 #endif
@@ -447,7 +472,7 @@ void Buffer::getParameterImplementationDSA(const GLenum value, GLint* const data
 }
 
 void Buffer::getParameterImplementationDSAEXT(const GLenum value, GLint* const data) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glGetNamedBufferParameterivEXT(_id, value, data);
 }
 #endif
@@ -462,7 +487,7 @@ void Buffer::getSubDataImplementationDSA(const GLintptr offset, const GLsizeiptr
 }
 
 void Buffer::getSubDataImplementationDSAEXT(const GLintptr offset, const GLsizeiptr size, GLvoid* const data) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glGetNamedBufferSubDataEXT(_id, offset, size, data);
 }
 #endif
@@ -477,7 +502,7 @@ void Buffer::dataImplementationDSA(const GLsizeiptr size, const GLvoid* const da
 }
 
 void Buffer::dataImplementationDSAEXT(GLsizeiptr size, const GLvoid* data, BufferUsage usage) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glNamedBufferDataEXT(_id, size, data, GLenum(usage));
 }
 #endif
@@ -492,7 +517,7 @@ void Buffer::subDataImplementationDSA(const GLintptr offset, const GLsizeiptr si
 }
 
 void Buffer::subDataImplementationDSAEXT(GLintptr offset, GLsizeiptr size, const GLvoid* data) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glNamedBufferSubDataEXT(_id, offset, size, data);
 }
 #endif
@@ -515,10 +540,11 @@ void Buffer::invalidateSubImplementationARB(GLintptr offset, GLsizeiptr length) 
 }
 #endif
 
+#ifndef MAGNUM_TARGET_WEBGL
 void* Buffer::mapImplementationDefault(MapAccess access) {
     #ifndef MAGNUM_TARGET_GLES
     return glMapBuffer(GLenum(bindSomewhereInternal(_targetHint)), GLenum(access));
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     return glMapBufferOES(GLenum(bindSomewhereInternal(_targetHint)), GLenum(access));
     #else
     static_cast<void>(access);
@@ -532,7 +558,7 @@ void* Buffer::mapImplementationDSA(const MapAccess access) {
 }
 
 void* Buffer::mapImplementationDSAEXT(MapAccess access) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     return glMapNamedBufferEXT(_id, GLenum(access));
 }
 #endif
@@ -540,7 +566,7 @@ void* Buffer::mapImplementationDSAEXT(MapAccess access) {
 void* Buffer::mapRangeImplementationDefault(GLintptr offset, GLsizeiptr length, MapFlags access) {
     #ifndef MAGNUM_TARGET_GLES2
     return glMapBufferRange(GLenum(bindSomewhereInternal(_targetHint)), offset, length, GLenum(access));
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     return glMapBufferRangeEXT(GLenum(bindSomewhereInternal(_targetHint)), offset, length, GLenum(access));
     #else
     static_cast<void>(offset);
@@ -556,7 +582,7 @@ void* Buffer::mapRangeImplementationDSA(const GLintptr offset, const GLsizeiptr 
 }
 
 void* Buffer::mapRangeImplementationDSAEXT(GLintptr offset, GLsizeiptr length, MapFlags access) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     return glMapNamedBufferRangeEXT(_id, offset, length, GLenum(access));
 }
 #endif
@@ -564,7 +590,7 @@ void* Buffer::mapRangeImplementationDSAEXT(GLintptr offset, GLsizeiptr length, M
 void Buffer::flushMappedRangeImplementationDefault(GLintptr offset, GLsizeiptr length) {
     #ifndef MAGNUM_TARGET_GLES2
     glFlushMappedBufferRange(GLenum(bindSomewhereInternal(_targetHint)), offset, length);
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     glFlushMappedBufferRangeEXT(GLenum(bindSomewhereInternal(_targetHint)), offset, length);
     #else
     static_cast<void>(offset);
@@ -579,7 +605,7 @@ void Buffer::flushMappedRangeImplementationDSA(const GLintptr offset, const GLsi
 }
 
 void Buffer::flushMappedRangeImplementationDSAEXT(GLintptr offset, GLsizeiptr length) {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     glFlushMappedNamedBufferRangeEXT(_id, offset, length);
 }
 #endif
@@ -587,7 +613,7 @@ void Buffer::flushMappedRangeImplementationDSAEXT(GLintptr offset, GLsizeiptr le
 bool Buffer::unmapImplementationDefault() {
     #ifndef MAGNUM_TARGET_GLES2
     return glUnmapBuffer(GLenum(bindSomewhereInternal(_targetHint)));
-    #elif !defined(CORRADE_TARGET_EMSCRIPTEN) && !defined(CORRADE_TARGET_NACL)
+    #elif !defined(CORRADE_TARGET_NACL)
     return glUnmapBufferOES(GLenum(bindSomewhereInternal(_targetHint)));
     #else
     CORRADE_ASSERT_UNREACHABLE();
@@ -600,9 +626,10 @@ bool Buffer::unmapImplementationDSA() {
 }
 
 bool Buffer::unmapImplementationDSAEXT() {
-    _created = true;
+    _flags |= ObjectFlag::Created;
     return glUnmapNamedBufferEXT(_id);
 }
+#endif
 #endif
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
@@ -611,17 +638,23 @@ Debug operator<<(Debug debug, Buffer::TargetHint value) {
         #define _c(value) case Buffer::TargetHint::value: return debug << "Buffer::TargetHint::" #value;
         _c(Array)
         #ifndef MAGNUM_TARGET_GLES2
+        #ifndef MAGNUM_TARGET_WEBGL
         _c(AtomicCounter)
+        #endif
         _c(CopyRead)
         _c(CopyWrite)
+        #ifndef MAGNUM_TARGET_WEBGL
         _c(DispatchIndirect)
         _c(DrawIndirect)
+        #endif
         #endif
         _c(ElementArray)
         #ifndef MAGNUM_TARGET_GLES2
         _c(PixelPack)
         _c(PixelUnpack)
+        #ifndef MAGNUM_TARGET_WEBGL
         _c(ShaderStorage)
+        #endif
         #endif
         #ifndef MAGNUM_TARGET_GLES
         _c(Texture)
@@ -643,8 +676,10 @@ Debug operator<<(Debug debug, Buffer::Target value) {
     switch(value) {
         #ifndef MAGNUM_TARGET_GLES2
         #define _c(value) case Buffer::Target::value: return debug << "Buffer::Target::" #value;
+        #ifndef MAGNUM_TARGET_WEBGL
         _c(AtomicCounter)
         _c(ShaderStorage)
+        #endif
         _c(Uniform)
         #undef _c
         #endif
@@ -654,8 +689,10 @@ Debug operator<<(Debug debug, Buffer::Target value) {
         #ifndef MAGNUM_TARGET_GLES2
         case Buffer::Target::CopyRead:
         case Buffer::Target::CopyWrite:
+        #ifndef MAGNUM_TARGET_WEBGL
         case Buffer::Target::DispatchIndirect:
         case Buffer::Target::DrawIndirect:
+        #endif
         #endif
         case Buffer::Target::ElementArray:
         #ifndef MAGNUM_TARGET_GLES2

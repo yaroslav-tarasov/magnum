@@ -39,6 +39,7 @@ struct TransformFeedbackGLTest: AbstractOpenGLTester {
     void construct();
     void constructCopy();
     void constructMove();
+    void wrap();
 
     void label();
 
@@ -47,13 +48,16 @@ struct TransformFeedbackGLTest: AbstractOpenGLTester {
     void attachBases();
     void attachRanges();
 
+    #ifndef MAGNUM_TARGET_GLES
     void interleaved();
+    #endif
 };
 
 TransformFeedbackGLTest::TransformFeedbackGLTest() {
     addTests({&TransformFeedbackGLTest::construct,
               &TransformFeedbackGLTest::constructCopy,
               &TransformFeedbackGLTest::constructMove,
+              &TransformFeedbackGLTest::wrap,
 
               &TransformFeedbackGLTest::label,
 
@@ -62,10 +66,18 @@ TransformFeedbackGLTest::TransformFeedbackGLTest() {
               &TransformFeedbackGLTest::attachBases,
               &TransformFeedbackGLTest::attachRanges,
 
-              &TransformFeedbackGLTest::interleaved});
+              #ifndef MAGNUM_TARGET_GLES
+              &TransformFeedbackGLTest::interleaved
+              #endif
+              });
 }
 
 void TransformFeedbackGLTest::construct() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback2>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback2::string() + std::string(" is not supported."));
+    #endif
+
     {
         TransformFeedback feedback;
 
@@ -89,6 +101,11 @@ void TransformFeedbackGLTest::constructCopy() {
 }
 
 void TransformFeedbackGLTest::constructMove() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback2>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback2::string() + std::string(" is not supported."));
+    #endif
+
     TransformFeedback a;
     const Int id = a.id();
 
@@ -110,8 +127,32 @@ void TransformFeedbackGLTest::constructMove() {
     CORRADE_COMPARE(c.id(), id);
 }
 
+void TransformFeedbackGLTest::wrap() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback2>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback2::string() + std::string(" is not supported."));
+    #endif
+
+    GLuint id;
+    glGenTransformFeedbacks(1, &id);
+
+    /* Releasing won't delete anything */
+    {
+        auto feedback = TransformFeedback::wrap(id, ObjectFlag::DeleteOnDestruction);
+        CORRADE_COMPARE(feedback.release(), id);
+    }
+
+    /* ...so we can wrap it again */
+    TransformFeedback::wrap(id);
+    glDeleteTransformFeedbacks(1, &id);
+}
+
 void TransformFeedbackGLTest::label() {
     /* No-Op version is tested in AbstractObjectGLTest */
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback2>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback2::string() + std::string(" is not supported."));
+    #endif
     if(!Context::current()->isExtensionSupported<Extensions::GL::KHR::debug>() &&
        !Context::current()->isExtensionSupported<Extensions::GL::EXT::debug_label>())
         CORRADE_SKIP("Required extension is not available");
@@ -172,6 +213,11 @@ XfbShader::XfbShader() {
 }
 
 void TransformFeedbackGLTest::attachBase() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback2>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback2::string() + std::string(" is not supported."));
+    #endif
+
     XfbShader shader;
 
     Buffer input;
@@ -196,13 +242,18 @@ void TransformFeedbackGLTest::attachBase() {
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Vector2* data = reinterpret_cast<Vector2*>(output.map(0, 2*sizeof(Vector2), Buffer::MapFlag::Read));
+    Vector2* data = output.map<Vector2>(0, 2*sizeof(Vector2), Buffer::MapFlag::Read);
     CORRADE_COMPARE(data[0], Vector2(1.0f, -1.0f));
     CORRADE_COMPARE(data[1], Vector2(0.0f, 0.0f));
     output.unmap();
 }
 
 void TransformFeedbackGLTest::attachRange() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback2>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback2::string() + std::string(" is not supported."));
+    #endif
+
     XfbShader shader;
 
     Buffer input;
@@ -227,7 +278,7 @@ void TransformFeedbackGLTest::attachRange() {
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Vector2* data = reinterpret_cast<Vector2*>(output.map(256, 2*sizeof(Vector2), Buffer::MapFlag::Read));
+    Vector2* data = output.map<Vector2>(256, 2*sizeof(Vector2), Buffer::MapFlag::Read);
     CORRADE_COMPARE(data[0], Vector2(1.0f, -1.0f));
     CORRADE_COMPARE(data[1], Vector2(0.0f, 0.0f));
     output.unmap();
@@ -272,6 +323,11 @@ XfbMultiShader::XfbMultiShader() {
 }
 
 void TransformFeedbackGLTest::attachBases() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback2>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback2::string() + std::string(" is not supported."));
+    #endif
+
     XfbMultiShader shader;
 
     Buffer input;
@@ -297,18 +353,23 @@ void TransformFeedbackGLTest::attachBases() {
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Vector2* data1 = reinterpret_cast<Vector2*>(output1.map(0, 2*sizeof(Vector2), Buffer::MapFlag::Read));
+    Vector2* data1 = output1.map<Vector2>(0, 2*sizeof(Vector2), Buffer::MapFlag::Read);
     CORRADE_COMPARE(data1[0], Vector2(1.0f, -1.0f));
     CORRADE_COMPARE(data1[1], Vector2(0.0f, 0.0f));
     output1.unmap();
 
-    Float* data2 = reinterpret_cast<Float*>(output2.map(0, 2*sizeof(Float), Buffer::MapFlag::Read));
+    Float* data2 = output2.map<Float>(0, 2*sizeof(Float), Buffer::MapFlag::Read);
     CORRADE_COMPARE(data2[0], 0.0f);
     CORRADE_COMPARE(data2[1], -2.0f);
     output2.unmap();
 }
 
 void TransformFeedbackGLTest::attachRanges() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback2>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback2::string() + std::string(" is not supported."));
+    #endif
+
     Buffer input;
     input.setData(inputData, BufferUsage::StaticDraw);
     Buffer output1, output2;
@@ -342,28 +403,28 @@ void TransformFeedbackGLTest::attachRanges() {
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Vector2* data1 = reinterpret_cast<Vector2*>(output1.map(256, 2*sizeof(Vector2), Buffer::MapFlag::Read));
+    Vector2* data1 = output1.map<Vector2>(256, 2*sizeof(Vector2), Buffer::MapFlag::Read);
     CORRADE_COMPARE(data1[0], Vector2(1.0f, -1.0f));
     CORRADE_COMPARE(data1[1], Vector2(0.0f, 0.0f));
     output1.unmap();
 
-    Float* data2 = reinterpret_cast<Float*>(output2.map(512, 2*sizeof(Float), Buffer::MapFlag::Read));
+    Float* data2 = output2.map<Float>(512, 2*sizeof(Float), Buffer::MapFlag::Read);
     CORRADE_COMPARE(data2[0], 0.0f);
     CORRADE_COMPARE(data2[1], -2.0f);
     output2.unmap();
 }
 
+#ifndef MAGNUM_TARGET_GLES
 void TransformFeedbackGLTest::interleaved() {
+    /* ARB_transform_feedback3 needed for gl_SkipComponents1 */
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::transform_feedback3>())
+        CORRADE_SKIP(Extensions::GL::ARB::transform_feedback3::string() + std::string(" is not supported."));
+
     struct XfbInterleavedShader: AbstractShaderProgram {
         typedef Attribute<0, Vector2> Input;
 
         explicit XfbInterleavedShader() {
-            #ifndef MAGNUM_TARGET_GLES
             Shader vert(Version::GL300, Shader::Type::Vertex);
-            #else
-            Shader vert(Version::GLES300, Shader::Type::Vertex);
-            Shader frag(Version::GLES300, Shader::Type::Fragment);
-            #endif
             CORRADE_INTERNAL_ASSERT_OUTPUT(vert.addSource(
                 "in mediump vec2 inputData;\n"
                 "out mediump vec2 output1;\n"
@@ -372,14 +433,7 @@ void TransformFeedbackGLTest::interleaved() {
                 "    output1 = inputData + vec2(1.0, -1.0);\n"
                 "    output2 = inputData.x - inputData.y + 5.0;\n"
                 "}\n").compile());
-            #ifndef MAGNUM_TARGET_GLES
             attachShader(vert);
-            #else
-            /* ES for some reason needs both vertex and fragment shader */
-            CORRADE_INTERNAL_ASSERT_OUTPUT(frag.addSource("void main() {}\n").compile());
-            /* GCC 4.4 has explicit std::reference_wrapper constructor */
-            attachShaders({std::ref(vert), std::ref(frag)});
-            #endif
             bindAttributeLocation(Input::Location, "inputData");
             setTransformFeedbackOutputs({"output1", "gl_SkipComponents1", "output2"}, TransformFeedbackBufferMode::InterleavedAttributes);
             CORRADE_INTERNAL_ASSERT_OUTPUT(link());
@@ -408,13 +462,14 @@ void TransformFeedbackGLTest::interleaved() {
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Vector2* data = reinterpret_cast<Vector2*>(output.map(0, 4*sizeof(Vector2), Buffer::MapFlag::Read));
+    Vector2* data = output.map<Vector2>(0, 4*sizeof(Vector2), Buffer::MapFlag::Read);
     CORRADE_COMPARE(data[0], Vector2(1.0f, -1.0f));
     CORRADE_COMPARE(data[1].y(), 5.0f);
     CORRADE_COMPARE(data[2], Vector2(0.0f, 0.0f));
     CORRADE_COMPARE(data[3].y(), 3.0f);
     output.unmap();
 }
+#endif
 
 }}
 

@@ -56,16 +56,6 @@ template<UnsignedInt dimensions> class AbstractVector: public AbstractShaderProg
          */
         typedef typename Generic<dimensions>::TextureCoordinates TextureCoordinates;
 
-        #ifdef MAGNUM_BUILD_DEPRECATED
-        enum: Int {
-            /**
-             * Vector texture binding unit
-             * @deprecated Use @ref Magnum::Shaders::AbstractVector::setVectorTexture() "setVectorTexture()" instead.
-             */
-            VectorTextureLayer = 15
-        };
-        #endif
-
         /**
          * @brief Set vector texture
          * @return Reference to self (for method chaining)
@@ -73,12 +63,10 @@ template<UnsignedInt dimensions> class AbstractVector: public AbstractShaderProg
         AbstractVector<dimensions>& setVectorTexture(Texture2D& texture);
 
     protected:
+        enum: Int { VectorTextureLayer = 15 };
+
         explicit AbstractVector();
         ~AbstractVector();
-
-        #ifndef MAGNUM_BUILD_DEPRECATED
-        enum: Int { VectorTextureLayer = 15 };
-        #endif
 };
 
 /** @brief Base for two-dimensional text shaders */

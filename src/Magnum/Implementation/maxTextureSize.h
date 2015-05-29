@@ -30,8 +30,12 @@
 namespace Magnum { namespace Implementation {
 
 GLint maxTextureSideSize();
+#if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
 GLint max3DTextureDepth();
+#endif
+#ifndef MAGNUM_TARGET_GLES2
 GLint maxTextureArrayLayers();
+#endif
 GLint maxCubeMapTextureSideSize();
 
 }}
