@@ -213,11 +213,7 @@ std::unique_ptr<ObjectData2D> AbstractImporter::object2D(const UnsignedInt id) {
 }
 
 std::unique_ptr<ObjectData2D> AbstractImporter::doObject2D(UnsignedInt) {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    return nullptr;
-    #else
     return {};
-    #endif
 }
 
 UnsignedInt AbstractImporter::object3DCount() const {
@@ -249,11 +245,7 @@ std::unique_ptr<ObjectData3D> AbstractImporter::object3D(const UnsignedInt id) {
 }
 
 std::unique_ptr<ObjectData3D> AbstractImporter::doObject3D(UnsignedInt) {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    return nullptr;
-    #else
     return {};
-    #endif
 }
 
 UnsignedInt AbstractImporter::mesh2DCount() const {
@@ -345,11 +337,7 @@ std::unique_ptr<AbstractMaterialData> AbstractImporter::material(const UnsignedI
 }
 
 std::unique_ptr<AbstractMaterialData> AbstractImporter::doMaterial(UnsignedInt) {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    return nullptr;
-    #else
     return {};
-    #endif
 }
 
 UnsignedInt AbstractImporter::textureCount() const {

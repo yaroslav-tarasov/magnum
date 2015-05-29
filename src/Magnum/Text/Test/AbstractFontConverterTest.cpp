@@ -90,11 +90,7 @@ void AbstractFontConverterTest::convertGlyphs() {
             #endif
             {
                 this->characters = characters;
-                #ifndef CORRADE_GCC45_COMPATIBILITY
-                return nullptr;
-                #else
                 return {};
-                #endif
             }
 
             #ifndef __MINGW32__

@@ -47,23 +47,14 @@ Image2D* AbstractImageConverter::doExportToImage(const ImageReference2D&) const 
 }
 
 Containers::Array<char> AbstractImageConverter::exportToData(const ImageReference2D& image) const {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    CORRADE_ASSERT(features() & Feature::ConvertData,
-        "Trade::AbstractImageConverter::exportToData(): feature not supported", nullptr);
-    #else
     CORRADE_ASSERT(features() & Feature::ConvertData,
         "Trade::AbstractImageConverter::exportToData(): feature not supported", {});
-    #endif
 
     return doExportToData(image);
 }
 
 Containers::Array<char> AbstractImageConverter::doExportToData(const ImageReference2D&) const {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    CORRADE_ASSERT(false, "Trade::AbstractImageConverter::exportToData(): feature advertised but not implemented", nullptr);
-    #else
     CORRADE_ASSERT(false, "Trade::AbstractImageConverter::exportToData(): feature advertised but not implemented", {});
-    #endif
 }
 
 bool AbstractImageConverter::exportToFile(const ImageReference2D& image, const std::string& filename) const {

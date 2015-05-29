@@ -85,17 +85,10 @@ std::vector<std::pair<std::string, Containers::Array<char>>> AbstractFontConvert
 }
 
 Containers::Array<char> AbstractFontConverter::exportFontToSingleData(AbstractFont& font, GlyphCache& cache, const std::string& characters) const {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    CORRADE_ASSERT(features() >= (Feature::ExportFont|Feature::ConvertData),
-        "Text::AbstractFontConverter::exportFontToSingleData(): feature not supported", nullptr);
-    CORRADE_ASSERT(!(features() & Feature::MultiFile),
-        "Text::AbstractFontConverter::exportFontToSingleData(): the format is not single-file", nullptr);
-    #else
     CORRADE_ASSERT(features() >= (Feature::ExportFont|Feature::ConvertData),
         "Text::AbstractFontConverter::exportFontToSingleData(): feature not supported", {});
     CORRADE_ASSERT(!(features() & Feature::MultiFile),
         "Text::AbstractFontConverter::exportFontToSingleData(): the format is not single-file", {});
-    #endif
 
     return doExportFontToSingleData(font, cache, uniqueUnicode(characters));
 }
@@ -106,13 +99,8 @@ Containers::Array<char> AbstractFontConverter::doExportFontToSingleData(Abstract
 Containers::Array<char> AbstractFontConverter::doExportFontToSingleData(AbstractFont&, GlyphCache&, const std::vector<char32_t>&) const
 #endif
 {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    CORRADE_ASSERT(false,
-        "Text::AbstractFontConverter::exportFontToSingleData(): feature advertised but not implemented", nullptr);
-    #else
     CORRADE_ASSERT(false,
         "Text::AbstractFontConverter::exportFontToSingleData(): feature advertised but not implemented", {});
-    #endif
 }
 
 bool AbstractFontConverter::exportFontToFile(AbstractFont& font, GlyphCache& cache, const std::string& filename, const std::string& characters) const {
@@ -159,29 +147,17 @@ std::vector<std::pair<std::string, Containers::Array<char>>> AbstractFontConvert
 }
 
 Containers::Array<char> AbstractFontConverter::exportGlyphCacheToSingleData(GlyphCache& cache) const {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    CORRADE_ASSERT(features() >= (Feature::ExportGlyphCache|Feature::ConvertData),
-        "Text::AbstractFontConverter::exportGlyphCacheToSingleData(): feature not supported", nullptr);
-    CORRADE_ASSERT(!(features() & Feature::MultiFile),
-        "Text::AbstractFontConverter::exportGlyphCacheToSingleData(): the format is not single-file", nullptr);
-    #else
     CORRADE_ASSERT(features() >= (Feature::ExportGlyphCache|Feature::ConvertData),
         "Text::AbstractFontConverter::exportGlyphCacheToSingleData(): feature not supported", {});
     CORRADE_ASSERT(!(features() & Feature::MultiFile),
         "Text::AbstractFontConverter::exportGlyphCacheToSingleData(): the format is not single-file", {});
-    #endif
 
     return doExportGlyphCacheToSingleData(cache);
 }
 
 Containers::Array<char> AbstractFontConverter::doExportGlyphCacheToSingleData(GlyphCache&) const {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    CORRADE_ASSERT(false,
-        "Text::AbstractFontConverter::exportGlyphCacheToSingleData(): feature advertised but not implemented", nullptr);
-    #else
     CORRADE_ASSERT(false,
         "Text::AbstractFontConverter::exportGlyphCacheToSingleData(): feature advertised but not implemented", {});
-    #endif
 }
 
 bool AbstractFontConverter::exportGlyphCacheToFile(GlyphCache& cache, const std::string& filename) const {

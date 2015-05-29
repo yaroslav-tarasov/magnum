@@ -117,11 +117,7 @@ void WavImporter::doOpenData(Containers::ArrayReference<const char> data) {
 }
 
 void WavImporter::doClose() {
-    #ifndef CORRADE_GCC45_COMPATIBILITY
-    _data = nullptr;
-    #else
     _data = {};
-    #endif
 }
 
 Buffer::Format WavImporter::doFormat() const { return _format; }

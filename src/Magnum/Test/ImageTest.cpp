@@ -138,7 +138,7 @@ void ImageTest::release() {
     const char* const pointer = a.release();
 
     CORRADE_COMPARE(pointer, data);
-    CORRADE_COMPARE(a.data(), static_cast<char*>(nullptr));
+    CORRADE_COMPARE(a.data(), nullptr);
     CORRADE_COMPARE(a.size(), Vector2i());
 }
 
