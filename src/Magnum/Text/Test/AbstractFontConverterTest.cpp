@@ -248,6 +248,7 @@ void AbstractFontConverterTest::importGlyphCacheFromSingleData() {
     /* doImportFromData() should call doImportFromSingleData() */
     SingleGlyphCacheDataImporter importer;
     const char data[] = {'\xa5'};
+    /* GCC 4.4 needs explicit typing */
     std::unique_ptr<GlyphCache> cache = importer.importGlyphCacheFromData(std::vector<std::pair<std::string, Containers::ArrayReference<const char>>>{{{}, data}});
     CORRADE_COMPARE(cache.get(), reinterpret_cast<GlyphCache*>(0xdeadbeef));
 

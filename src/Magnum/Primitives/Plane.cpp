@@ -33,6 +33,7 @@ namespace Magnum { namespace Primitives {
 
 Trade::MeshData3D Plane::solid(const TextureCoords textureCoords) {
     std::vector<std::vector<Vector2>> coords;
+    /* GCC 4.4 needs explicit typing */
     if(textureCoords == TextureCoords::Generate) coords.push_back(std::vector<Vector2>{
         {1.0f, 0.0f},
         {1.0f, 1.0f},
@@ -40,11 +41,13 @@ Trade::MeshData3D Plane::solid(const TextureCoords textureCoords) {
         {0.0f, 1.0f}
     });
 
+    /* GCC 4.4 needs explicit typing */
     return Trade::MeshData3D(MeshPrimitive::TriangleStrip, {}, {std::vector<Vector3>{
         {1.0f, -1.0f, 0.0f},
         {1.0f, 1.0f, 0.0f},
         {-1.0f, -1.0f, 0.0f},
         {-1.0f, 1.0f, 0.0f}
+    /* GCC 4.4 needs explicit typing */
     }}, {std::vector<Vector3>{
         {0.0f, 0.0f, 1.0f},
         {0.0f, 0.0f, 1.0f},
@@ -54,6 +57,7 @@ Trade::MeshData3D Plane::solid(const TextureCoords textureCoords) {
 }
 
 Trade::MeshData3D Plane::wireframe() {
+    /* GCC 4.4 needs explicit typing */
     return Trade::MeshData3D(MeshPrimitive::LineLoop, {}, {std::vector<Vector3>{
         {-1.0f, -1.0f, 0.0f},
         {1.0f, -1.0f, 0.0f},

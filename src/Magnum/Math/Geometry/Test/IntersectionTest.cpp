@@ -50,18 +50,22 @@ void IntersectionTest::planeLine() {
     const Vector3 planeNormal(0.0f, 0.0f, 1.0f);
 
     /* Inside line segment */
+    /* MSVC 2013 needs explicit types here */
     CORRADE_COMPARE(Intersection::planeLine(planePosition, planeNormal,
         Vector3{0.0f, 0.0f, -1.0f}, Vector3{0.0f, 0.0f, 2.0f}), 0.75f);
 
     /* Outside line segment */
+    /* MSVC 2013 needs explicit types here */
     CORRADE_COMPARE(Intersection::planeLine(planePosition, planeNormal,
         Vector3{0.0f, 0.0f, 1.0f}, Vector3{0.0f, 0.0f, 1.0f}), -0.5f);
 
     /* Line lies on the plane */
+    /* MSVC 2013 needs explicit types here */
     CORRADE_COMPARE(Intersection::planeLine(planePosition, planeNormal,
         Vector3{1.0f, 0.5f, 0.5f}, Vector3{-1.0f, 0.5f, 0.0f}), Constants::nan());
 
     /* Line is parallel to the plane */
+    /* MSVC 2013 needs explicit types here */
     CORRADE_COMPARE(Intersection::planeLine(planePosition, planeNormal,
         Vector3{1.0f, 0.0f, 1.0f}, Vector3{-1.0f, 0.0f, 0.0f}), -Constants::inf());
 }
@@ -71,18 +75,21 @@ void IntersectionTest::lineLine() {
     const Vector2 r(1.0, 2.0f);
 
     /* Inside both line segments */
+    /* MSVC 2013 needs explicit types here */
     CORRADE_COMPARE(Intersection::lineSegmentLineSegment(p, r,
         Vector2{0.0f, 0.0f}, Vector2{-1.0f, 0.0f}), std::make_pair(0.5f, 0.5f));
     CORRADE_COMPARE(Intersection::lineSegmentLine(p, r,
         Vector2{0.0f, 0.0f}, Vector2{-1.0f, 0.0f}), 0.5);
 
     /* Outside both line segments */
+    /* MSVC 2013 needs explicit types here */
     CORRADE_COMPARE(Intersection::lineSegmentLineSegment(p, r,
         Vector2{0.0f, -2.0f}, Vector2{-1.0f, 0.0f}), std::make_pair(-0.5f, 1.5f));
     CORRADE_COMPARE(Intersection::lineSegmentLine(p, r,
         Vector2{0.0f, -2.0f}, Vector2{-1.0f, 0.0f}), -0.5f);
 
     /* Collinear lines */
+    /* MSVC 2013 needs explicit types here */
     const auto tu = Intersection::lineSegmentLineSegment(p, r,
         Vector2{0.0f, 1.0f}, Vector2{-1.0f, -2.0f});
     CORRADE_COMPARE(tu.first, -Constants::nan());
@@ -91,6 +98,7 @@ void IntersectionTest::lineLine() {
         Vector2{0.0f, 1.0f}, Vector2{-1.0f, -2.0f}), -Constants::nan());
 
     /* Parallel lines */
+    /* MSVC 2013 needs explicit types here */
     CORRADE_COMPARE(Intersection::lineSegmentLineSegment(p, r,
         Vector2{0.0f, 0.0f}, Vector2{1.0f, 2.0f}), std::make_pair(Constants::inf(), Constants::inf()));
     CORRADE_COMPARE(Intersection::lineSegmentLine(p, r,

@@ -88,6 +88,7 @@ void GlyphCacheGLTest::reserve() {
     Text::GlyphCache cache(Vector2i(236));
 
     /* Verify that this works for "empty" cache */
+    /* GCC 4.4 needs explicit typing */
     CORRADE_VERIFY(!cache.reserve(std::vector<Vector2i>{{5, 3}}).empty());
 }
 

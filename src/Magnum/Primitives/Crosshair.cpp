@@ -33,6 +33,7 @@
 namespace Magnum { namespace Primitives {
 
 Trade::MeshData2D Crosshair2D::wireframe() {
+    /* GCC 4.4 needs explicit typing */
     return Trade::MeshData2D(MeshPrimitive::Lines, {}, {std::vector<Vector2>{
         {-1.0f,  0.0f}, {1.0f, 0.0f},
         { 0.0f, -1.0f}, {0.0f, 1.0f}
@@ -40,6 +41,7 @@ Trade::MeshData2D Crosshair2D::wireframe() {
 }
 
 Trade::MeshData3D Crosshair3D::wireframe() {
+    /* GCC 4.4 needs explicit typing */
     return Trade::MeshData3D(MeshPrimitive::Lines, {}, {std::vector<Vector3>{
         {-1.0f,  0.0f,  0.0f}, {1.0f, 0.0f, 0.0f},
         { 0.0f, -1.0f,  0.0f}, {0.0f, 1.0f, 0.0f},

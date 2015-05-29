@@ -40,7 +40,7 @@
 #include <Corrade/Utility/Macros.h>
 #endif
 #ifdef CORRADE_MSVC2013_COMPATIBILITY
-#include "Magnum/Mesh.h"
+#include "Magnum/Mesh.h" /* std::reference_wrapper needs full definition uhh */
 #endif
 
 namespace Magnum {

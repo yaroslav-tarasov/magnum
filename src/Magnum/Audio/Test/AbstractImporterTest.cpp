@@ -57,6 +57,7 @@ void AbstractImporterTest::openFile() {
                 opened = (data.size() == 1 && data[0] == '\xa5');
             }
 
+            /* GCC 4.5 needs explicit type */
             Buffer::Format doFormat() const override { return Buffer::Format(); }
             UnsignedInt doFrequency() const override { return {}; }
             Corrade::Containers::Array<char> doData() override {

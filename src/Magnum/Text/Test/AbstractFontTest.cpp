@@ -79,6 +79,7 @@ void AbstractFontTest::openSingleData() {
     SingleDataFont font;
     const char data[] = {'\xa5'};
     CORRADE_VERIFY(!font.isOpened());
+    /* GCC 4.4 needs explicit typing */
     font.openData(std::vector<std::pair<std::string, Containers::ArrayReference<const char>>>{{{}, data}}, 3.0f);
     CORRADE_VERIFY(font.isOpened());
 }

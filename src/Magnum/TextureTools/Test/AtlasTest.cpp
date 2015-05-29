@@ -48,6 +48,7 @@ AtlasTest::AtlasTest() {
 }
 
 void AtlasTest::create() {
+    /* GCC 4.4 needs explicit typing */
     std::vector<Range2Di> atlas = TextureTools::atlas({64, 64}, std::vector<Vector2i>{
         {12, 18},
         {32, 15},
@@ -62,6 +63,7 @@ void AtlasTest::create() {
 }
 
 void AtlasTest::createPadding() {
+    /* GCC 4.4 needs explicit typing */
     std::vector<Range2Di> atlas = TextureTools::atlas({64, 64}, std::vector<Vector2i>{
         {8, 16},
         {28, 13},
@@ -84,6 +86,7 @@ void AtlasTest::createTooSmall() {
     std::ostringstream o;
     Error::setOutput(&o);
 
+    /* GCC 4.4 needs explicit typing */
     std::vector<Range2Di> atlas = TextureTools::atlas({64, 32}, std::vector<Vector2i>{
         {8, 16},
         {21, 13},

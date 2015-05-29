@@ -74,6 +74,7 @@ void AbstractImporter::close() {
 }
 
 Buffer::Format AbstractImporter::format() const {
+    /* GCC 4.5 needs explicit type */
     CORRADE_ASSERT(isOpened(), "Audio::AbstractImporter::format(): no file opened", Buffer::Format());
     return doFormat();
 }

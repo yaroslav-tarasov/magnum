@@ -33,12 +33,14 @@
 namespace Magnum { namespace Primitives {
 
 Trade::MeshData2D Line2D::wireframe() {
+    /* GCC 4.4 needs explicit typing */
     return Trade::MeshData2D(MeshPrimitive::Lines, {}, {std::vector<Vector2>{
         {0.0f, 0.0f}, {1.0f, 0.0f}
     }}, {});
 }
 
 Trade::MeshData3D Line3D::wireframe() {
+    /* GCC 4.4 needs explicit typing */
     return Trade::MeshData3D(MeshPrimitive::Lines, {}, {std::vector<Vector3>{
         {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f},
     }}, {}, {});

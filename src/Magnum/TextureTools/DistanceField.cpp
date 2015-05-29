@@ -92,6 +92,7 @@ DistanceFieldShader::DistanceFieldShader(): radiusUniform(0), scalingUniform(1) 
         .addSource(rs.get("DistanceFieldShader.vert"));
     frag.addSource(rs.get("DistanceFieldShader.frag"));
 
+    /* GCC 4.4 has explicit std::reference_wrapper constructor */
     CORRADE_INTERNAL_ASSERT_OUTPUT(Shader::compile({std::ref(vert), std::ref(frag)}));
 
     attachShaders({std::ref(vert), std::ref(frag)});

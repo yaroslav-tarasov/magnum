@@ -471,6 +471,7 @@ std::optional<MeshData3D> ObjImporter::doMesh3D(UnsignedInt id) {
     if(!normalIndices.empty() || !textureCoordinateIndices.empty()) {
         std::vector<std::reference_wrapper<std::vector<UnsignedInt>>> arrays;
         arrays.reserve(3);
+        /* GCC 4.4 has explicit std::reference_wrapper constructor */
         arrays.push_back(std::ref(positionIndices));
         if(!normalIndices.empty()) arrays.push_back(std::ref(normalIndices));
         if(!textureCoordinateIndices.empty()) arrays.push_back(std::ref(textureCoordinateIndices));

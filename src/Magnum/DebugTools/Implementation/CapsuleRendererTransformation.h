@@ -56,6 +56,7 @@ template<> std::array<Matrix3, 3> capsuleRendererTransformation<2>(const Vector2
 
     /* Scaling and translation of all parts */
     const auto rotationScaling = rotation*Matrix3::scaling(Vector2(radius));
+    /* GCC 4.5 needs explicit type */
     return std::array<Matrix3, 3>{{
         Matrix3::translation(a+capDistance)*rotationScaling,
         Matrix3::translation(0.5f*(a + b))*rotation*Matrix3::scaling({radius, length}),
@@ -95,6 +96,7 @@ template<> std::array<Matrix4, 3> capsuleRendererTransformation<3>(const Vector3
 
     /* Scaling and translation of all parts */
     const auto rotationScaling = rotation*Matrix4::scaling(Vector3(radius));
+    /* GCC 4.5 needs explicit type */
     return std::array<Matrix4, 3>{{
         Matrix4::translation(a+capDistance)*rotationScaling,
         Matrix4::translation(0.5f*(a + b))*rotation*Matrix4::scaling({radius, length, radius}),

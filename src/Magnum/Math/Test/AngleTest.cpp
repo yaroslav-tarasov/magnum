@@ -123,7 +123,7 @@ void AngleTest::literals() {
     CORRADE_VERIFY((std::is_same<decltype(n), const Rad>::value));
     CORRADE_COMPARE(Float(n), 3.14f);
     #else
-    CORRADE_SKIP("User-defined literals are not available on GCC < 4.7.");
+    CORRADE_SKIP("User-defined literals are not available on GCC < 4.7 and MSVC 2013.");
     #endif
 }
 
