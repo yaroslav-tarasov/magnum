@@ -96,7 +96,8 @@ class PrimitiveQuery: public AbstractQuery {
          * behavior.
          * @see @ref release()
          */
-        static PrimitiveQuery wrap(GLuint id, Target target, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static PrimitiveQuery wrap(GLuint id, Target target, ObjectFlags flags = ObjectFlags{}) {
             return PrimitiveQuery{id, target, flags};
         }
 

@@ -835,7 +835,8 @@ class MAGNUM_EXPORT Buffer: public AbstractObject {
          * behavior.
          * @see @ref release()
          */
-        static Buffer wrap(GLuint id, TargetHint targetHint = TargetHint::Array, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static Buffer wrap(GLuint id, TargetHint targetHint = TargetHint::Array, ObjectFlags flags = ObjectFlags{}) {
             return Buffer{id, targetHint, flags};
         }
 

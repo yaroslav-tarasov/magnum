@@ -194,7 +194,8 @@ class SampleQuery: public AbstractQuery {
          * behavior.
          * @see @ref release(), @fn_gl{IsQuery}
          */
-        static SampleQuery wrap(GLuint id, Target target, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static SampleQuery wrap(GLuint id, Target target, ObjectFlags flags = ObjectFlags{}) {
             return SampleQuery{id, target, flags};
         }
 

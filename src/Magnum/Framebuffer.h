@@ -348,7 +348,8 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * different behavior.
          * @see @ref release()
          */
-        static Framebuffer wrap(GLuint id, const Range2Di& viewport, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static Framebuffer wrap(GLuint id, const Range2Di& viewport, ObjectFlags flags = ObjectFlags{}) {
             return Framebuffer{id, viewport, flags};
         }
 

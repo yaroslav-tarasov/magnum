@@ -443,7 +443,8 @@ class MAGNUM_EXPORT Mesh: public AbstractObject {
          * @requires_webgl20 Extension @webgl_extension{OES,vertex_array_object}
          *      in WebGL 1.0.
          */
-        static Mesh wrap(GLuint id, MeshPrimitive primitive = MeshPrimitive::Triangles, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static Mesh wrap(GLuint id, MeshPrimitive primitive = MeshPrimitive::Triangles, ObjectFlags flags = ObjectFlags{}) {
             return Mesh{id, primitive, flags};
         }
 

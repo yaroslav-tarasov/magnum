@@ -122,7 +122,8 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          * @p flags for different behavior.
          * @see @ref release()
          */
-        static TextureArray<dimensions> wrap(GLuint id, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static TextureArray<dimensions> wrap(GLuint id, ObjectFlags flags = ObjectFlags{}) {
             return TextureArray<dimensions>{id, flags};
         }
 

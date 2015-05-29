@@ -125,7 +125,8 @@ template<UnsignedInt dimensions> class MultisampleTexture: public AbstractTextur
          * behavior.
          * @see @ref release()
          */
-        static MultisampleTexture<dimensions> wrap(GLuint id, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static MultisampleTexture<dimensions> wrap(GLuint id, ObjectFlags flags = ObjectFlags{}) {
             return MultisampleTexture<dimensions>{id, flags};
         }
 

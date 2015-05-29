@@ -91,7 +91,8 @@ class MAGNUM_EXPORT RectangleTexture: public AbstractTexture {
          * destruction, use @p flags for different behavior.
          * @see @ref release()
          */
-        static RectangleTexture wrap(GLuint id, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static RectangleTexture wrap(GLuint id, ObjectFlags flags = ObjectFlags{}) {
             return RectangleTexture{id, flags};
         }
 

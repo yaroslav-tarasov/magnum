@@ -134,7 +134,8 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * destruction, use @p flags for different behavior.
          * @see @ref release()
          */
-        static Texture<dimensions> wrap(GLuint id, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static Texture<dimensions> wrap(GLuint id, ObjectFlags flags = ObjectFlags{}) {
             return Texture<dimensions>{id, flags};
         }
 

@@ -106,7 +106,8 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          * destruction, use @p flags for different behavior.
          * @see @ref release()
          */
-        static CubeMapTextureArray wrap(GLuint id, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static CubeMapTextureArray wrap(GLuint id, ObjectFlags flags = ObjectFlags{}) {
             return CubeMapTextureArray{id, flags};
         }
 

@@ -160,7 +160,8 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * different behavior.
          * @see @ref release()
          */
-        static TransformFeedback wrap(GLuint id, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static TransformFeedback wrap(GLuint id, ObjectFlags flags = ObjectFlags{}) {
             return TransformFeedback{id, flags};
         }
 

@@ -104,7 +104,8 @@ class MAGNUM_EXPORT Renderbuffer: public AbstractObject {
          * different behavior.
          * @see @ref release()
          */
-        static Renderbuffer wrap(GLuint id, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static Renderbuffer wrap(GLuint id, ObjectFlags flags = ObjectFlags{}) {
             return Renderbuffer{id, flags};
         }
 

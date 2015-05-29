@@ -116,7 +116,8 @@ class TimeQuery: public AbstractQuery {
          * behavior.
          * @see @ref release()
          */
-        static TimeQuery wrap(GLuint id, Target target, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static TimeQuery wrap(GLuint id, Target target, ObjectFlags flags = ObjectFlags{}) {
             return TimeQuery{id, target, flags};
         }
 

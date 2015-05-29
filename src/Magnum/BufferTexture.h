@@ -235,7 +235,8 @@ class MAGNUM_EXPORT BufferTexture: public AbstractTexture {
          * destruction, use @p flags for different behavior.
          * @see @ref release()
          */
-        static BufferTexture wrap(GLuint id, ObjectFlags flags = {}) {
+        /* GCC 4.6 needs explicit type */
+        static BufferTexture wrap(GLuint id, ObjectFlags flags = ObjectFlags{}) {
             return BufferTexture{id, flags};
         }
 
