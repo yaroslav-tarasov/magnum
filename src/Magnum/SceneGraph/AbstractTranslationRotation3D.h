@@ -42,7 +42,6 @@ See @ref scenegraph-features-transformation for more information.
     @ref AbstractBasicTranslationRotation2D,
     @ref BasicRigidMatrixTransformation3D,
     @ref BasicDualQuaternionTransformation
-@todo Use AbstractBasicTransformation3D<T> when support for GCC 4.6 is dropped
 */
 template<class T> class AbstractBasicTranslationRotation3D: public AbstractTranslation<3, T> {
     public:

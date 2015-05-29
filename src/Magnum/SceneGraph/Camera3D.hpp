@@ -32,8 +32,6 @@
 #include "Magnum/SceneGraph/AbstractCamera.hpp"
 #include "Magnum/SceneGraph/Camera3D.h"
 
-/** @todo Use AbstractBasicCamera3D<T> when support for GCC 4.6 is dropped (also in header) */
-
 namespace Magnum { namespace SceneGraph {
 
 template<class T> BasicCamera3D<T>::BasicCamera3D(AbstractObject<3, T>& object): AbstractCamera<3, T>(object), _near(T(0)), _far(T(0)) {}

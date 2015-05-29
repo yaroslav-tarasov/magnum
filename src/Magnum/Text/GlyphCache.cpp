@@ -33,8 +33,6 @@
 
 namespace Magnum { namespace Text {
 
-/** @todo Do this using delegating constructors when support for GCC 4.6 is dropped */
-
 GlyphCache::GlyphCache(const TextureFormat internalFormat, const Vector2i& originalSize, const Vector2i& size, const Vector2i& padding): _size(originalSize), _padding(padding) {
     initialize(internalFormat, size);
 }
