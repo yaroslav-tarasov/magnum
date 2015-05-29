@@ -311,12 +311,7 @@ namespace std {
     template<> struct hash<Magnum::ResourceKey> {
         #ifndef DOXYGEN_GENERATING_OUTPUT
         std::size_t operator()(Magnum::ResourceKey key) const {
-            #ifndef CORRADE_GCC44_COMPATIBILITY
             return *reinterpret_cast<const std::size_t*>(key.byteArray());
-            #else
-            /* GCC 4.4 thinks reinterpret_cast will break strict aliasing, doing it with bit cast instead */
-            return Corrade::Utility::bitCast<std::size_t>(key);
-            #endif
         }
         #endif
     };
