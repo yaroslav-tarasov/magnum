@@ -107,6 +107,16 @@ class MAGNUM_EXPORT RectangleTexture: public AbstractTexture {
          */
         explicit RectangleTexture(): AbstractTexture(GL_TEXTURE_RECTANGLE) {}
 
+        #ifdef CORRADE_GCC45_COMPATIBILITY
+        RectangleTexture(const RectangleTexture&) = delete;
+        RectangleTexture(RectangleTexture&& other): AbstractTexture(std::move(other)) {}
+        RectangleTexture& operator=(RectangleTexture&) = delete;
+        RectangleTexture& operator=(RectangleTexture&& other) {
+            AbstractTexture::operator=(std::move(other));
+            return *this;
+        }
+        #endif
+
         /**
          * @copybrief Texture::setMinificationFilter()
          * @return Reference to self (for method chaining)

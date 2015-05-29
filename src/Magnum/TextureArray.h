@@ -139,6 +139,16 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          */
         explicit TextureArray(): AbstractTexture(Implementation::textureArrayTarget<dimensions>()) {}
 
+        #ifdef CORRADE_GCC45_COMPATIBILITY
+        TextureArray(const TextureArray<dimensions>&) = delete;
+        TextureArray(TextureArray<dimensions>&& other): AbstractTexture(std::move(other)) {}
+        TextureArray<dimensions>& operator=(TextureArray<dimensions>&) = delete;
+        TextureArray<dimensions>& operator=(TextureArray<dimensions>&& other) {
+            AbstractTexture::operator=(std::move(other));
+            return *this;
+        }
+        #endif
+
         /**
          * @copybrief Texture::setBaseLevel()
          * @return Reference to self (for method chaining)

@@ -143,6 +143,16 @@ template<UnsignedInt dimensions> class MultisampleTexture: public AbstractTextur
          */
         explicit MultisampleTexture(): AbstractTexture(Implementation::multisampleTextureTarget<dimensions>()) {}
 
+        #ifdef CORRADE_GCC45_COMPATIBILITY
+        MultisampleTexture(const MultisampleTexture<dimensions>&) = delete;
+        MultisampleTexture(MultisampleTexture<dimensions>&& other): AbstractTexture(std::move(other)) {}
+        MultisampleTexture<dimensions>& operator=(MultisampleTexture<dimensions>&) = delete;
+        MultisampleTexture<dimensions>& operator=(MultisampleTexture<dimensions>&& other) {
+            AbstractTexture::operator=(std::move(other));
+            return *this;
+        }
+        #endif
+
         /**
          * @brief Set storage
          * @param samples           Sample count
