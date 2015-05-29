@@ -54,13 +54,12 @@ Trade::MeshData3D Plane::solid(const TextureCoords textureCoords) {
 }
 
 Trade::MeshData3D Plane::wireframe() {
-    /* {} initializers are causing ICE in MSVC 2013. Bhaha. */
-    return Trade::MeshData3D(MeshPrimitive::LineLoop, std::vector<UnsignedInt>(), {std::vector<Vector3>{
+    return Trade::MeshData3D(MeshPrimitive::LineLoop, {}, {std::vector<Vector3>{
         {-1.0f, -1.0f, 0.0f},
         {1.0f, -1.0f, 0.0f},
         {1.0f, 1.0f, 0.0f},
         {-1.0f, 1.0f, 0.0f}
-    }}, std::vector<std::vector<Vector3>>(), std::vector<std::vector<Vector2>>());
+    }}, {}, {});
 }
 
 }}

@@ -165,12 +165,7 @@ template<class T> class BasicColor3: public Math::Vector3<T> {
          * floating-point underlying type equivalent to @ref Vector3::xAxis().
          * @see @ref green(), @ref blue(), @ref cyan()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor3<T> red(T red = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor3<T> red(T red = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor3<T> red(T red = Implementation::fullChannel<T>()) {
             return Math::Vector3<T>::xAxis(red);
         }
 
@@ -181,12 +176,7 @@ template<class T> class BasicColor3: public Math::Vector3<T> {
          * floating-point underlying type equivalent to @ref Vector3::yAxis().
          * @see @ref red(), @ref blue(), @ref magenta()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor3<T> green(T green = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor3<T> green(T green = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor3<T> green(T green = Implementation::fullChannel<T>()) {
             return Math::Vector3<T>::yAxis(green);
         }
 
@@ -197,12 +187,7 @@ template<class T> class BasicColor3: public Math::Vector3<T> {
          * floating-point underlying type equivalent to @ref Vector3::zAxis().
          * @see @ref red(), @ref green(), @ref yellow()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor3<T> blue(T blue = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor3<T> blue(T blue = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor3<T> blue(T blue = Implementation::fullChannel<T>()) {
             return Math::Vector3<T>::zAxis(blue);
         }
 
@@ -343,12 +328,6 @@ template<class T> class BasicColor3: public Math::Vector3<T> {
         }
 
         MAGNUM_VECTOR_SUBCLASS_IMPLEMENTATION(3, BasicColor3)
-
-    #ifdef CORRADE_MSVC2013_COMPATIBILITY
-    private:
-        template<class U = T, class = typename std::enable_if<std::is_floating_point<T>::value, T>::type> constexpr static T fullChannel() { return T(1); }
-        template<class U = T, class V = T, class = typename std::enable_if<std::is_integral<T>::value, T>::type> constexpr static T fullChannel() { return std::numeric_limits<T>::max(); }
-    #endif
 };
 
 /** @brief Three-component (RGB) float color */
@@ -388,12 +367,7 @@ class BasicColor4: public Math::Vector4<T> {
          * Convenience alternative to e.g. `Color4(red, 0.0f, 0.0f, alpha)`.
          * @see @ref green(), @ref blue(), @ref cyan()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor4<T> red(T red = Implementation::fullChannel<T>(), T alpha = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor4<T> red(T red = fullChannel(), T alpha = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor4<T> red(T red = Implementation::fullChannel<T>(), T alpha = Implementation::fullChannel<T>()) {
             return {red, T(0), T(0), alpha};
         }
 
@@ -403,12 +377,7 @@ class BasicColor4: public Math::Vector4<T> {
          * Convenience alternative to e.g. `Color4(0.0f, green, 0.0f, alpha)`.
          * @see @ref red(), @ref blue(), @ref magenta()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor4<T> green(T green = Implementation::fullChannel<T>(), T alpha = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor4<T> green(T green = fullChannel(), T alpha = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor4<T> green(T green = Implementation::fullChannel<T>(), T alpha = Implementation::fullChannel<T>()) {
             return {T(0), green, T(0), alpha};
         }
 
@@ -418,12 +387,7 @@ class BasicColor4: public Math::Vector4<T> {
          * Convenience alternative to e.g. `Color4(0.0f, 0.0f, blue, alpha)`.
          * @see @ref red(), @ref green(), @ref yellow()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor4<T> blue(T blue = Implementation::fullChannel<T>(), T alpha = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor4<T> blue(T blue = fullChannel(), T alpha = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor4<T> blue(T blue = Implementation::fullChannel<T>(), T alpha = Implementation::fullChannel<T>()) {
             return {T(0), T(0), blue, alpha};
         }
 
@@ -433,12 +397,7 @@ class BasicColor4: public Math::Vector4<T> {
          * Convenience alternative to e.g. `Color4(red, 1.0f, 1.0f, alpha)`.
          * @see @ref magenta(), @ref yellow(), @ref red()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor4<T> cyan(T red = T(0), T alpha = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor4<T> cyan(T red = T(0), T alpha = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor4<T> cyan(T red = T(0), T alpha = Implementation::fullChannel<T>()) {
             return {red, Implementation::fullChannel<T>(), Implementation::fullChannel<T>(), alpha};
         }
 
@@ -448,12 +407,7 @@ class BasicColor4: public Math::Vector4<T> {
          * Convenience alternative to e.g. `Color4(1.0f, green, 1.0f, alpha)`.
          * @see @ref cyan(), @ref yellow(), @ref green()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor4<T> magenta(T green = T(0), T alpha = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor4<T> magenta(T green = T(0), T alpha = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor4<T> magenta(T green = T(0), T alpha = Implementation::fullChannel<T>()) {
             return {Implementation::fullChannel<T>(), green, Implementation::fullChannel<T>(), alpha};
         }
 
@@ -463,12 +417,7 @@ class BasicColor4: public Math::Vector4<T> {
          * Convenience alternative to e.g. `Color4(1.0f, 1.0f, blue, alpha)`.
          * @see @ref cyan(), @ref magenta(), @ref red()
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor4<T> yellow(T blue = T(0), T alpha = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor4<T> yellow(T blue = T(0), T alpha = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor4<T> yellow(T blue = T(0), T alpha = Implementation::fullChannel<T>()) {
             return {Implementation::fullChannel<T>(), Implementation::fullChannel<T>(), blue, alpha};
         }
 
@@ -477,12 +426,7 @@ class BasicColor4: public Math::Vector4<T> {
          * @param a     Alpha value, defaults to `1.0` for floating-point types
          *      and maximum positive value for integral types.
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
-        constexpr static BasicColor4<T> fromHSV(HSV hsv, T a = Implementation::fullChannel<T>())
-        #else
-        constexpr static BasicColor4<T> fromHSV(HSV hsv, T a = fullChannel())
-        #endif
-        {
+        constexpr static BasicColor4<T> fromHSV(HSV hsv, T a = Implementation::fullChannel<T>()) {
             return BasicColor4<T>(Implementation::fromHSV<T>(hsv), a);
         }
         /** @overload */
@@ -503,11 +447,7 @@ class BasicColor4: public Math::Vector4<T> {
          * @param alpha Alpha value, defaults to `1.0` for floating-point types
          *      and maximum positive value for integral types.
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         constexpr explicit BasicColor4(T rgb, T alpha = Implementation::fullChannel<T>()): Math::Vector4<T>(rgb, rgb, rgb, alpha) {}
-        #else
-        constexpr explicit BasicColor4(T rgb, T alpha = fullChannel()): Math::Vector4<T>(rgb, rgb, rgb, alpha) {}
-        #endif
 
         /**
          * @brief Constructor
@@ -517,11 +457,7 @@ class BasicColor4: public Math::Vector4<T> {
          * @param a     A value, defaults to `1.0` for floating-point types and
          *      maximum positive value for integral types.
          */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         constexpr /*implicit*/ BasicColor4(T r, T g, T b, T a = Implementation::fullChannel<T>()): Math::Vector4<T>(r, g, b, a) {}
-        #else
-        constexpr /*implicit*/ BasicColor4(T r, T g, T b, T a = fullChannel()): Math::Vector4<T>(r, g, b, a) {}
-        #endif
 
         /**
          * @brief Constructor
@@ -530,11 +466,7 @@ class BasicColor4: public Math::Vector4<T> {
          */
         /* Not marked as explicit, because conversion from BasicColor3 to BasicColor4
            is fairly common, nearly always with A set to 1 */
-        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         constexpr /*implicit*/ BasicColor4(const Math::Vector3<T>& rgb, T a = Implementation::fullChannel<T>()): Math::Vector4<T>(rgb[0], rgb[1], rgb[2], a) {}
-        #else
-        constexpr /*implicit*/ BasicColor4(const Math::Vector3<T>& rgb, T a = fullChannel()): Math::Vector4<T>(rgb[0], rgb[1], rgb[2], a) {}
-        #endif
 
         /**
          * @copydoc Math::Vector::Vector(const Vector<size, U>&)
@@ -569,12 +501,6 @@ class BasicColor4: public Math::Vector4<T> {
         }
 
         MAGNUM_VECTOR_SUBCLASS_IMPLEMENTATION(4, BasicColor4)
-
-    #ifdef CORRADE_MSVC2013_COMPATIBILITY
-    private:
-        template<class U = T, class = typename std::enable_if<std::is_floating_point<T>::value, T>::type> constexpr static T fullChannel() { return T(1); }
-        template<class U = T, class V = T, class = typename std::enable_if<std::is_integral<T>::value, T>::type> constexpr static T fullChannel() { return std::numeric_limits<T>::max(); }
-    #endif
 };
 
 /** @brief Four-component (RGBA) float color */

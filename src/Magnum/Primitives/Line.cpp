@@ -39,10 +39,9 @@ Trade::MeshData2D Line2D::wireframe() {
 }
 
 Trade::MeshData3D Line3D::wireframe() {
-    /* {} initializers are causing ICE in MSVC 2013. Bhaha. */
-    return Trade::MeshData3D(MeshPrimitive::Lines, std::vector<UnsignedInt>(), {std::vector<Vector3>{
+    return Trade::MeshData3D(MeshPrimitive::Lines, {}, {std::vector<Vector3>{
         {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f},
-    }}, std::vector<std::vector<Vector3>>(), std::vector<std::vector<Vector2>>());
+    }}, {}, {});
 }
 
 }}

@@ -174,8 +174,7 @@ void AbstractFontConverterTest::exportFontToFile() {
 
     /* doExportToFile() should call doExportToData() */
     DataExporter exporter;
-    /* MSVC 2013 can't handle {} here */
-    bool exported = exporter.exportFontToFile(nullFont, nullGlyphCache, Utility::Directory::join(TEXT_TEST_OUTPUT_DIR, "font.out"), std::string());
+    bool exported = exporter.exportFontToFile(nullFont, nullGlyphCache, Utility::Directory::join(TEXT_TEST_OUTPUT_DIR, "font.out"), {});
     CORRADE_VERIFY(exported);
     CORRADE_COMPARE_AS(Utility::Directory::join(TEXT_TEST_OUTPUT_DIR, "font.out"),
                        "\xf0", TestSuite::Compare::FileToString);

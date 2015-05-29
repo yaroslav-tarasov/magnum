@@ -59,8 +59,7 @@ void AbstractImageTest::pixelSize() {
 
 void AbstractImageTest::dataSize() {
     /* Verify that row size is properly rounded */
-    /* MSVC 2013 has ICE when {} is used. Meh. */
-    CORRADE_COMPARE(Image2D(ColorFormat::RGBA, ColorType::UnsignedByte).dataSize(Vector2i()), 0);
+    CORRADE_COMPARE(Image2D(ColorFormat::RGBA, ColorType::UnsignedByte).dataSize({}), 0);
     CORRADE_COMPARE(Image2D(ColorFormat::Red, ColorType::UnsignedByte).dataSize({4, 2}), 8);
     CORRADE_COMPARE(Image2D(ColorFormat::Red, ColorType::UnsignedByte).dataSize({2, 4}), 16);
     CORRADE_COMPARE(Image2D(ColorFormat::RGBA, ColorType::UnsignedByte).dataSize(Vector2i(1)), 4);

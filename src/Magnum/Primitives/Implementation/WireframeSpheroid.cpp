@@ -111,8 +111,7 @@ void WireframeSpheroid::cylinder() {
 }
 
 Trade::MeshData3D WireframeSpheroid::finalize() {
-    /* {} initializers are causing ICE in MSVC 2013. Bhaha. */
-    return Trade::MeshData3D(MeshPrimitive::Lines, std::move(_indices), {std::move(_positions)}, std::vector<std::vector<Vector3>>(), std::vector<std::vector<Vector2>>());
+    return Trade::MeshData3D(MeshPrimitive::Lines, std::move(_indices), {std::move(_positions)}, {}, {});
 }
 
 }}}

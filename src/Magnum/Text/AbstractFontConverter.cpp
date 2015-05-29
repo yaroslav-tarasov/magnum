@@ -64,9 +64,8 @@ AbstractFontConverter::AbstractFontConverter() = default;
 AbstractFontConverter::AbstractFontConverter(PluginManager::AbstractManager& manager, std::string plugin): PluginManager::AbstractPlugin(manager, std::move(plugin)) {}
 
 std::vector<std::pair<std::string, Containers::Array<char>>> AbstractFontConverter::exportFontToData(AbstractFont& font, GlyphCache& cache, const std::string& filename, const std::string& characters) const {
-    /* MSVC 2013 complains about deleted Array copy constructor if {} is used */
     CORRADE_ASSERT(features() >= (Feature::ExportFont|Feature::ConvertData),
-        "Text::AbstractFontConverter::exportFontToData(): feature not supported", (std::vector<std::pair<std::string, Containers::Array<char>>>{}));
+        "Text::AbstractFontConverter::exportFontToData(): feature not supported", {});
 
     return doExportFontToData(font, cache, filename, uniqueUnicode(characters));
 }
@@ -77,9 +76,8 @@ std::vector<std::pair<std::string, Containers::Array<char>>> AbstractFontConvert
 std::vector<std::pair<std::string, Containers::Array<char>>> AbstractFontConverter::doExportFontToData(AbstractFont& font, GlyphCache& cache, const std::string& filename, const std::vector<char32_t>& characters) const
 #endif
 {
-    /* MSVC 2013 complains about deleted Array copy constructor if {} is used */
     CORRADE_ASSERT(!(features() & Feature::MultiFile),
-        "Text::AbstractFontConverter::exportFontToData(): feature advertised but not implemented", (std::vector<std::pair<std::string, Containers::Array<char>>>{}));
+        "Text::AbstractFontConverter::exportFontToData(): feature advertised but not implemented", {});
 
     std::vector<std::pair<std::string, Containers::Array<char>>> out;
     out.emplace_back(filename, std::move(doExportFontToSingleData(font, cache, characters)));
@@ -145,17 +143,15 @@ bool AbstractFontConverter::doExportFontToFile(AbstractFont& font, GlyphCache& c
 }
 
 std::vector<std::pair<std::string, Containers::Array<char>>> AbstractFontConverter::exportGlyphCacheToData(GlyphCache& cache, const std::string& filename) const {
-    /* MSVC 2013 complains about deleted Array copy constructor if {} is used */
     CORRADE_ASSERT(features() >= (Feature::ExportGlyphCache|Feature::ConvertData),
-        "Text::AbstractFontConverter::exportGlyphCacheToData(): feature not supported", (std::vector<std::pair<std::string, Containers::Array<char>>>{}));
+        "Text::AbstractFontConverter::exportGlyphCacheToData(): feature not supported", {});
 
     return doExportGlyphCacheToData(cache, filename);
 }
 
 std::vector<std::pair<std::string, Containers::Array<char>>> AbstractFontConverter::doExportGlyphCacheToData(GlyphCache& cache, const std::string& filename) const {
-    /* MSVC 2013 complains about deleted Array copy constructor if {} is used */
     CORRADE_ASSERT(!(features() & Feature::MultiFile),
-        "Text::AbstractFontConverter::exportGlyphCacheToData(): feature advertised but not implemented", (std::vector<std::pair<std::string, Containers::Array<char>>>{}));
+        "Text::AbstractFontConverter::exportGlyphCacheToData(): feature advertised but not implemented", {});
 
     std::vector<std::pair<std::string, Containers::Array<char>>> out;
     out.emplace_back(filename, std::move(doExportGlyphCacheToSingleData(cache)));

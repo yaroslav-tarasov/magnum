@@ -323,26 +323,14 @@ template<class Transformation> class Object: public AbstractObject<Transformatio
          */
         /* `objects` passed by copy intentionally (to allow move from
            transformationMatrices() and avoid copy in the function itself) */
-        std::vector<typename Transformation::DataType> transformations(std::vector<std::reference_wrapper<Object<Transformation>>> objects, const typename Transformation::DataType& initialTransformation =
-            #ifndef CORRADE_MSVC2013_COMPATIBILITY
-            typename Transformation::DataType()
-            #else
-            Transformation::DataType()
-            #endif
-            ) const;
+        std::vector<typename Transformation::DataType> transformations(std::vector<std::reference_wrapper<Object<Transformation>>> objects, const typename Transformation::DataType& initialTransformation = typename Transformation::DataType()) const;
 
         #ifdef MAGNUM_BUILD_DEPRECATED
         /**
          * @copybrief transformations()
          * @deprecated Use @ref Magnum::SceneGraph::Object::transformations() "transformations(std::vector<std::reference_wrapper<Object<Transformation>>>, const typename Transformation::DataType&)" instead.
          */
-        CORRADE_DEPRECATED("use transformations(std::vector<std::reference_wrapper<Object<Transformation>>>, const typename Transformation::DataType&) instead") std::vector<typename Transformation::DataType> transformations(const std::vector<Object<Transformation>*>& objects, const typename Transformation::DataType& initialTransformation =
-            #ifndef CORRADE_MSVC2013_COMPATIBILITY
-            typename Transformation::DataType()
-            #else
-            Transformation::DataType()
-            #endif
-            ) const;
+        CORRADE_DEPRECATED("use transformations(std::vector<std::reference_wrapper<Object<Transformation>>>, const typename Transformation::DataType&) instead") std::vector<typename Transformation::DataType> transformations(const std::vector<Object<Transformation>*>& objects, const typename Transformation::DataType& initialTransformation = typename Transformation::DataType()) const;
 
         #if defined(CORRADE_GCC47_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
         /* Workarounds to avoid ambiguous overload errors on GCC < 4.8. And I
@@ -359,13 +347,7 @@ template<class Transformation> class Object: public AbstractObject<Transformatio
             /* GCC 4.5 doesn't like {} here */
             return transformations(std::vector<std::reference_wrapper<Object<Transformation>>>(objects), initialTransformation);
         }
-        CORRADE_DEPRECATED("use transformations(std::vector<std::reference_wrapper<Object<Transformation>>>, const typename Transformation::DataType&) instead") std::vector<typename Transformation::DataType> transformations(std::initializer_list<Object<Transformation>*> objects, const typename Transformation::DataType& initialTransformation =
-            #ifndef CORRADE_MSVC2013_COMPATIBILITY
-            typename Transformation::DataType()
-            #else
-            Transformation::DataType()
-            #endif
-            ) const;
+        CORRADE_DEPRECATED("use transformations(std::vector<std::reference_wrapper<Object<Transformation>>>, const typename Transformation::DataType&) instead") std::vector<typename Transformation::DataType> transformations(std::initializer_list<Object<Transformation>*> objects, const typename Transformation::DataType& initialTransformation = typename Transformation::DataType()) const;
         #endif
         #endif
 

@@ -315,8 +315,7 @@ TextureState::TextureState(Context& context, std::vector<std::string>& extension
 TextureState::~TextureState() = default;
 
 void TextureState::reset() {
-    /* MSVC 2013 has ICE when {} are used */
-    std::fill_n(bindings.begin(), bindings.size(), std::pair<GLenum, GLuint>{0, State::DisengagedBinding});
+    std::fill_n(bindings.begin(), bindings.size(), std::pair<GLenum, GLuint>{{}, State::DisengagedBinding});
 }
 
 }}
