@@ -78,7 +78,11 @@ void ImageDataTest::constructMove() {
     Trade::ImageData2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
     Trade::ImageData2D b(std::move(a));
 
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_COMPARE(a.data(), nullptr);
+    #else
+    CORRADE_VERIFY(a.data() == nullptr);
+    #endif
     CORRADE_COMPARE(a.size(), Vector2i());
 
     CORRADE_COMPARE(b.format(), ColorFormat::Red);
@@ -125,7 +129,11 @@ void ImageDataTest::release() {
     const char* const pointer = a.release();
 
     CORRADE_COMPARE(pointer, data);
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_COMPARE(a.data(), nullptr);
+    #else
+    CORRADE_VERIFY(a.data() == nullptr);
+    #endif
     CORRADE_COMPARE(a.size(), Vector2i());
 }
 

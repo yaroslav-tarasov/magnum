@@ -101,7 +101,7 @@ Containers::Array<char> AbstractFontConverter::doExportFontToSingleData(Abstract
 {
     CORRADE_ASSERT(false,
         "Text::AbstractFontConverter::exportFontToSingleData(): feature advertised but not implemented", {});
-    return nullptr;
+    return {};
 }
 
 bool AbstractFontConverter::exportFontToFile(AbstractFont& font, GlyphCache& cache, const std::string& filename, const std::string& characters) const {
@@ -159,7 +159,7 @@ Containers::Array<char> AbstractFontConverter::exportGlyphCacheToSingleData(Glyp
 Containers::Array<char> AbstractFontConverter::doExportGlyphCacheToSingleData(GlyphCache&) const {
     CORRADE_ASSERT(false,
         "Text::AbstractFontConverter::exportGlyphCacheToSingleData(): feature advertised but not implemented", {});
-    return nullptr;
+    return {};
 }
 
 bool AbstractFontConverter::exportGlyphCacheToFile(GlyphCache& cache, const std::string& filename) const {
@@ -213,7 +213,7 @@ std::unique_ptr<GlyphCache> AbstractFontConverter::importGlyphCacheFromSingleDat
 std::unique_ptr<GlyphCache> AbstractFontConverter::doImportGlyphCacheFromSingleData(Containers::ArrayView<const char>) const {
     CORRADE_ASSERT(false,
         "Text::AbstractFontConverter::importGlyphCacheFromSingleData(): feature advertised but not implemented", {});
-    return nullptr;
+    return {};
 }
 
 std::unique_ptr<GlyphCache> AbstractFontConverter::importGlyphCacheFromFile(const std::string& filename) const {

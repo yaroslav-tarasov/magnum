@@ -147,7 +147,7 @@ std::unique_ptr<GlyphCache> AbstractFont::createGlyphCache() {
 
 std::unique_ptr<GlyphCache> AbstractFont::doCreateGlyphCache() {
     CORRADE_ASSERT(false, "Text::AbstractFont::createGlyphCache(): feature advertised but not implemented", {});
-    return nullptr;
+    return {};
 }
 
 std::unique_ptr<AbstractLayouter> AbstractFont::layout(const GlyphCache& cache, const Float size, const std::string& text) {

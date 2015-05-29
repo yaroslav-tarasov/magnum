@@ -56,7 +56,7 @@ Containers::Array<char> AbstractImageConverter::exportToData(const ImageReferenc
 
 Containers::Array<char> AbstractImageConverter::doExportToData(const ImageReference2D&) const {
     CORRADE_ASSERT(false, "Trade::AbstractImageConverter::exportToData(): feature advertised but not implemented", {});
-    return nullptr;
+    return {};
 }
 
 bool AbstractImageConverter::exportToFile(const ImageReference2D& image, const std::string& filename) const {
