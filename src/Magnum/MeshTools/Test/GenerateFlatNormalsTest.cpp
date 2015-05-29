@@ -64,7 +64,8 @@ void GenerateFlatNormalsTest::generate() {
     std::tie(indices, normals) = MeshTools::generateFlatNormals({
         0, 1, 2,
         1, 2, 3
-    }, {
+    /* GCCC 4.4 needs explicit type */
+    }, std::vector<Vector3>{
         {-1.0f, 0.0f, 0.0f},
         {0.0f, -1.0f, 0.0f},
         {0.0f, 1.0f, 0.0f},
