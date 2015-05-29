@@ -30,13 +30,16 @@
  */
 
 #include <cmath>
-#include <algorithm> /* std::max(), needed by MSVC */
 #include <limits>
 #include <type_traits>
 #include <utility>
 
 #include "Magnum/visibility.h"
 #include "Magnum/Math/Vector.h"
+
+#ifdef CORRADE_MSVC2013_COMPATIBILITY
+#include <algorithm> /* std::max() */
+#endif
 
 namespace Magnum { namespace Math {
 
