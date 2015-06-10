@@ -91,7 +91,13 @@ std::vector<std::pair<std::string, Containers::Array<char>>> MagnumFontConverter
 
         Utility::ConfigurationGroup* group = configuration.addGroup("char");
         const UnsignedInt glyphId = font.glyphId(c);
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         group->setValue("unicode", c);
+        #else
+        /* MSVC 2013 has char32_t as typedef to unsigned int, so we need to use
+           hexadecimal explicitly */
+        group->setValue("unicode", c, 0, Utility::ConfigurationValueFlag::Hex);
+        #endif
 
         /* Map old glyph ID to new, if not found, map to glyph 0 */
         auto found = glyphIdMap.find(glyphId);

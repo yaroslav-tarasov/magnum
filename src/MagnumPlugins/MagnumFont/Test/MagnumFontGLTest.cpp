@@ -53,7 +53,11 @@ void MagnumFontGLTest::properties() {
     CORRADE_VERIFY(font.openFile(Utility::Directory::join(MAGNUMFONT_TEST_DIR, "font.conf"), 0.0f));
     CORRADE_COMPARE(font.size(), 16.0f);
     CORRADE_COMPARE(font.lineHeight(), 39.7333f);
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     CORRADE_COMPARE(font.glyphAdvance(font.glyphId(U'W')), Vector2(23.0f, 0.0f));
+    #else
+    CORRADE_COMPARE(font.glyphAdvance(font.glyphId('W')), Vector2(23.0f, 0.0f));
+    #endif
 }
 
 void MagnumFontGLTest::layout() {
@@ -62,8 +66,13 @@ void MagnumFontGLTest::layout() {
 
     /* Fill the cache with some fake glyphs */
     GlyphCache cache(Vector2i(256));
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     cache.insert(font.glyphId(U'W'), {25, 34}, {{0, 8}, {16, 128}});
     cache.insert(font.glyphId(U'e'), {25, 12}, {{16, 4}, {64, 32}});
+    #else
+    cache.insert(font.glyphId('W'), {25, 34}, {{0, 8}, {16, 128}});
+    cache.insert(font.glyphId('e'), {25, 12}, {{16, 4}, {64, 32}});
+    #endif
 
     auto layouter = font.layout(cache, 0.5f, "Wave");
     CORRADE_VERIFY(layouter);

@@ -98,8 +98,13 @@ void MagnumFontConverterGLTest::exportFont() {
     /* Create fake cache */
     MAGNUM_ASSERT_EXTENSION_SUPPORTED(Extensions::GL::ARB::texture_rg);
     GlyphCache cache(TextureFormat::R8, Vector2i(1536), Vector2i(256), Vector2i(24));
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     cache.insert(font.glyphId(U'W'), {25, 34}, {{0, 8}, {16, 128}});
     cache.insert(font.glyphId(U'e'), {25, 12}, {{16, 4}, {64, 32}});
+    #else
+    cache.insert(font.glyphId('W'), {25, 34}, {{0, 8}, {16, 128}});
+    cache.insert(font.glyphId('e'), {25, 12}, {{16, 4}, {64, 32}});
+    #endif
 
     /* Convert the file */
     MagnumFontConverter converter;

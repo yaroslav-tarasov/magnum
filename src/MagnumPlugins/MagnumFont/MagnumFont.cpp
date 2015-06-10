@@ -165,7 +165,13 @@ std::pair<Float, Float> MagnumFont::openInternal(Utility::Configuration&& conf, 
         const UnsignedInt glyphId = c->value<UnsignedInt>("glyph");
         CORRADE_INTERNAL_ASSERT(glyphId < _opened->glyphAdvance.size());
         #ifndef CORRADE_GCC46_COMPATIBILITY
+        #ifndef CORRADE_MSVC2013_COMPATIBILITY
         _opened->glyphId.emplace(c->value<char32_t>("unicode"), glyphId);
+        #else
+        /* MSVC 2013 has char32_t as typedef to unsigned int, so we need to use
+           hexadecimal explicitly */
+        _opened->glyphId.emplace(c->value<char32_t>("unicode", 0, Utility::ConfigurationValueFlag::Hex), glyphId);
+        #endif
         #else
         _opened->glyphId.insert({c->value<char32_t>("unicode"), glyphId});
         #endif
