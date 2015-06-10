@@ -130,7 +130,8 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          */
         explicit CubeMapTexture(): AbstractTexture(GL_TEXTURE_CUBE_MAP) {}
 
-        #ifdef CORRADE_GCC45_COMPATIBILITY
+        #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
+        /* GCC 4.5 somehow cannot do this on its own, MSVC 2013 comlains about using deleted function */
         CubeMapTexture(const CubeMapTexture&) = delete;
         CubeMapTexture(CubeMapTexture&& other): AbstractTexture(std::move(other)) {}
         CubeMapTexture& operator=(CubeMapTexture&) = delete;

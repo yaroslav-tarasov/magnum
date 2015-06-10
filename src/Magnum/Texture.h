@@ -151,7 +151,8 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          */
         explicit Texture(): AbstractTexture(Implementation::textureTarget<dimensions>()) {}
 
-        #ifdef CORRADE_GCC45_COMPATIBILITY
+        #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
+        /* GCC 4.5 somehow cannot do this on its own, MSVC 2013 comlains about using deleted function */
         Texture(const Texture<dimensions>&) = delete;
         Texture(Texture<dimensions>&& other): AbstractTexture(std::move(other)) {}
         Texture<dimensions>& operator=(const Texture<dimensions>&) = delete;

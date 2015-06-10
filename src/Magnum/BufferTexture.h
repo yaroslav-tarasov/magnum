@@ -251,7 +251,8 @@ class MAGNUM_EXPORT BufferTexture: public AbstractTexture {
          */
         explicit BufferTexture(): AbstractTexture(GL_TEXTURE_BUFFER) {}
 
-        #ifdef CORRADE_GCC45_COMPATIBILITY
+        #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
+        /* GCC 4.5 somehow cannot do this on its own, MSVC 2013 comlains about using deleted function */
         BufferTexture(const BufferTexture&) = delete;
         BufferTexture(BufferTexture&& other): AbstractTexture(std::move(other)) {}
         BufferTexture& operator=(const BufferTexture&) = delete;

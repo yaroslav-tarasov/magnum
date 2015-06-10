@@ -217,8 +217,8 @@ class SampleQuery: public AbstractQuery {
          */
         explicit SampleQuery(Target target): AbstractQuery(GLenum(target)) {}
 
-        #ifdef CORRADE_GCC45_COMPATIBILITY
-        /* GCC 4.5 somehow cannot do this on its own */
+        #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
+        /* GCC 4.5 somehow cannot do this on its own, MSVC 2013 comlains about using deleted function */
         SampleQuery(const SampleQuery&) = delete;
         SampleQuery(SampleQuery&& other): AbstractQuery(std::move(other)) {}
         SampleQuery& operator=(const SampleQuery&) = delete;

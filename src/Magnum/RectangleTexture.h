@@ -107,7 +107,8 @@ class MAGNUM_EXPORT RectangleTexture: public AbstractTexture {
          */
         explicit RectangleTexture(): AbstractTexture(GL_TEXTURE_RECTANGLE) {}
 
-        #ifdef CORRADE_GCC45_COMPATIBILITY
+        #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
+        /* GCC 4.5 somehow cannot do this on its own, MSVC 2013 comlains about using deleted function */
         RectangleTexture(const RectangleTexture&) = delete;
         RectangleTexture(RectangleTexture&& other): AbstractTexture(std::move(other)) {}
         RectangleTexture& operator=(RectangleTexture&) = delete;

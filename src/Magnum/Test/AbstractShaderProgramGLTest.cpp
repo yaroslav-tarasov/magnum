@@ -83,7 +83,8 @@ namespace {
         public:
             explicit DummyShader() {}
 
-            #ifdef CORRADE_GCC45_COMPATIBILITY
+            #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
+            /* GCC 4.5 somehow cannot do this on its own, MSVC 2013 comlains about using deleted function */
             DummyShader(const DummyShader&) = delete;
             DummyShader(DummyShader&& other): AbstractShaderProgram(std::move(other)) {}
             DummyShader& operator=(const DummyShader&) = delete;

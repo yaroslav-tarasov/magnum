@@ -131,8 +131,8 @@ class TimeQuery: public AbstractQuery {
          */
         explicit TimeQuery(Target target): AbstractQuery(GLenum(target)) {}
 
-        #ifdef CORRADE_GCC45_COMPATIBILITY
-        /* GCC 4.5 somehow cannot do this on its own */
+        #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
+        /* GCC 4.5 somehow cannot do this on its own, MSVC 2013 comlains about using deleted function */
         TimeQuery(const TimeQuery&) = delete;
         TimeQuery(TimeQuery&& other): AbstractQuery(std::move(other)) {}
         TimeQuery& operator=(const TimeQuery&) = delete;
