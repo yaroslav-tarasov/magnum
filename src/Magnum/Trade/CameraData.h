@@ -68,7 +68,7 @@ class CameraData {
 };
 
 constexpr CameraData::CameraData(Rad fov, Float near, Float far) noexcept:
-    _fov{fov != fov ? Rad{35.0_degf} : fov},
+    _fov{fov != fov ? Rad{Deg{35.0f}} : fov},
     _near{near != near ? 0.01f : near},
     _far{far != far ? 100.0f : far} {}
 
