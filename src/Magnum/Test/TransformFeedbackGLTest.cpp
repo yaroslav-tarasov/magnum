@@ -90,10 +90,20 @@ void TransformFeedbackGLTest::construct() {
 
 void TransformFeedbackGLTest::constructCopy() {
     #ifndef CORRADE_GCC44_COMPATIBILITY
-    CORRADE_VERIFY(!(std::is_constructible<TransformFeedback, const TransformFeedback&>::value));
+    {
+        #ifdef CORRADE_MSVC2013_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("std::is_constructible is buggy on MSVC 2013.");
+        #endif
+        CORRADE_VERIFY(!(std::is_constructible<TransformFeedback, const TransformFeedback&>::value));
+    }
     /* GCC 4.6 doesn't have std::is_assignable */
     #ifndef CORRADE_GCC46_COMPATIBILITY
-    CORRADE_VERIFY(!(std::is_assignable<TransformFeedback, const TransformFeedback&>{}));
+    {
+        #ifdef CORRADE_MSVC2013_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("std::is_assignable is buggy on MSVC 2013.");
+        #endif
+        CORRADE_VERIFY(!(std::is_assignable<TransformFeedback, const TransformFeedback&>{}));
+    }
     #endif
     #else
     CORRADE_SKIP("Type traits needed to test this are not available on GCC 4.4.");

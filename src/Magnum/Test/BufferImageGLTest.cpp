@@ -73,10 +73,20 @@ void BufferImageGLTest::construct() {
 
 void BufferImageGLTest::constructCopy() {
     #ifndef CORRADE_GCC44_COMPATIBILITY
-    CORRADE_VERIFY(!(std::is_constructible<BufferImage2D, const BufferImage2D&>::value));
+    {
+        #ifdef CORRADE_MSVC2013_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("std::is_constructible is buggy on MSVC 2013.");
+        #endif
+        CORRADE_VERIFY(!(std::is_constructible<BufferImage2D, const BufferImage2D&>::value));
+    }
     /* GCC 4.6 doesn't have std::is_assignable */
     #ifndef CORRADE_GCC46_COMPATIBILITY
-    CORRADE_VERIFY(!(std::is_assignable<BufferImage2D, const BufferImage2D&>{}));
+    {
+        #ifdef CORRADE_MSVC2013_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("std::is_assignable is buggy on MSVC 2013.");
+        #endif
+        CORRADE_VERIFY(!(std::is_assignable<BufferImage2D, const BufferImage2D&>{}));
+    }
     #endif
     #else
     CORRADE_SKIP("Type traits needed to test this are not available on GCC 4.4.");
