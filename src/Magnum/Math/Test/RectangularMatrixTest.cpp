@@ -37,8 +37,11 @@ namespace Magnum { namespace Math {
 
 namespace Implementation {
 
-template<> struct RectangularMatrixConverter<2, 3, float, Mat2x3> {
-    constexpr static RectangularMatrix<2, 3, Float> from(const Mat2x3& other) {
+template<> struct RectangularMatrixConverter<2, 3, Float, Mat2x3> {
+    #if !defined(__GNUC__) || defined(__clang__)
+    constexpr /* See the convert() test case */
+    #endif
+    static RectangularMatrix<2, 3, Float> from(const Mat2x3& other) {
         return RectangularMatrix<2, 3, Float>(
             Vector<3, Float>(other.a[0], other.a[1], other.a[2]),
             Vector<3, Float>(other.a[3], other.a[4], other.a[5]));
@@ -63,8 +66,8 @@ struct RectangularMatrixTest: Corrade::TestSuite::Tester {
     void constructFromData();
     void constructFromDiagonal();
     void constructCopy();
-
     void convert();
+
     void data();
     void row();
 
@@ -109,8 +112,8 @@ RectangularMatrixTest::RectangularMatrixTest() {
               &RectangularMatrixTest::constructFromData,
               &RectangularMatrixTest::constructFromDiagonal,
               &RectangularMatrixTest::constructCopy,
-
               &RectangularMatrixTest::convert,
+
               &RectangularMatrixTest::data,
               &RectangularMatrixTest::row,
 
@@ -214,10 +217,13 @@ void RectangularMatrixTest::convert() {
     constexpr Matrix2x3 b(Vector3(1.5f, 2.0f, -3.5f),
                           Vector3(2.0f, -3.1f,  0.4f));
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
+    /* GCC 5.1 fills the result with zeros instead of properly calling
+       delegated copy constructor if using constexpr. Reported here:
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
     constexpr /* Not constexpr under GCC < 4.7 */
     #endif
-    Matrix2x3 c(b);
+    Matrix2x3 c{a};
     CORRADE_COMPARE(c, b);
 
     #ifndef CORRADE_GCC46_COMPATIBILITY

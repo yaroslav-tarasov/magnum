@@ -96,9 +96,9 @@ See also @ref AbstractFramebuffer-performance-optimization "relevant section in 
 If either @extension{ARB,direct_state_access} (part of OpenGL 4.5) or
 @extension{EXT,direct_state_access} desktop extension is available, functions
 @ref checkStatus(), @ref mapForDraw(), @ref mapForRead(), @ref invalidate(),
-@ref attachRenderbuffer(), @ref attachTexture(), @ref attachCubeMapTexture()
-and @ref attachTextureLayer() use DSA to avoid unnecessary calls to
-@fn_gl{BindFramebuffer}. See their respective documentation for more
+@ref attachRenderbuffer(), @ref attachTexture(), @ref attachCubeMapTexture(),
+@ref attachTextureLayer() and @ref detach() use DSA to avoid unnecessary calls
+to @fn_gl{BindFramebuffer}. See their respective documentation for more
 information.
 
 @requires_gl30 Extension @extension{ARB,framebuffer_object}
@@ -578,7 +578,7 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the framebuffer is bound before the operation (if not
          * already).
-         * @see @fn_gl2{NamedFramebufferRenderbuffer,FramebufferRenderbuffer},
+         * @see @ref detach(), @fn_gl2{NamedFramebufferRenderbuffer,FramebufferRenderbuffer},
          *      @fn_gl_extension{NamedFramebufferRenderbuffer,EXT,direct_state_access},
          *      eventually @fn_gl{BindFramebuffer} and @fn_gl{FramebufferRenderbuffer}
          */
@@ -596,7 +596,8 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the framebuffer is bound before the operation (if not
          * already).
-         * @see @ref attachCubeMapTexture(), @fn_gl2{NamedFramebufferTexture,FramebufferTexture},
+         * @see @ref detach(), @ref attachCubeMapTexture(),
+         *      @fn_gl2{NamedFramebufferTexture,FramebufferTexture},
          *      @fn_gl_extension{NamedFramebufferTexture1D,EXT,direct_state_access},
          *      eventually @fn_gl{BindFramebuffer} and
          *      @fn_gl2{FramebufferTexture1D,FramebufferTexture}
@@ -617,7 +618,8 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the framebuffer is bound before the operation (if not
          * already).
-         * @see @ref attachCubeMapTexture(), @fn_gl2{NamedFramebufferTexture,FramebufferTexture},
+         * @see @ref detach(), @ref attachCubeMapTexture(),
+         *      @fn_gl2{NamedFramebufferTexture,FramebufferTexture},
          *      @fn_gl_extension{NamedFramebufferTexture2D,EXT,direct_state_access},
          *      eventually @fn_gl{BindFramebuffer} and
          *      @fn_gl2{FramebufferTexture2D,FramebufferTexture}
@@ -655,7 +657,8 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the framebuffer is bound before the operation (if not
          * already).
-         * @see @ref attachTexture(), @fn_gl2{NamedFramebufferTexture,FramebufferTexture},
+         * @see @ref detach(), @ref attachTexture(),
+         *      @fn_gl2{NamedFramebufferTexture,FramebufferTexture},
          *      @fn_gl_extension{NamedFramebufferTexture2D,EXT,direct_state_access},
          *      eventually @fn_gl{BindFramebuffer} and @fn_gl2{FramebufferTexture2D,FramebufferTexture}
          */
@@ -674,7 +677,7 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the framebuffer is bound before the operation (if not
          * already).
-         * @see @fn_gl2{NamedFramebufferTextureLayer,FramebufferTextureLayer},
+         * @see @ref detach(), @fn_gl2{NamedFramebufferTextureLayer,FramebufferTextureLayer},
          *      @fn_gl_extension{NamedFramebufferTextureLayer,EXT,direct_state_access},
          *      eventually @fn_gl{BindFramebuffer} and @fn_gl2{FramebufferTextureLayer,FramebufferTexture}
          *      or @fn_gles_extension{FramebufferTexture3D,OES,texture_3D} in
@@ -720,6 +723,23 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
         Framebuffer& attachTextureLayer(BufferAttachment attachment, MultisampleTexture2DArray& texture, Int layer);
         #endif
 
+        /**
+         * @brief Detach any texture or renderbuffer bound to given buffer
+         * @param attachment        Buffer attachment
+         * @return Reference to self (for method chaining)
+         *
+         * If neither @extension{ARB,direct_state_access} (part of OpenGL 4.5)
+         * nor @extension{EXT,direct_state_access} desktop extension is
+         * available, the framebuffer is bound before the operation (if not
+         * already).
+         * @see @ref attachRenderbuffer(), @ref attachTexture(),
+         *      @ref attachCubeMapTexture(), @ref attachTextureLayer(),
+         *      @fn_gl2{NamedFramebufferRenderbuffer,FramebufferRenderbuffer},
+         *      @fn_gl_extension{NamedFramebufferRenderbuffer,EXT,direct_state_access},
+         *      eventually @fn_gl{BindFramebuffer} and @fn_gl{FramebufferRenderbuffer}
+         */
+        Framebuffer& detach(BufferAttachment attachment);
+
         /* Overloads to remove WTF-factor from method chaining order */
         #ifndef DOXYGEN_GENERATING_OUTPUT
         Framebuffer& setViewport(const Range2Di& rectangle) {
@@ -744,10 +764,10 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
         Framebuffer& setLabelInternal(Containers::ArrayView<const char> label);
         #endif
 
-        void MAGNUM_LOCAL renderbufferImplementationDefault(BufferAttachment attachment, Renderbuffer& renderbuffer);
+        void MAGNUM_LOCAL renderbufferImplementationDefault(BufferAttachment attachment, GLuint renderbufferId);
         #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL renderbufferImplementationDSA(BufferAttachment attachment, Renderbuffer& renderbuffer);
-        void MAGNUM_LOCAL renderbufferImplementationDSAEXT(BufferAttachment attachment, Renderbuffer& renderbuffer);
+        void MAGNUM_LOCAL renderbufferImplementationDSA(BufferAttachment attachment, GLuint renderbufferId);
+        void MAGNUM_LOCAL renderbufferImplementationDSAEXT(BufferAttachment attachment, GLuint renderbufferId);
         #endif
 
         #ifndef MAGNUM_TARGET_GLES

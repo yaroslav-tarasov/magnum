@@ -310,8 +310,8 @@ namespace GL {
         #ifdef MAGNUM_TARGET_GLES2
         _extension(GL,EXT,shadow_samplers,          GLES200, GLES300) // #102
         _extension(GL,EXT,texture_rg,               GLES200, GLES300) // #103
+        _extension(GL,EXT,sRGB,                     GLES200, GLES300) // #105
         #endif
-        _extension(GL,EXT,sRGB,                     GLES200,    None) // #105
         _extension(GL,EXT,multisampled_render_to_texture, GLES200, None) // #106
         _extension(GL,EXT,robustness,               GLES200,    None) // #107
         #ifdef MAGNUM_TARGET_GLES2
@@ -323,6 +323,7 @@ namespace GL {
         _extension(GL,EXT,draw_buffers,             GLES200, GLES300) // #151
         #endif
         _extension(GL,EXT,texture_sRGB_decode,      GLES200,    None) // #152
+        _extension(GL,EXT,sRGB_write_control,       GLES200,    None) // #153
         #ifdef MAGNUM_TARGET_GLES2
         _extension(GL,EXT,instanced_arrays,         GLES200, GLES300) // #156
         _extension(GL,EXT,draw_instanced,           GLES200, GLES300) // #157
@@ -356,6 +357,7 @@ namespace GL {
         _extension(GL,NV,shadow_samplers_cube,      GLES200, GLES300) // #147
         #endif
         _extension(GL,NV,texture_border_clamp,      GLES200,    None) // #149
+        _extension(GL,NV,polygon_mode,              GLES200,    None) // #238
     } namespace OES {
         #ifdef MAGNUM_TARGET_GLES2
         _extension(GL,OES,depth24,                  GLES200, GLES300) // #24

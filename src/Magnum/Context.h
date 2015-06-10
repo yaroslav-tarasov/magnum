@@ -195,10 +195,10 @@ class MAGNUM_EXPORT Context {
             IntelWindows = 1 << 1,
             #endif
 
-            #ifdef MAGNUM_TARGET_GLES2
+            #ifdef MAGNUM_TARGET_GLES
             /**
-             * OpenGL ES 2.0 implementation by ANGLE (translated to D3D9), used
-             * by browsers on Windows for Native Client and WebGL. As the WebGL
+             * OpenGL ES implementation by ANGLE (translated to D3D), used by
+             * browsers on Windows for Native Client and WebGL. As the WebGL
              * specification explicitly disallows exposing driver information
              * to the application, this check cannot be done reliably.
              */
@@ -216,15 +216,15 @@ class MAGNUM_EXPORT Context {
         /** @brief Copying is not allowed */
         Context(const Context&) = delete;
 
-        /** @brief Moving is not allowed */
-        Context(Context&&) = delete;
+        /** @brief Move constructor */
+        Context(Context&& other);
 
         ~Context();
 
         /** @brief Copying is not allowed */
         Context& operator=(const Context&) = delete;
 
-        /** @brief Moving is not allowed */
+        /** @brief Move assignment is not allowed */
         Context& operator=(Context&&) = delete;
 
         /** @brief Current context */
@@ -390,7 +390,7 @@ class MAGNUM_EXPORT Context {
          * @endcode
          */
         template<class T> bool isExtensionSupported(Version version) const {
-            return _extensionRequiredVersion[T::Index] <= version && extensionStatus[T::Index];
+            return _extensionRequiredVersion[T::Index] <= version && _extensionStatus[T::Index];
         }
 
         /**
@@ -403,7 +403,7 @@ class MAGNUM_EXPORT Context {
          *      @ref MAGNUM_ASSERT_EXTENSION_SUPPORTED()
          */
         bool isExtensionSupported(const Extension& extension) const {
-            return isVersionSupported(_extensionRequiredVersion[extension._index]) && extensionStatus[extension._index];
+            return isVersionSupported(_extensionRequiredVersion[extension._index]) && _extensionStatus[extension._index];
         }
 
         /**
@@ -468,6 +468,7 @@ class MAGNUM_EXPORT Context {
 
         explicit Context(void functionLoader());
 
+        /* Defined in Implementation/driverSpecific.cpp */
         MAGNUM_LOCAL void setupDriverWorkarounds();
 
         Version _version;
@@ -476,7 +477,7 @@ class MAGNUM_EXPORT Context {
         #endif
 
         std::array<Version, 160> _extensionRequiredVersion;
-        std::bitset<160> extensionStatus;
+        std::bitset<160> _extensionStatus;
         std::vector<Extension> _supportedExtensions;
 
         Implementation::State* _state;

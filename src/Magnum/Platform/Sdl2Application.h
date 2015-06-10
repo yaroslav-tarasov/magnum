@@ -158,7 +158,7 @@ executable.
     <div id="listener">
       <canvas id="module"></canvas>
       <div id="status">Initialization...</div>
-      <div id="statusDescription" />
+      <div id="statusDescription"></div>
       <script src="EmscriptenApplication.js"></script>
       <script async="async" src="<application>.js"></script>
     </div>
@@ -299,8 +299,25 @@ class Sdl2Application {
          * `-1` for late swap tearing. Prints error message and returns `false`
          * if swap interval cannot be set, `true` otherwise. Default is
          * driver-dependent, you can query the value with @ref swapInterval().
+         * @see @ref setMinimalLoopPeriod()
          */
         bool setSwapInterval(Int interval);
+
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        /**
+         * @brief Set minimal loop period
+         *
+         * This setting reduces the main loop frequency in case VSync is
+         * not/cannot be enabled or no drawing is done. Default is `0` (i.e.
+         * looping at maximum frequency).
+         * @note Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten",
+         *      the browser is managing the frequency instead.
+         * @see @ref setSwapInterval()
+         */
+        void setMinimalLoopPeriod(UnsignedInt milliseconds) {
+            _minimalLoopPeriod = milliseconds;
+        }
+        #endif
 
         /**
          * @brief Redraw immediately
@@ -316,6 +333,17 @@ class Sdl2Application {
     #else
     private:
     #endif
+        /**
+         * @brief Tick event
+         *
+         * If implemented, this function is called periodically after
+         * processing all input events and before draw event even though there
+         * might be no input events and redraw is not requested. Useful e.g.
+         * for asynchronous task polling. Use @ref setMinimalLoopPeriod()/
+         * @ref setSwapInterval() to control main loop frequency.
+         */
+        virtual void tickEvent();
+
         /**
          * @brief Viewport event
          *
@@ -411,8 +439,10 @@ class Sdl2Application {
     private:
         enum class Flag: UnsignedByte {
             Redraw = 1 << 0,
+            VSyncEnabled = 1 << 1,
+            NoTickEvent = 1 << 2,
             #ifndef CORRADE_TARGET_EMSCRIPTEN
-            Exit = 1 << 1
+            Exit = 1 << 3
             #endif
         };
 
@@ -430,6 +460,7 @@ class Sdl2Application {
         #ifndef CORRADE_TARGET_EMSCRIPTEN
         SDL_Window* _window;
         SDL_GLContext _glContext;
+        UnsignedInt _minimalLoopPeriod;
         #else
         SDL_Surface* _glContext;
         #endif

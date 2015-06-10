@@ -29,7 +29,30 @@
 #include "Magnum/Math/Complex.h"
 #include "Magnum/Math/Matrix3.h"
 
-namespace Magnum { namespace Math { namespace Test {
+struct Cmpl {
+    float re, im;
+};
+
+namespace Magnum { namespace Math {
+
+namespace Implementation {
+
+template<> struct ComplexConverter<Float, Cmpl> {
+    #if !defined(__GNUC__) || defined(__clang__)
+    constexpr /* See the convert() test case */
+    #endif
+    static Complex<Float> from(const Cmpl& other) {
+        return {other.re, other.im};
+    }
+
+    constexpr static Cmpl to(const Complex<Float>& other) {
+        return {other.real(), other.imaginary()};
+    }
+};
+
+}
+
+namespace Test {
 
 struct ComplexTest: Corrade::TestSuite::Tester {
     explicit ComplexTest();
@@ -38,6 +61,7 @@ struct ComplexTest: Corrade::TestSuite::Tester {
     void constructDefault();
     void constructFromVector();
     void constructCopy();
+    void convert();
 
     void compare();
     void isNormalized();
@@ -69,6 +93,7 @@ ComplexTest::ComplexTest() {
               &ComplexTest::constructDefault,
               &ComplexTest::constructFromVector,
               &ComplexTest::constructCopy,
+              &ComplexTest::convert,
 
               &ComplexTest::compare,
               &ComplexTest::isNormalized,
@@ -141,6 +166,28 @@ void ComplexTest::constructCopy() {
     constexpr Complex a(2.5f, -5.0f);
     constexpr Complex b(a);
     CORRADE_COMPARE(b, Complex(2.5f, -5.0f));
+}
+
+void ComplexTest::convert() {
+    constexpr Cmpl a{1.5f, -3.5f};
+    constexpr Complex b{1.5f, -3.5f};
+
+    /* GCC 5.1 fills the result with zeros instead of properly calling
+       delegated copy constructor if using constexpr. Reported here:
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
+    #if !defined(__GNUC__) || defined(__clang__)
+    constexpr
+    #endif
+    Complex c(a);
+    CORRADE_COMPARE(c, b);
+
+    constexpr Cmpl d(b);
+    CORRADE_COMPARE(d.re, a.re);
+    CORRADE_COMPARE(d.im, a.im);
+
+    /* Implicit conversion is not allowed */
+    CORRADE_VERIFY(!(std::is_convertible<Cmpl, Complex>::value));
+    CORRADE_VERIFY(!(std::is_convertible<Complex, Cmpl>::value));
 }
 
 void ComplexTest::compare() {

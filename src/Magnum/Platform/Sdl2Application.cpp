@@ -62,24 +62,38 @@ void Sdl2Application::staticMainLoop() {
 }
 #endif
 
-Sdl2Application::Sdl2Application(const Arguments&, const Configuration& configuration): _glContext(nullptr), _flags(Flag::Redraw) {
+Sdl2Application::Sdl2Application(const Arguments&, const Configuration& configuration): _glContext(nullptr),
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    _minimalLoopPeriod{0},
+    #endif
+     _flags(Flag::Redraw)
+{
     initialize();
     createContext(configuration);
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Sdl2Application::Sdl2Application(const Arguments&): _glContext(nullptr), _flags(Flag::Redraw) {
+Sdl2Application::Sdl2Application(const Arguments&): _glContext(nullptr),
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    _minimalLoopPeriod{0},
+    #endif
+    _flags(Flag::Redraw)
+{
     initialize();
     createContext();
 }
 #endif
 
 #ifndef CORRADE_GCC45_COMPATIBILITY
-Sdl2Application::Sdl2Application(const Arguments&, std::nullptr_t)
+Sdl2Application::Sdl2Application(const Arguments&, std::nullptr_t):
 #else
-Sdl2Application::Sdl2Application(const Arguments&, void*)
+Sdl2Application::Sdl2Application(const Arguments&, void*):
 #endif
-    : _glContext(nullptr), _flags(Flag::Redraw)
+    _glContext(nullptr),
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    _minimalLoopPeriod{0},
+    #endif
+    _flags(Flag::Redraw)
 {
     initialize();
 }
@@ -236,14 +250,17 @@ Int Sdl2Application::swapInterval() const {
 bool Sdl2Application::setSwapInterval(const Int interval) {
     if(SDL_GL_SetSwapInterval(interval) == -1) {
         Error() << "Platform::Sdl2Application::setSwapInterval(): cannot set swap interval:" << SDL_GetError();
+        _flags &= ~Flag::VSyncEnabled;
         return false;
     }
 
     if(SDL_GL_GetSwapInterval() != interval) {
         Error() << "Platform::Sdl2Application::setSwapInterval(): swap interval setting ignored by the driver";
+        _flags &= ~Flag::VSyncEnabled;
         return false;
     }
 
+    _flags |= Flag::VSyncEnabled;
     return true;
 }
 
@@ -279,8 +296,11 @@ void Sdl2Application::exit() {
 }
 
 void Sdl2Application::mainLoop() {
-    SDL_Event event;
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    const UnsignedInt timeBefore = _minimalLoopPeriod ? SDL_GetTicks() : 0;
+    #endif
 
+    SDL_Event event;
     while(SDL_PollEvent(&event)) {
         switch(event.type) {
             case SDL_WINDOWEVENT:
@@ -328,14 +348,37 @@ void Sdl2Application::mainLoop() {
         }
     }
 
+    /* Tick event */
+    if(!(_flags & Flag::NoTickEvent)) tickEvent();
+
+    /* Draw event */
     if(_flags & Flag::Redraw) {
         _flags &= ~Flag::Redraw;
         drawEvent();
+
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        /* If VSync is not enabled, delay to prevent CPU hogging (if set) */
+        if(!(_flags & Flag::VSyncEnabled) && _minimalLoopPeriod) {
+            const UnsignedInt loopTime = SDL_GetTicks() - timeBefore;
+            if(loopTime < _minimalLoopPeriod)
+                SDL_Delay(_minimalLoopPeriod - loopTime);
+        }
+        #endif
+
         return;
     }
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
-    SDL_WaitEvent(nullptr);
+    /* If not drawing anything, delay to prevent CPU hogging (if set) */
+    if(_minimalLoopPeriod) {
+        const UnsignedInt loopTime = SDL_GetTicks() - timeBefore;
+        if(loopTime < _minimalLoopPeriod)
+            SDL_Delay(_minimalLoopPeriod - loopTime);
+    }
+
+    /* Then, if the tick event doesn't need to be called periodically, wait
+       indefinitely for next input event */
+    if(_flags & Flag::NoTickEvent) SDL_WaitEvent(nullptr);
     #endif
 }
 
@@ -348,6 +391,12 @@ void Sdl2Application::setMouseLocked(bool enabled) {
     CORRADE_ASSERT(false, "Sdl2Application::setMouseLocked(): not implemented", );
     static_cast<void>(enabled);
     #endif
+}
+
+void Sdl2Application::tickEvent() {
+    /* If this got called, the tick event is not implemented by user and thus
+       we don't need to call it ever again */
+    _flags |= Flag::NoTickEvent;
 }
 
 void Sdl2Application::viewportEvent(const Vector2i&) {}

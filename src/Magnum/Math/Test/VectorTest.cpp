@@ -37,8 +37,11 @@ namespace Magnum { namespace Math {
 
 namespace Implementation {
 
-template<> struct VectorConverter<3, float, Vec3> {
-    constexpr static Vector<3, Float> from(const Vec3& other) {
+template<> struct VectorConverter<3, Float, Vec3> {
+    #if !defined(__GNUC__) || defined(__clang__)
+    constexpr /* See the convert() test case */
+    #endif
+    static Vector<3, Float> from(const Vec3& other) {
         return {other.x, other.y, other.z};
     }
 
@@ -62,11 +65,11 @@ struct VectorTest: Corrade::TestSuite::Tester {
     void constructOneComponent();
     void constructConversion();
     void constructCopy();
+    void convert();
 
     void isZero();
     void isNormalized();
 
-    void convert();
     void data();
 
     void negative();
@@ -118,11 +121,11 @@ VectorTest::VectorTest() {
               &VectorTest::constructOneComponent,
               &VectorTest::constructConversion,
               &VectorTest::constructCopy,
+              &VectorTest::convert,
 
               &VectorTest::isZero,
               &VectorTest::isNormalized,
 
-              &VectorTest::convert,
               &VectorTest::data,
 
               &VectorTest::negative,
@@ -226,24 +229,17 @@ void VectorTest::constructCopy() {
     CORRADE_COMPARE(b, Vector4(1.0f, 3.5f, 4.0f, -2.7f));
 }
 
-void VectorTest::isZero() {
-    CORRADE_VERIFY(!Vector3(0.01f, 0.0f, 0.0f).isZero());
-    CORRADE_VERIFY(Vector3(0.0f, 0.0f, 0.0f).isZero());
-}
-
-void VectorTest::isNormalized() {
-    CORRADE_VERIFY(!Vector3(1.0f, 2.0f, -1.0f).isNormalized());
-    CORRADE_VERIFY(Vector3(0.0f, 1.0f, 0.0f).isNormalized());
-}
-
 void VectorTest::convert() {
     constexpr Vec3 a{1.5f, 2.0f, -3.5f};
     constexpr Vector3 b(1.5f, 2.0f, -3.5f);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    /* GCC 5.1 fills the result with zeros instead of properly calling
+       delegated copy constructor if using constexpr. Reported here:
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    constexpr  /* Not constexpr under GCC < 4.7 */
     #endif
-    Vector3 c(b);
+    Vector3 c{a};
     CORRADE_COMPARE(c, b);
 
     #ifndef CORRADE_GCC46_COMPATIBILITY
@@ -262,6 +258,16 @@ void VectorTest::convert() {
         #endif
         CORRADE_VERIFY(!(std::is_convertible<Vector3, Vec3>::value));
     }
+}
+
+void VectorTest::isZero() {
+    CORRADE_VERIFY(!Vector3(0.01f, 0.0f, 0.0f).isZero());
+    CORRADE_VERIFY(Vector3(0.0f, 0.0f, 0.0f).isZero());
+}
+
+void VectorTest::isNormalized() {
+    CORRADE_VERIFY(!Vector3(1.0f, 2.0f, -1.0f).isNormalized());
+    CORRADE_VERIFY(Vector3(0.0f, 1.0f, 0.0f).isNormalized());
 }
 
 void VectorTest::data() {

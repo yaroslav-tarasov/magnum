@@ -252,8 +252,8 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,EXT,debug_marker),
         _extension(GL,EXT,disjoint_timer_query),
         _extension(GL,EXT,texture_sRGB_decode),
+        _extension(GL,EXT,sRGB_write_control),
         _extension(GL,EXT,separate_shader_objects),
-        _extension(GL,EXT,sRGB),
         _extension(GL,EXT,multisampled_render_to_texture),
         _extension(GL,EXT,robustness),
         _extension(GL,KHR,texture_compression_astc_ldr),
@@ -267,6 +267,7 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,NV,read_stencil),
         _extension(GL,NV,read_depth_stencil),
         _extension(GL,NV,texture_border_clamp),
+        _extension(GL,NV,polygon_mode),
         _extension(GL,OES,depth32),
         _extension(GL,OES,mapbuffer),
         _extension(GL,OES,stencil1),
@@ -287,6 +288,7 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,EXT,occlusion_query_boolean),
         _extension(GL,EXT,shadow_samplers),
         _extension(GL,EXT,texture_rg),
+        _extension(GL,EXT,sRGB),
         _extension(GL,EXT,texture_storage),
         _extension(GL,EXT,map_buffer_range),
         _extension(GL,EXT,draw_buffers),
@@ -404,9 +406,12 @@ Context::Context(void functionLoader()) {
         #ifndef MAGNUM_TARGET_GLES
         if(version.compare(0, 3, "2.1") == 0)
         #elif defined(MAGNUM_TARGET_WEBGL)
-        if(version.find("WebGL 1") != std::string::npos)
+        /* Internet Explorer currently has 0.94 */
+        if(version.find("WebGL 1") != std::string::npos ||
+           version.find("WebGL 0") != std::string::npos)
         #else
         if(version.find("OpenGL ES 2.0") != std::string::npos ||
+           /* It is possible to use Magnum compiled for ES2 on ES3 contexts */
            version.find("OpenGL ES 3.") != std::string::npos)
         #endif
         {
@@ -490,7 +495,7 @@ Context::Context(void functionLoader()) {
     /* Mark all extensions from past versions as supported */
     for(std::size_t i = 0; i != future; ++i)
         for(auto it = Extension::extensions(versions[i]).begin(); it != Extension::extensions(versions[i]).end(); ++it)
-            extensionStatus.set(it->_index);
+            _extensionStatus.set(it->_index);
 
     /* List of extensions from future versions (extensions from current and
        previous versions should be supported automatically, so we don't need
@@ -512,7 +517,7 @@ Context::Context(void functionLoader()) {
         const auto found = futureExtensions.find(*it);
         if(found != futureExtensions.end()) {
             _supportedExtensions.push_back(found->second);
-            extensionStatus.set(found->second._index);
+            _extensionStatus.set(found->second._index);
         }
     }
 
@@ -545,10 +550,24 @@ Context::Context(void functionLoader()) {
     Renderer::initializeContextBasedFunctionality();
 }
 
+Context::Context(Context&& other): _version{std::move(other._version)},
+    #ifndef MAGNUM_TARGET_WEBGL
+    _flags{std::move(other._flags)},
+    #endif
+    _extensionRequiredVersion(std::move(other._extensionRequiredVersion)),
+    _extensionStatus{std::move(other._extensionStatus)},
+    _supportedExtensions{std::move(other._supportedExtensions)},
+    _state{std::move(other._state)},
+    _detectedDrivers{std::move(other._detectedDrivers)}
+{
+    other._state = nullptr;
+    if(_current == &other) _current = this;
+}
+
 Context::~Context() {
-    CORRADE_ASSERT(_current == this, "Context: Cannot destroy context which is not currently active", );
     delete _state;
-    _current = nullptr;
+
+    if(_current == this) _current = nullptr;
 }
 
 std::vector<std::string> Context::shadingLanguageVersionStrings() const {

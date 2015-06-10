@@ -302,6 +302,7 @@ Extension                                   | Status
 @es_extension{EXT,occlusion_query_boolean}  | done
 @es_extension{EXT,shadow_samplers}          | done
 @es_extension{EXT,texture_rg}               | done
+@es_extension{EXT,sRGB}                     | done
 @es_extension{EXT,texture_storage}          | done
 @es_extension{EXT,map_buffer_range}         | done
 @es_extension{EXT,draw_buffers}             | done
@@ -350,11 +351,11 @@ Extension                                   | Status
 @es_extension{EXT,debug_label}              | see above
 @es_extension{EXT,debug_marker}             | done
 @es_extension{EXT,separate_shader_objects}  | only direct uniform binding
-@es_extension{EXT,sRGB}                     | done
 @es_extension{EXT,multisampled_render_to_texture} | only renderbuffer storage
 @es_extension{EXT,robustness}               | done
 @es_extension{EXT,disjoint_timer_query}     | only time elapsed query
 @es_extension{EXT,texture_sRGB_decode}      | done
+@es_extension{EXT,sRGB_write_control}       | done
 @es_extension{EXT,shader_integer_mix}       | done (shading language only)
 @extension3{KHR,texture_compression_astc_ldr,texture_compression_astc_hdr} | |
 @extension{KHR,texture_compression_astc_hdr} | |
@@ -367,6 +368,7 @@ Extension                                   | Status
 @es_extension2{NV,read_stencil,NV_read_depth_stencil} | done
 @es_extension{NV,read_depth_stencil}        | done
 @es_extension{NV,texture_border_clamp}      | done
+@es_extension{NV,polygon_mode}              | done
 @es_extension{OES,depth32}                  | done
 @es_extension{OES,mapbuffer}                | done
 @es_extension{OES,stencil1}                 | done

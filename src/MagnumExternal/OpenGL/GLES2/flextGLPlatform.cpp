@@ -52,6 +52,8 @@ void flextGLInit() {
 
     /* GL_EXT_texture_rg */
 
+    /* GL_EXT_sRGB */
+
     /* GL_EXT_texture_storage */
     flextglTexStorage1DEXT = reinterpret_cast<void(APIENTRY*)(GLenum, GLsizei, GLenum, GLsizei)>(loader.load("glTexStorage1DEXT"));
     flextglTexStorage2DEXT = reinterpret_cast<void(APIENTRY*)(GLenum, GLsizei, GLenum, GLsizei, GLsizei)>(loader.load("glTexStorage2DEXT"));
@@ -168,6 +170,8 @@ void flextGLInit() {
 
     /* GL_EXT_texture_sRGB_decode */
 
+    /* GL_EXT_sRGB_write_control */
+
     /* GL_EXT_separate_shader_objects */
     flextglUseShaderProgramEXT = reinterpret_cast<void(APIENTRY*)(GLenum, GLuint)>(loader.load("glUseShaderProgramEXT"));
     flextglActiveProgramEXT = reinterpret_cast<void(APIENTRY*)(GLuint)>(loader.load("glActiveProgramEXT"));
@@ -217,8 +221,6 @@ void flextGLInit() {
     flextglProgramUniformMatrix3x4fvEXT = reinterpret_cast<void(APIENTRY*)(GLuint, GLint, GLsizei, GLboolean, const GLfloat *)>(loader.load("glProgramUniformMatrix3x4fvEXT"));
     flextglProgramUniformMatrix4x3fvEXT = reinterpret_cast<void(APIENTRY*)(GLuint, GLint, GLsizei, GLboolean, const GLfloat *)>(loader.load("glProgramUniformMatrix4x3fvEXT"));
 
-    /* GL_EXT_sRGB */
-
     /* GL_EXT_multisampled_render_to_texture */
     flextglRenderbufferStorageMultisampleEXT = reinterpret_cast<void(APIENTRY*)(GLenum, GLsizei, GLenum, GLsizei, GLsizei)>(loader.load("glRenderbufferStorageMultisampleEXT"));
     flextglFramebufferTexture2DMultisampleEXT = reinterpret_cast<void(APIENTRY*)(GLenum, GLenum, GLenum, GLuint, GLint, GLsizei)>(loader.load("glFramebufferTexture2DMultisampleEXT"));
@@ -262,6 +264,9 @@ void flextGLInit() {
     /* GL_NV_read_depth_stencil */
 
     /* GL_NV_texture_border_clamp */
+
+    /* GL_NV_polygon_mode */
+    flextglPolygonModeNV = reinterpret_cast<void(APIENTRY*)(GLenum, GLenum)>(loader.load("glPolygonModeNV"));
 
     /* GL_OES_depth32 */
 

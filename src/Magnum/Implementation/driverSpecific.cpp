@@ -25,8 +25,77 @@
 
 #include "Magnum/Context.h"
 #include "Magnum/Extensions.h"
+#include "Magnum/Math/Range.h"
 
 namespace Magnum {
+
+namespace Implementation {
+
+/* Used in Shader.cpp (duh) */
+bool isShaderCompilationLogEmpty(const std::string&);
+bool isShaderCompilationLogEmpty(const std::string& result) {
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Intel Windows drivers are too chatty */
+    if((Context::current()->detectedDriver() & Context::DetectedDriver::IntelWindows) && result == "No errors.\n")
+        return true;
+    #else
+    static_cast<void>(result);
+    #endif
+
+    return false;
+}
+
+/* Used in AbstractShaderProgram.cpp (duh) */
+bool isProgramLinkLogEmpty(const std::string&);
+bool isProgramLinkLogEmpty(const std::string& result) {
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Intel Windows drivers are too chatty */
+    if((Context::current()->detectedDriver() & Context::DetectedDriver::IntelWindows) && result == "No errors.\n")
+        return true;
+    #else
+    static_cast<void>(result);
+    #endif
+
+    return false;
+}
+
+}
+
+auto Context::detectedDriver() -> DetectedDrivers {
+    if(_detectedDrivers) return *_detectedDrivers;
+
+    _detectedDrivers = DetectedDrivers{};
+
+    const std::string vendor = vendorString();
+
+    #ifndef MAGNUM_TARGET_GLES
+    /* AMD binary desktop drivers */
+    if(vendor.find("ATI Technologies Inc.") != std::string::npos)
+        return *_detectedDrivers |= DetectedDriver::AMD;
+
+    #ifdef CORRADE_TARGET_WINDOWS
+    /* Intel Windows drivers */
+    if(vendor.find("Intel") != std::string::npos)
+        return *_detectedDrivers |= DetectedDriver::IntelWindows;
+    #endif
+    #endif
+
+    /** @todo there is also D3D9/D3D11 distinction on webglreport.com, is it useful? */
+    #ifdef MAGNUM_TARGET_GLES
+    /* OpenGL ES implementation using ANGLE. Taken from these sources:
+       http://stackoverflow.com/a/20149090
+       http://webglreport.com
+    */
+    {
+        Range1Di range;
+        glGetIntegerv(GL_ALIASED_LINE_WIDTH_RANGE, range.data());
+        if(range.min() == 1 && range.max() == 1 && vendor != "Internet Explorer")
+            return *_detectedDrivers |= DetectedDriver::ProbablyAngle;
+    }
+    #endif
+
+    return *_detectedDrivers;
+}
 
 void Context::setupDriverWorkarounds() {
     #define _setRequiredVersion(extension, version)                           \

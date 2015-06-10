@@ -82,6 +82,7 @@ struct FramebufferGLTest: AbstractOpenGLTester {
     #ifndef MAGNUM_TARGET_GLES
     void attachCubeMapTextureArray();
     #endif
+    void detach();
 
     void multipleColorOutputs();
 
@@ -133,6 +134,7 @@ FramebufferGLTest::FramebufferGLTest() {
               #ifndef MAGNUM_TARGET_GLES
               &FramebufferGLTest::attachCubeMapTextureArray,
               #endif
+              &FramebufferGLTest::detach,
 
               &FramebufferGLTest::multipleColorOutputs,
 
@@ -637,6 +639,20 @@ void FramebufferGLTest::attachCubeMapTextureArray() {
 }
 #endif
 
+void FramebufferGLTest::detach() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::framebuffer_object>())
+        CORRADE_SKIP(Extensions::GL::ARB::framebuffer_object::string() + std::string(" is not available."));
+    #endif
+
+    Framebuffer framebuffer({{}, Vector2i(128)});
+    framebuffer.detach(Framebuffer::ColorAttachment(0))
+               .detach(Framebuffer::BufferAttachment::Depth)
+               .detach(Framebuffer::BufferAttachment::Stencil);
+
+    MAGNUM_VERIFY_NO_ERROR();
+}
+
 void FramebufferGLTest::multipleColorOutputs() {
     #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::framebuffer_object>())
@@ -687,6 +703,11 @@ void FramebufferGLTest::multipleColorOutputs() {
 }
 
 void FramebufferGLTest::clear() {
+    #ifndef MAGNUM_TARGET_GLES
+    if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::framebuffer_object>())
+        CORRADE_SKIP(Extensions::GL::ARB::framebuffer_object::string() + std::string(" is not available."));
+    #endif
+
     Renderbuffer color;
     #ifndef MAGNUM_TARGET_GLES2
     color.setStorage(RenderbufferFormat::RGBA8, Vector2i(128));
