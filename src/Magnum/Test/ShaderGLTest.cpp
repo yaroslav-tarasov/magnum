@@ -50,7 +50,7 @@ struct ShaderGLTest: AbstractOpenGLTester {
 };
 
 ShaderGLTest::ShaderGLTest() {
-    addTests({&ShaderGLTest::construct,
+    addTests<ShaderGLTest>({&ShaderGLTest::construct,
               &ShaderGLTest::constructNoVersion,
               &ShaderGLTest::constructCopy,
               &ShaderGLTest::constructMove,

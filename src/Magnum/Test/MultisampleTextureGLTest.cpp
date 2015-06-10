@@ -67,7 +67,7 @@ struct MultisampleTextureGLTest: AbstractOpenGLTester {
 };
 
 MultisampleTextureGLTest::MultisampleTextureGLTest() {
-    addTests({&MultisampleTextureGLTest::construct2D,
+    addTests<MultisampleTextureGLTest>({&MultisampleTextureGLTest::construct2D,
               #ifndef MAGNUM_TARGET_GLES
               &MultisampleTextureGLTest::construct2DArray,
               #endif

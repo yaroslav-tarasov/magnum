@@ -41,7 +41,7 @@ struct RendererGLTest: Magnum::Test::AbstractOpenGLTester {
 };
 
 RendererGLTest::RendererGLTest() {
-    addTests({&RendererGLTest::renderData,
+    addTests<RendererGLTest>({&RendererGLTest::renderData,
               &RendererGLTest::renderMesh,
               &RendererGLTest::renderMeshIndexType,
               &RendererGLTest::mutableText,

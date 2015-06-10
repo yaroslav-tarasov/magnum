@@ -49,7 +49,7 @@ struct PrimitiveQueryGLTest: AbstractOpenGLTester {
 };
 
 PrimitiveQueryGLTest::PrimitiveQueryGLTest() {
-    addTests({&PrimitiveQueryGLTest::wrap,
+    addTests<PrimitiveQueryGLTest>({&PrimitiveQueryGLTest::wrap,
 
               #ifndef MAGNUM_TARGET_GLES
               &PrimitiveQueryGLTest::primitivesGenerated,

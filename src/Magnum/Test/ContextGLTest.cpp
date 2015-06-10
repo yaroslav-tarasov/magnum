@@ -39,7 +39,7 @@ struct ContextGLTest: AbstractOpenGLTester {
 };
 
 ContextGLTest::ContextGLTest() {
-    addTests({&ContextGLTest::isVersionSupported,
+    addTests<ContextGLTest>({&ContextGLTest::isVersionSupported,
               &ContextGLTest::supportedVersion,
               &ContextGLTest::isExtensionSupported,
               &ContextGLTest::isExtensionDisabled});

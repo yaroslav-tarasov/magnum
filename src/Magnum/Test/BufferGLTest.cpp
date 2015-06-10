@@ -63,7 +63,7 @@ struct BufferGLTest: AbstractOpenGLTester {
 };
 
 BufferGLTest::BufferGLTest() {
-    addTests({&BufferGLTest::construct,
+    addTests<BufferGLTest>({&BufferGLTest::construct,
               &BufferGLTest::constructCopy,
               &BufferGLTest::constructMove,
               &BufferGLTest::wrap,

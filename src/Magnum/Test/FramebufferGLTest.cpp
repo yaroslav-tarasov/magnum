@@ -104,7 +104,7 @@ struct FramebufferGLTest: AbstractOpenGLTester {
 };
 
 FramebufferGLTest::FramebufferGLTest() {
-    addTests({&FramebufferGLTest::construct,
+    addTests<FramebufferGLTest>({&FramebufferGLTest::construct,
               &FramebufferGLTest::constructCopy,
               &FramebufferGLTest::constructMove,
               &FramebufferGLTest::wrap,

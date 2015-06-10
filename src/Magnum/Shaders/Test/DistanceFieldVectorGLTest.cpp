@@ -36,7 +36,7 @@ struct DistanceFieldVectorGLTest: Magnum::Test::AbstractOpenGLTester {
 };
 
 DistanceFieldVectorGLTest::DistanceFieldVectorGLTest() {
-    addTests({&DistanceFieldVectorGLTest::compile2D,
+    addTests<DistanceFieldVectorGLTest>({&DistanceFieldVectorGLTest::compile2D,
               &DistanceFieldVectorGLTest::compile3D});
 }
 

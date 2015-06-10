@@ -39,7 +39,7 @@ struct MeshVisualizerGLTest: Magnum::Test::AbstractOpenGLTester {
 };
 
 MeshVisualizerGLTest::MeshVisualizerGLTest() {
-    addTests({&MeshVisualizerGLTest::compile,
+    addTests<MeshVisualizerGLTest>({&MeshVisualizerGLTest::compile,
               &MeshVisualizerGLTest::compileWireframeGeometryShader,
               &MeshVisualizerGLTest::compileWireframeNoGeometryShader});
 }

@@ -49,7 +49,7 @@ class MagnumFontConverterGLTest: public Magnum::Test::AbstractOpenGLTester {
 };
 
 MagnumFontConverterGLTest::MagnumFontConverterGLTest() {
-    addTests({&MagnumFontConverterGLTest::exportFont});
+    addTests<MagnumFontConverterGLTest>({&MagnumFontConverterGLTest::exportFont});
 }
 
 void MagnumFontConverterGLTest::exportFont() {

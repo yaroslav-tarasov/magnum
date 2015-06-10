@@ -47,7 +47,7 @@ struct RenderbufferGLTest: AbstractOpenGLTester {
 };
 
 RenderbufferGLTest::RenderbufferGLTest() {
-    addTests({&RenderbufferGLTest::construct,
+    addTests<RenderbufferGLTest>({&RenderbufferGLTest::construct,
               &RenderbufferGLTest::constructCopy,
               &RenderbufferGLTest::constructMove,
               &RenderbufferGLTest::wrap,

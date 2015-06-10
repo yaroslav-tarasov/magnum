@@ -36,7 +36,7 @@ struct VertexColorGLTest: Magnum::Test::AbstractOpenGLTester {
 };
 
 VertexColorGLTest::VertexColorGLTest() {
-    addTests({&VertexColorGLTest::compile2D,
+    addTests<VertexColorGLTest>({&VertexColorGLTest::compile2D,
               &VertexColorGLTest::compile3D});
 }
 

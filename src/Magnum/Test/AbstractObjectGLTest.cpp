@@ -37,7 +37,7 @@ struct AbstractObjectGLTest: AbstractOpenGLTester {
 };
 
 AbstractObjectGLTest::AbstractObjectGLTest() {
-    addTests({&AbstractObjectGLTest::labelNoOp});
+    addTests<AbstractObjectGLTest>({&AbstractObjectGLTest::labelNoOp});
 }
 
 void AbstractObjectGLTest::labelNoOp() {

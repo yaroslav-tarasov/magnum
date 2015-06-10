@@ -39,7 +39,7 @@ struct GlyphCacheGLTest: Magnum::Test::AbstractOpenGLTester {
 };
 
 GlyphCacheGLTest::GlyphCacheGLTest() {
-    addTests({&GlyphCacheGLTest::initialize,
+    addTests<GlyphCacheGLTest>({&GlyphCacheGLTest::initialize,
               &GlyphCacheGLTest::access,
               &GlyphCacheGLTest::reserve});
 }

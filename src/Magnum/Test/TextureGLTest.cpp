@@ -162,7 +162,7 @@ struct TextureGLTest: AbstractOpenGLTester {
 };
 
 TextureGLTest::TextureGLTest() {
-    addTests({
+    addTests<TextureGLTest>({
         #ifndef MAGNUM_TARGET_GLES
         &TextureGLTest::construct1D,
         #endif

@@ -38,7 +38,7 @@ struct FlatGLTest: Magnum::Test::AbstractOpenGLTester {
 };
 
 FlatGLTest::FlatGLTest() {
-    addTests({&FlatGLTest::compile2D,
+    addTests<FlatGLTest>({&FlatGLTest::compile2D,
               &FlatGLTest::compile3D,
               &FlatGLTest::compile2DTextured,
               &FlatGLTest::compile3DTextured});

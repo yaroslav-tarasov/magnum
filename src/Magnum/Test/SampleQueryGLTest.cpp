@@ -50,7 +50,7 @@ struct SampleQueryGLTest: AbstractOpenGLTester {
 };
 
 SampleQueryGLTest::SampleQueryGLTest() {
-    addTests({&SampleQueryGLTest::wrap,
+    addTests<SampleQueryGLTest>({&SampleQueryGLTest::wrap,
 
               &SampleQueryGLTest::querySamplesPassed,
               #ifndef MAGNUM_TARGET_GLES

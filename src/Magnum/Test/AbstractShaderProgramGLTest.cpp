@@ -59,7 +59,7 @@ struct AbstractShaderProgramGLTest: AbstractOpenGLTester {
 };
 
 AbstractShaderProgramGLTest::AbstractShaderProgramGLTest() {
-    addTests({&AbstractShaderProgramGLTest::construct,
+    addTests<AbstractShaderProgramGLTest>({&AbstractShaderProgramGLTest::construct,
               &AbstractShaderProgramGLTest::constructCopy,
               &AbstractShaderProgramGLTest::constructMove,
 

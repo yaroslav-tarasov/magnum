@@ -42,7 +42,7 @@ struct PhongGLTest: Magnum::Test::AbstractOpenGLTester {
 };
 
 PhongGLTest::PhongGLTest() {
-    addTests({&PhongGLTest::compile,
+    addTests<PhongGLTest>({&PhongGLTest::compile,
               &PhongGLTest::compileAmbientTexture,
               &PhongGLTest::compileDiffuseTexture,
               &PhongGLTest::compileSpecularTexture,

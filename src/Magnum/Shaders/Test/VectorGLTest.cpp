@@ -36,7 +36,7 @@ struct VectorGLTest: Magnum::Test::AbstractOpenGLTester {
 };
 
 VectorGLTest::VectorGLTest() {
-    addTests({&VectorGLTest::compile2D,
+    addTests<VectorGLTest>({&VectorGLTest::compile2D,
               &VectorGLTest::compile3D});
 }
 

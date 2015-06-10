@@ -39,7 +39,7 @@ struct AbstractQueryGLTest: AbstractOpenGLTester {
 };
 
 AbstractQueryGLTest::AbstractQueryGLTest() {
-    addTests({&AbstractQueryGLTest::construct,
+    addTests<AbstractQueryGLTest>({&AbstractQueryGLTest::construct,
               &AbstractQueryGLTest::constructCopy,
               &AbstractQueryGLTest::constructMove,
 

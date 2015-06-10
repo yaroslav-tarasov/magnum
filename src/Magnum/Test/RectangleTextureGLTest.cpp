@@ -66,7 +66,7 @@ struct RectangleTextureGLTest: AbstractOpenGLTester {
 };
 
 RectangleTextureGLTest::RectangleTextureGLTest() {
-    addTests({&RectangleTextureGLTest::construct,
+    addTests<RectangleTextureGLTest>({&RectangleTextureGLTest::construct,
               &RectangleTextureGLTest::wrap,
 
               &RectangleTextureGLTest::bind,

@@ -41,7 +41,7 @@ struct AbstractTextureGLTest: AbstractOpenGLTester {
 };
 
 AbstractTextureGLTest::AbstractTextureGLTest() {
-    addTests({&AbstractTextureGLTest::construct,
+    addTests<AbstractTextureGLTest>({&AbstractTextureGLTest::construct,
               &AbstractTextureGLTest::constructCopy,
               &AbstractTextureGLTest::constructMove,
 

@@ -89,7 +89,7 @@ struct CubeMapTextureGLTest: AbstractOpenGLTester {
 };
 
 CubeMapTextureGLTest::CubeMapTextureGLTest() {
-    addTests({&CubeMapTextureGLTest::construct,
+    addTests<CubeMapTextureGLTest>({&CubeMapTextureGLTest::construct,
               &CubeMapTextureGLTest::wrap,
 
               &CubeMapTextureGLTest::bind,

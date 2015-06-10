@@ -54,7 +54,7 @@ struct TransformFeedbackGLTest: AbstractOpenGLTester {
 };
 
 TransformFeedbackGLTest::TransformFeedbackGLTest() {
-    addTests({&TransformFeedbackGLTest::construct,
+    addTests<TransformFeedbackGLTest>({&TransformFeedbackGLTest::construct,
               &TransformFeedbackGLTest::constructCopy,
               &TransformFeedbackGLTest::constructMove,
               &TransformFeedbackGLTest::wrap,

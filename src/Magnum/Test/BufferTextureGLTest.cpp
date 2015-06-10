@@ -43,7 +43,7 @@ struct BufferTextureGLTest: AbstractOpenGLTester {
 };
 
 BufferTextureGLTest::BufferTextureGLTest() {
-    addTests({&BufferTextureGLTest::construct,
+    addTests<BufferTextureGLTest>({&BufferTextureGLTest::construct,
               &BufferTextureGLTest::wrap,
 
               &BufferTextureGLTest::bind,

@@ -38,7 +38,7 @@ struct TimeQueryGLTest: AbstractOpenGLTester {
 };
 
 TimeQueryGLTest::TimeQueryGLTest() {
-    addTests({&TimeQueryGLTest::wrap,
+    addTests<TimeQueryGLTest>({&TimeQueryGLTest::wrap,
 
               &TimeQueryGLTest::queryTime,
               &TimeQueryGLTest::queryTimestamp});

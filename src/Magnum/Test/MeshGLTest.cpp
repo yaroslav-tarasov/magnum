@@ -137,7 +137,7 @@ struct MeshGLTest: AbstractOpenGLTester {
 };
 
 MeshGLTest::MeshGLTest() {
-    addTests({&MeshGLTest::construct,
+    addTests<MeshGLTest>({&MeshGLTest::construct,
               &MeshGLTest::constructCopy,
               &MeshGLTest::constructMove,
               &MeshGLTest::wrap,

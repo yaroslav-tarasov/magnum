@@ -43,7 +43,7 @@ class MagnumFontGLTest: public Magnum::Test::AbstractOpenGLTester {
 };
 
 MagnumFontGLTest::MagnumFontGLTest() {
-    addTests({&MagnumFontGLTest::properties,
+    addTests<MagnumFontGLTest>({&MagnumFontGLTest::properties,
               &MagnumFontGLTest::layout,
               &MagnumFontGLTest::createGlyphCache});
 }

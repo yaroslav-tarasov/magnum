@@ -42,7 +42,7 @@ struct BufferImageGLTest: AbstractOpenGLTester {
 };
 
 BufferImageGLTest::BufferImageGLTest() {
-    addTests({&BufferImageGLTest::construct,
+    addTests<BufferImageGLTest>({&BufferImageGLTest::construct,
               &BufferImageGLTest::constructCopy,
               &BufferImageGLTest::constructMove,
 
