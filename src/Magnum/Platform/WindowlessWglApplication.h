@@ -95,9 +95,8 @@ class WindowlessWglApplication {
     public:
         /** @brief Application arguments */
         struct Arguments {
-            #ifdef CORRADE_MSVC2013_COMPATIBILITY
-            constexpr /*implicit*/ Arguments(int& argc, char** argv, HWND window) noexcept: argc{argc}, argv{argv}, window{window} {}
-            #endif
+            /** @brief Constructor */
+            /*implicit*/ constexpr Arguments(int& argc, char** argv, HWND window) noexcept: argc{argc}, argv{argv}, window{window} {}
 
             int& argc;      /**< @brief Argument count */
             char** argv;    /**< @brief Argument values */
@@ -199,9 +198,8 @@ windowless application header is included this macro is also aliased to
             case WM_CREATE:                                                 \
                 {                                                           \
                     className app({globalArgc, globalArgv, hWnd});          \
-                    app.exec();                                             \
+                    PostQuitMessage(app.exec());                            \
                 }                                                           \
-                PostQuitMessage(0);                                         \
                 break;                                                      \
             default: return DefWindowProc(hWnd, message, wParam, lParam);   \
         }                                                                   \

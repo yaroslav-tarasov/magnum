@@ -30,7 +30,9 @@ set(MagnumFontConverter_HEADERS
     MagnumFontConverter.h)
 
 # Objects shared between plugin and test library
-add_library(MagnumFontConverterObjects OBJECT ${MagnumFontConverter_SRCS})
+add_library(MagnumFontConverterObjects OBJECT
+    ${MagnumFontConverter_SRCS}
+    ${MagnumFontConverter_HEADERS})
 if(NOT BUILD_PLUGINS_STATIC OR BUILD_STATIC_PIC)
     set_target_properties(MagnumFontConverterObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
@@ -52,7 +54,19 @@ endif()
 install(FILES ${MagnumFontConverter_HEADERS} DESTINATION ${MAGNUM_PLUGINS_INCLUDE_INSTALL_DIR}/MagnumFontConverter)
 
 if(BUILD_GL_TESTS)
-    add_library(MagnumMagnumFontConverterTestLib STATIC $<TARGET_OBJECTS:MagnumFontConverterObjects>)
+    # On Win32 we need to avoid dllimporting TgaImageConverter symbols, because
+    # it would search for the symbols in some DLL even when they were linked
+    # statically. However it apparently doesn't matter that they were
+    # dllexported when building the static library. EH.
+    if(WIN32)
+        add_library(MagnumMagnumFontConverterTestLib STATIC
+            ${MagnumFontConverter_SRCS}
+            ${MagnumFontConverter_HEADERS})
+        set_target_properties(MagnumMagnumFontConverterTestLib PROPERTIES COMPILE_FLAGS "-DMAGNUM_TGAIMAGECONVERTER_BUILD_STATIC")
+    else()
+        add_library(MagnumMagnumFontConverterTestLib STATIC $<TARGET_OBJECTS:MagnumFontConverterObjects>)
+    endif()
     target_link_libraries(MagnumMagnumFontConverterTestLib Magnum MagnumText MagnumTgaImageConverterTestLib)
+
     add_subdirectory(Test)
 endif()

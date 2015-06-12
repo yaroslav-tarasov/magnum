@@ -115,4 +115,4 @@ void MagnumFontGLTest::createGlyphCache() {
 
 }}}
 
-CORRADE_TEST_MAIN(Magnum::Text::Test::MagnumFontGLTest)
+MAGNUM_GL_TEST_MAIN(Magnum::Text::Test::MagnumFontGLTest)

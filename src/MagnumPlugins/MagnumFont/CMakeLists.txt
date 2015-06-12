@@ -30,7 +30,9 @@ set(MagnumFont_HEADERS
     MagnumFont.h)
 
 # Objects shared between plugin and test library
-add_library(MagnumFontObjects OBJECT ${MagnumFont_SRCS})
+add_library(MagnumFontObjects OBJECT
+    ${MagnumFont_SRCS}
+    ${MagnumFont_HEADERS})
 if(NOT BUILD_PLUGINS_STATIC OR BUILD_STATIC_PIC)
     set_target_properties(MagnumFontObjects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
@@ -52,7 +54,19 @@ endif()
 install(FILES ${MagnumFont_HEADERS} DESTINATION ${MAGNUM_PLUGINS_INCLUDE_INSTALL_DIR}/MagnumFont)
 
 if(BUILD_GL_TESTS)
-    add_library(MagnumMagnumFontTestLib STATIC $<TARGET_OBJECTS:MagnumFontObjects>)
+    # On Win32 we need to avoid dllimporting TgaImporter symbols, because it
+    # would search for the symbols in some DLL even when they were linked
+    # statically. However it apparently doesn't matter that they were
+    # dllexported when building the static library. EH.
+    if(WIN32)
+        add_library(MagnumMagnumFontTestLib STATIC
+            ${MagnumFont_SRCS}
+            ${MagnumFont_HEADERS})
+        set_target_properties(MagnumMagnumFontTestLib PROPERTIES COMPILE_FLAGS "-DMAGNUM_TGAIMPORTER_BUILD_STATIC")
+    else()
+        add_library(MagnumMagnumFontTestLib STATIC $<TARGET_OBJECTS:MagnumFontObjects>)
+    endif()
     target_link_libraries(MagnumMagnumFontTestLib Magnum MagnumText MagnumTgaImporterTestLib)
+
     add_subdirectory(Test)
 endif()

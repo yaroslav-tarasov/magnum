@@ -483,4 +483,4 @@ void TransformFeedbackGLTest::interleaved() {
 
 }}
 
-CORRADE_TEST_MAIN(Magnum::Test::TransformFeedbackGLTest)
+MAGNUM_GL_TEST_MAIN(Magnum::Test::TransformFeedbackGLTest)

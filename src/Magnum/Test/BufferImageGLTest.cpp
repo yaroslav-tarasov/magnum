@@ -155,4 +155,4 @@ void BufferImageGLTest::setData() {
 
 }}
 
-CORRADE_TEST_MAIN(Magnum::Test::BufferImageGLTest)
+MAGNUM_GL_TEST_MAIN(Magnum::Test::BufferImageGLTest)

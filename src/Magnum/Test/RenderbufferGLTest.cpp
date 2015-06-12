@@ -148,6 +148,9 @@ void RenderbufferGLTest::label() {
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::framebuffer_object>())
         CORRADE_SKIP(Extensions::GL::ARB::framebuffer_object::string() + std::string(" is not available."));
     #endif
+    if(!Context::current()->isExtensionSupported<Extensions::GL::KHR::debug>() &&
+       !Context::current()->isExtensionSupported<Extensions::GL::EXT::debug_label>())
+        CORRADE_SKIP("Required extension is not available");
 
     Renderbuffer renderbuffer;
 
@@ -200,4 +203,4 @@ void RenderbufferGLTest::setStorageMultisample() {
 
 }}
 
-CORRADE_TEST_MAIN(Magnum::Test::RenderbufferGLTest)
+MAGNUM_GL_TEST_MAIN(Magnum::Test::RenderbufferGLTest)

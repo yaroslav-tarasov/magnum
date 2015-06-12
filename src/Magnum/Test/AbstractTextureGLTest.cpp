@@ -122,4 +122,4 @@ void AbstractTextureGLTest::label() {
 
 }}
 
-CORRADE_TEST_MAIN(Magnum::Test::AbstractTextureGLTest)
+MAGNUM_GL_TEST_MAIN(Magnum::Test::AbstractTextureGLTest)

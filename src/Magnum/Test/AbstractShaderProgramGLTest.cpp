@@ -416,4 +416,4 @@ void AbstractShaderProgramGLTest::uniformArray() {
 
 }}
 
-CORRADE_TEST_MAIN(Magnum::Test::AbstractShaderProgramGLTest)
+MAGNUM_GL_TEST_MAIN(Magnum::Test::AbstractShaderProgramGLTest)
