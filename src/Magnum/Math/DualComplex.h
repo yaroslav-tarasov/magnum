@@ -132,13 +132,20 @@ template<class T> class DualComplex: public Dual<Complex<T>> {
         #endif
 
         /** @brief Construct dual complex number from external representation */
+        #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::from(std::declval<U>()))> constexpr explicit DualComplex(const U& other): DualComplex{Implementation::DualComplexConverter<T, U>::from(other)} {}
+        #else
+        template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::from(std::declval<U>()))> explicit DualComplex(const U& other) {
+            *this = Implementation::DualComplexConverter<T, U>::from(other);
+        }
+        #endif
 
         /** @brief Copy constructor */
         constexpr DualComplex(const Dual<Complex<T>>& other): Dual<Complex<T>>(other) {}
 
         /** @brief Convert dual complex number to external representation */
         template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::to(std::declval<DualComplex<T>>()))> constexpr explicit operator U() const {
+            /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::DualComplexConverter<T, U>::to(*this);
         }
 

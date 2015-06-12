@@ -96,10 +96,17 @@ template<UnsignedInt dimensions, class T> class Range {
         template<class U> constexpr explicit Range(const Range<dimensions, U>& other): _min(other._min), _max(other._max) {}
 
         /** @brief Construct range from external representation */
+        #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(std::declval<U>()))> constexpr explicit Range(const U& other): Range{Implementation::RangeConverter<dimensions, T, U>::from(other)} {}
+        #else
+        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(std::declval<U>()))> explicit Range(const U& other) {
+            *this = Implementation::RangeConverter<dimensions, T, U>::from(other);
+        }
+        #endif
 
         /** @brief Convert range to external representation */
         template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::to(std::declval<Range<dimensions, T>>()))> constexpr explicit operator U() const {
+            /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::RangeConverter<dimensions, T, U>::to(*this);
         }
 

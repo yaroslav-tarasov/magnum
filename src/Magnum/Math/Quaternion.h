@@ -219,10 +219,17 @@ template<class T> class Quaternion {
         constexpr explicit Quaternion(const Vector3<T>& vector): _vector(vector), _scalar(T(0)) {}
 
         /** @brief Construct quaternion from external representation */
+        #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(std::declval<U>()))> constexpr explicit Quaternion(const U& other): Quaternion{Implementation::QuaternionConverter<T, U>::from(other)} {}
+        #else
+        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(std::declval<U>()))> explicit Quaternion(const U& other) {
+            *this = Implementation::QuaternionConverter<T, U>::from(other);
+        }
+        #endif
 
         /** @brief Convert quaternion to external representation */
         template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::to(std::declval<Quaternion<T>>()))> constexpr explicit operator U() const {
+            /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::QuaternionConverter<T, U>::to(*this);
         }
 

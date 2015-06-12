@@ -237,7 +237,7 @@ void VectorTest::convert() {
        delegated copy constructor if using constexpr. Reported here:
        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
     #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
-    constexpr  /* Not constexpr under GCC < 4.7 */
+    constexpr /* Not constexpr under GCC < 4.7 */
     #endif
     Vector3 c{a};
     CORRADE_COMPARE(c, b);

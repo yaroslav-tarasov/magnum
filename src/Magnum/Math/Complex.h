@@ -162,10 +162,17 @@ template<class T> class Complex {
         constexpr explicit Complex(const Vector2<T>& vector): _real(vector.x()), _imaginary(vector.y()) {}
 
         /** @brief Construct complex number from external representation */
+        #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::from(std::declval<U>()))> constexpr explicit Complex(const U& other): Complex{Implementation::ComplexConverter<T, U>::from(other)} {}
+        #else
+        template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::from(std::declval<U>()))> explicit Complex(const U& other) {
+            *this = Implementation::ComplexConverter<T, U>::from(other);
+        }
+        #endif
 
         /** @brief Convert complex number to external representation */
         template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::to(std::declval<Complex<T>>()))> constexpr explicit operator U() const {
+            /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::ComplexConverter<T, U>::to(*this);
         }
 

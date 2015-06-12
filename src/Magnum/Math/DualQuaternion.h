@@ -139,13 +139,20 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
         #endif
 
         /** @brief Construct dual quaternion from external representation */
+        #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::from(std::declval<U>()))> constexpr explicit DualQuaternion(const U& other): DualQuaternion{Implementation::DualQuaternionConverter<T, U>::from(other)} {}
+        #else
+        template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::from(std::declval<U>()))> explicit DualQuaternion(const U& other) {
+            *this = Implementation::DualQuaternionConverter<T, U>::from(other);
+        }
+        #endif
 
         /** @brief Copy constructor */
         constexpr DualQuaternion(const Dual<Quaternion<T>>& other): Dual<Quaternion<T>>(other) {}
 
         /** @brief Convert dual quaternion to external representation */
         template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::to(std::declval<DualQuaternion<T>>()))> constexpr explicit operator U() const {
+            /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::DualQuaternionConverter<T, U>::to(*this);
         }
 

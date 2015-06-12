@@ -252,8 +252,8 @@ void RangeTest::convert() {
     /* GCC 5.1 fills the result with zeros instead of properly calling
        delegated copy constructor if using constexpr. Reported here:
        https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
-    #if !defined(__GNUC__) || defined(__clang__)
-    constexpr
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    constexpr /* Not constexpr under GCC < 4.7 */
     #endif
     Range<2, Float> g{b};
     #if !defined(__GNUC__) || defined(__clang__)
@@ -273,17 +273,26 @@ void RangeTest::convert() {
     CORRADE_COMPARE(i, e);
     CORRADE_COMPARE(j, f);
 
-    constexpr Dim k(d);
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr /* Not constexpr under GCC < 4.7 */
+    #endif
+    Dim k(d);
     CORRADE_COMPARE(k.offset, a.offset);
     CORRADE_COMPARE(k.size, a.size);
 
-    constexpr Rect l(e);
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr /* Not constexpr under GCC < 4.7 */
+    #endif
+    Rect l(e);
     CORRADE_COMPARE(l.x, b.x);
     CORRADE_COMPARE(l.y, b.y);
     CORRADE_COMPARE(l.w, b.w);
     CORRADE_COMPARE(l.h, b.h);
 
-    constexpr Box m(f);
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr /* Not constexpr under GCC < 4.7 */
+    #endif
+    Box m(f);
     CORRADE_COMPARE(m.x, c.x);
     CORRADE_COMPARE(m.y, c.y);
     CORRADE_COMPARE(m.z, c.z);
