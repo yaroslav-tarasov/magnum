@@ -222,13 +222,23 @@ template<class T> class Quaternion {
         #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(std::declval<U>()))> constexpr explicit Quaternion(const U& other): Quaternion{Implementation::QuaternionConverter<T, U>::from(other)} {}
         #else
-        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(std::declval<U>()))> explicit Quaternion(const U& other) {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(std::declval<U>()))> explicit Quaternion(const U& other)
+        #else
+        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(*static_cast<const U*>(nullptr)))> explicit Quaternion(const U& other)
+        #endif
+        {
             *this = Implementation::QuaternionConverter<T, U>::from(other);
         }
         #endif
 
         /** @brief Convert quaternion to external representation */
-        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::to(std::declval<Quaternion<T>>()))> constexpr explicit operator U() const {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::to(std::declval<Quaternion<T>>()))> constexpr explicit operator U() const
+        #else
+        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::to(*static_cast<const Quaternion<T>*>(nullptr)))> constexpr operator U() const
+        #endif
+        {
             /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::QuaternionConverter<T, U>::to(*this);
         }

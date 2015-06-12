@@ -186,7 +186,12 @@ void DualQuaternionTest::convert() {
 
     /* Implicit conversion is not allowed */
     CORRADE_VERIFY(!(std::is_convertible<DualQuat, DualQuaternion>::value));
-    CORRADE_VERIFY(!(std::is_convertible<DualQuaternion, DualQuat>::value));
+    {
+        #ifdef CORRADE_GCC44_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("GCC 4.4 doesn't have explicit conversion operators");
+        #endif
+        CORRADE_VERIFY(!(std::is_convertible<DualQuaternion, DualQuat>::value));
+    }
 }
 
 void DualQuaternionTest::isNormalized() {

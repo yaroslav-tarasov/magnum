@@ -165,13 +165,23 @@ template<class T> class Complex {
         #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::from(std::declval<U>()))> constexpr explicit Complex(const U& other): Complex{Implementation::ComplexConverter<T, U>::from(other)} {}
         #else
-        template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::from(std::declval<U>()))> explicit Complex(const U& other) {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::from(std::declval<U>()))> explicit Complex(const U& other)
+        #else
+        template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::from(*static_cast<const U*>(nullptr)))> explicit Complex(const U& other)
+        #endif
+        {
             *this = Implementation::ComplexConverter<T, U>::from(other);
         }
         #endif
 
         /** @brief Convert complex number to external representation */
-        template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::to(std::declval<Complex<T>>()))> constexpr explicit operator U() const {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::to(std::declval<Complex<T>>()))> constexpr explicit operator U() const
+        #else
+        template<class U, class V = decltype(Implementation::ComplexConverter<T, U>::to(*static_cast<const Complex<T>*>(nullptr)))> constexpr operator U() const
+        #endif
+        {
             /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::ComplexConverter<T, U>::to(*this);
         }

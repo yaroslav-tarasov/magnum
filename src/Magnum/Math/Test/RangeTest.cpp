@@ -306,9 +306,14 @@ void RangeTest::convert() {
     CORRADE_VERIFY(!(std::is_convertible<Rect, Range2D>::value));
     CORRADE_VERIFY(!(std::is_convertible<Box, Range3D>::value));
 
-    CORRADE_VERIFY(!(std::is_convertible<Range1D, Dim>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Range2D, Rect>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Range3D, Box>::value));
+    {
+        #ifdef CORRADE_GCC44_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("GCC 4.4 doesn't have explicit conversion operators");
+        #endif
+        CORRADE_VERIFY(!(std::is_convertible<Range1D, Dim>::value));
+        CORRADE_VERIFY(!(std::is_convertible<Range2D, Rect>::value));
+        CORRADE_VERIFY(!(std::is_convertible<Range3D, Box>::value));
+    }
 }
 
 void RangeTest::access() {

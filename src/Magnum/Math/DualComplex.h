@@ -135,7 +135,12 @@ template<class T> class DualComplex: public Dual<Complex<T>> {
         #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::from(std::declval<U>()))> constexpr explicit DualComplex(const U& other): DualComplex{Implementation::DualComplexConverter<T, U>::from(other)} {}
         #else
-        template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::from(std::declval<U>()))> explicit DualComplex(const U& other) {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::from(std::declval<U>()))> explicit DualComplex(const U& other)
+        #else
+        template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::from(*static_cast<const U*>(nullptr)))> explicit DualComplex(const U& other)
+        #endif
+        {
             *this = Implementation::DualComplexConverter<T, U>::from(other);
         }
         #endif
@@ -144,7 +149,12 @@ template<class T> class DualComplex: public Dual<Complex<T>> {
         constexpr DualComplex(const Dual<Complex<T>>& other): Dual<Complex<T>>(other) {}
 
         /** @brief Convert dual complex number to external representation */
-        template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::to(std::declval<DualComplex<T>>()))> constexpr explicit operator U() const {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::to(std::declval<DualComplex<T>>()))> constexpr explicit operator U() const
+        #else
+        template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::to(*static_cast<const DualComplex<T>*>(nullptr)))> constexpr operator U() const
+        #endif
+        {
             /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::DualComplexConverter<T, U>::to(*this);
         }

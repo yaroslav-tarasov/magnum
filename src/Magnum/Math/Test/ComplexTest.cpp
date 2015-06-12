@@ -190,7 +190,12 @@ void ComplexTest::convert() {
 
     /* Implicit conversion is not allowed */
     CORRADE_VERIFY(!(std::is_convertible<Cmpl, Complex>::value));
-    CORRADE_VERIFY(!(std::is_convertible<Complex, Cmpl>::value));
+    {
+        #ifdef CORRADE_GCC44_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("GCC 4.4 doesn't have explicit conversion operators");
+        #endif
+        CORRADE_VERIFY(!(std::is_convertible<Complex, Cmpl>::value));
+    }
 }
 
 void ComplexTest::compare() {

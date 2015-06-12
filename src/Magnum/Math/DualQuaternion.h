@@ -142,7 +142,12 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
         #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::from(std::declval<U>()))> constexpr explicit DualQuaternion(const U& other): DualQuaternion{Implementation::DualQuaternionConverter<T, U>::from(other)} {}
         #else
-        template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::from(std::declval<U>()))> explicit DualQuaternion(const U& other) {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::from(std::declval<U>()))> explicit DualQuaternion(const U& other)
+        #else
+        template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::from(*static_cast<const U*>(nullptr)))> explicit DualQuaternion(const U& other)
+        #endif
+        {
             *this = Implementation::DualQuaternionConverter<T, U>::from(other);
         }
         #endif
@@ -151,7 +156,12 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
         constexpr DualQuaternion(const Dual<Quaternion<T>>& other): Dual<Quaternion<T>>(other) {}
 
         /** @brief Convert dual quaternion to external representation */
-        template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::to(std::declval<DualQuaternion<T>>()))> constexpr explicit operator U() const {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::to(std::declval<DualQuaternion<T>>()))> constexpr explicit operator U() const
+        #else
+        template<class U, class V = decltype(Implementation::DualQuaternionConverter<T, U>::to(*static_cast<const DualQuaternion<T>*>(nullptr)))> constexpr operator U() const
+        #endif
+        {
             /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::DualQuaternionConverter<T, U>::to(*this);
         }

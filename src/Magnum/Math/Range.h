@@ -99,13 +99,23 @@ template<UnsignedInt dimensions, class T> class Range {
         #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(std::declval<U>()))> constexpr explicit Range(const U& other): Range{Implementation::RangeConverter<dimensions, T, U>::from(other)} {}
         #else
-        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(std::declval<U>()))> explicit Range(const U& other) {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(std::declval<U>()))> explicit Range(const U& other)
+        #else
+        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(*static_cast<const U*>(nullptr)))> explicit Range(const U& other)
+        #endif
+        {
             *this = Implementation::RangeConverter<dimensions, T, U>::from(other);
         }
         #endif
 
         /** @brief Convert range to external representation */
-        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::to(std::declval<Range<dimensions, T>>()))> constexpr explicit operator U() const {
+        #ifndef CORRADE_GCC44_COMPATIBILITY
+        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::to(std::declval<Range<dimensions, T>>()))> constexpr explicit operator U() const
+        #else
+        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::to(*static_cast<const Range<dimensions, T>*>(nullptr)))> constexpr operator U() const
+        #endif
+        {
             /** @bug Why this is not constexpr under GCC 4.6? */
             return Implementation::RangeConverter<dimensions, T, U>::to(*this);
         }
@@ -243,7 +253,11 @@ template<class T> class Range2D: public Range<2, T> {
         template<class U> constexpr explicit Range2D(const Range2D<U>& other): Range<2, T>(other) {}
 
         /** @brief Construct range from external representation */
+        #ifndef CORRADE_GCC44_COMPATIBILITY
         template<class U, class V = decltype(Implementation::RangeConverter<2, T, U>::from(std::declval<U>()))> constexpr explicit Range2D(const U& other): Range<2, T>{Implementation::RangeConverter<2, T, U>::from(other)} {}
+        #else
+        template<class U, class V = decltype(Implementation::RangeConverter<2, T, U>::from(*static_cast<const U*>(nullptr)))> constexpr explicit Range2D(const U& other): Range<2, T>{Implementation::RangeConverter<2, T, U>::from(other)} {}
+        #endif
 
         /**
          * @brief Bottom left corner
@@ -347,7 +361,11 @@ template<class T> class Range3D: public Range<3, T> {
         template<class U> constexpr explicit Range3D(const Range3D<U>& other): Range<3, T>(other) {}
 
         /** @brief Construct range from external representation */
+        #ifndef CORRADE_GCC44_COMPATIBILITY
         template<class U, class V = decltype(Implementation::RangeConverter<3, T, U>::from(std::declval<U>()))> constexpr explicit Range3D(const U& other): Range<3, T>{Implementation::RangeConverter<3, T, U>::from(other)} {}
+        #else
+        template<class U, class V = decltype(Implementation::RangeConverter<3, T, U>::from(*static_cast<const U*>(nullptr)))> constexpr explicit Range3D(const U& other): Range<3, T>{Implementation::RangeConverter<3, T, U>::from(other)} {}
+        #endif
 
         /**
          * @brief Back bottom left corner
