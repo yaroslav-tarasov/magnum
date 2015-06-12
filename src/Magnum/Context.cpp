@@ -556,7 +556,8 @@ Context::Context(Context&& other): _version{std::move(other._version)},
     #endif
     _extensionRequiredVersion(std::move(other._extensionRequiredVersion)),
     _extensionStatus{std::move(other._extensionStatus)},
-    _supportedExtensions{std::move(other._supportedExtensions)},
+    /* GCC 4.5 can't handle {} here */
+    _supportedExtensions(std::move(other._supportedExtensions)),
     _state{std::move(other._state)},
     _detectedDrivers{std::move(other._detectedDrivers)}
 {
