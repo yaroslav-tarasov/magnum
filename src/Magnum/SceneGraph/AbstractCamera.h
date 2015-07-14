@@ -37,13 +37,14 @@ CORRADE_DEPRECATED_FILE("use Magnum/SceneGraph/Camera.h instead")
 
 namespace Magnum { namespace SceneGraph {
 
+#ifndef CORRADE_GCC46_COMPATIBILITY
 /**
  * @copybrief Camera
  * @deprecated Use @ref Camera instead.
  */
+/* Not possible to stay backwards-compatible on GCC 4.6, sorry */
 template<UnsignedInt dimensions, class T> using AbstractCamera CORRADE_DEPRECATED("use Camera instead") = Camera<dimensions, T>;
 
-#ifndef CORRADE_GCC46_COMPATIBILITY
 /**
  * @copybrief BasicCamera2D
  * @deprecated Use @ref BasicCamera2D instead.

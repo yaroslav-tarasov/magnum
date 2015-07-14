@@ -95,7 +95,7 @@ template<UnsignedInt dimensions, class T> void Camera<dimensions, T>::draw(Drawa
     objects.reserve(group.size());
     for(std::size_t i = 0; i != group.size(); ++i)
         objects.push_back(group[i].object());
-    std::vector<MatrixTypeFor<dimensions, T>> transformations =
+    std::vector<typename DimensionTraits<dimensions, T>::MatrixType> transformations =
         scene->transformationMatrices(objects, _cameraMatrix);
 
     /* Perform the drawing */
