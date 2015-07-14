@@ -33,6 +33,10 @@
 
 #include "Magnum/AbstractTexture.h"
 
+#ifdef CORRADE_GCC45_COMPATIBILITY
+#include "BufferTextureFormat.h"
+#endif
+
 #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 namespace Magnum {
 
