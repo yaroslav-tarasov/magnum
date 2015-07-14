@@ -62,6 +62,7 @@ struct RectangularMatrixTest: Corrade::TestSuite::Tester {
 
     void construct();
     void constructDefault();
+    void constructNoInit();
     void constructConversion();
     void constructFromData();
     void constructFromDiagonal();
@@ -108,6 +109,7 @@ typedef Vector<2, Int> Vector2i;
 RectangularMatrixTest::RectangularMatrixTest() {
     addTests<RectangularMatrixTest>({&RectangularMatrixTest::construct,
               &RectangularMatrixTest::constructDefault,
+              &RectangularMatrixTest::constructNoInit,
               &RectangularMatrixTest::constructConversion,
               &RectangularMatrixTest::constructFromData,
               &RectangularMatrixTest::constructFromDiagonal,
@@ -148,10 +150,25 @@ void RectangularMatrixTest::construct() {
 
 void RectangularMatrixTest::constructDefault() {
     constexpr Matrix4x3 a;
+    constexpr Matrix4x3 b{ZeroInit};
     CORRADE_COMPARE(a, Matrix4x3(Vector3(0.0f, 0.0f, 0.0f),
                                  Vector3(0.0f, 0.0f, 0.0f),
                                  Vector3(0.0f, 0.0f, 0.0f),
                                  Vector3(0.0f, 0.0f, 0.0f)));
+    CORRADE_COMPARE(b, Matrix4x3(Vector3(0.0f, 0.0f, 0.0f),
+                                 Vector3(0.0f, 0.0f, 0.0f),
+                                 Vector3(0.0f, 0.0f, 0.0f),
+                                 Vector3(0.0f, 0.0f, 0.0f)));
+}
+
+void RectangularMatrixTest::constructNoInit() {
+    Matrix3x4 a{Vector4(1.0f,  2.0f,  3.0f,  4.0f),
+                Vector4(5.0f,  6.0f,  7.0f,  8.0f),
+                Vector4(9.0f, 10.0f, 11.0f, 12.0f)};
+    new(&a) Matrix3x4{NoInit};
+    CORRADE_COMPARE(a, Matrix3x4(Vector4(1.0f,  2.0f,  3.0f,  4.0f),
+                                 Vector4(5.0f,  6.0f,  7.0f,  8.0f),
+                                 Vector4(9.0f, 10.0f, 11.0f, 12.0f)));
 }
 
 void RectangularMatrixTest::constructConversion() {
@@ -433,7 +450,7 @@ void RectangularMatrixTest::vector() {
 template<std::size_t size, class T> class BasicMat: public Math::RectangularMatrix<size, size, T> {
     public:
         /* MSVC 2013 can't cope with {} here */
-        template<class ...U> constexpr BasicMat(U&&... args): Math::RectangularMatrix<size, size, T>(std::forward<U>(args)...) {}
+        template<class ...U> constexpr BasicMat(U&&... args): Math::RectangularMatrix<size, size, T>(args...) {}
 
         MAGNUM_RECTANGULARMATRIX_SUBCLASS_IMPLEMENTATION(size, size, BasicMat<size, T>)
 };
@@ -443,7 +460,7 @@ MAGNUM_MATRIX_OPERATOR_IMPLEMENTATION(BasicMat<size, T>)
 template<class T> class BasicMat2x2: public BasicMat<2, T> {
     public:
         /* MSVC 2013 can't cope with {} here */
-        template<class ...U> constexpr BasicMat2x2(U&&... args): BasicMat<2, T>(std::forward<U>(args)...) {}
+        template<class ...U> constexpr BasicMat2x2(U&&... args): BasicMat<2, T>(args...) {}
 
         MAGNUM_RECTANGULARMATRIX_SUBCLASS_IMPLEMENTATION(2, 2, BasicMat2x2<T>)
 };
@@ -496,8 +513,9 @@ void RectangularMatrixTest::subclass() {
     CORRADE_COMPARE(Mat2x2::fromDiagonal({1.0f, -2.0f}), Mat2x2(Vector2(1.0f,  0.0f),
                                                                 Vector2(0.0f, -2.0f)));
 
-    const Mat2x2 a(Vector2(1.0f, -3.0f),
-                   Vector2(-3.0f, 1.0f));
+    /* Constexpr constructor */
+    constexpr Mat2x2 a(Vector2(1.0f, -3.0f),
+                       Vector2(-3.0f, 1.0f));
     CORRADE_COMPARE(-a, Mat2x2(Vector2(-1.0f, 3.0f),
                                Vector2(3.0f, -1.0f)));
 

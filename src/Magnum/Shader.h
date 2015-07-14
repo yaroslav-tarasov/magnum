@@ -71,33 +71,49 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
         enum class Type: GLenum {
             Vertex = GL_VERTEX_SHADER,      /**< Vertex shader */
 
-            #ifndef MAGNUM_TARGET_GLES
+            #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
             /**
              * Tessellation control shader
              * @requires_gl40 Extension @extension{ARB,tessellation_shader}
-             * @requires_gl Tessellation shaders are not available in OpenGL ES
-             *      or WebGL.
+             * @requires_gles30 Not defined in OpenGL ES 2.0.
+             * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+             *      @es_extension{EXT,tessellation_shader}
+             * @requires_gles Tessellation shaders are not available in WebGL.
              */
+            #ifndef MAGNUM_TARGET_GLES
             TessellationControl = GL_TESS_CONTROL_SHADER,
+            #else
+            TessellationControl = GL_TESS_CONTROL_SHADER_EXT,
+            #endif
 
             /**
              * Tessellation evaluation shader
              * @requires_gl40 Extension @extension{ARB,tessellation_shader}
-             * @requires_gl Tessellation shaders are not available in OpenGL ES
-             *      or WebGL.
+             * @requires_gles30 Not defined in OpenGL ES 2.0.
+             * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+             *      @es_extension{EXT,tessellation_shader}
+             * @requires_gles Tessellation shaders are not available in WebGL.
              */
+            #ifndef MAGNUM_TARGET_GLES
             TessellationEvaluation = GL_TESS_EVALUATION_SHADER,
+            #else
+            TessellationEvaluation = GL_TESS_EVALUATION_SHADER_EXT,
+            #endif
 
             /**
              * Geometry shader
              * @requires_gl32 Extension @extension{ARB,geometry_shader4}
-             * @requires_gl Geometry shaders are not available in OpenGL ES or
-             *      WebGL.
+             * @requires_gles30 Not defined in OpenGL ES 2.0.
+             * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+             *      @es_extension{EXT,geometry_shader}
+             * @requires_gles Geometry shaders are not available in WebGL.
              */
+            #ifndef MAGNUM_TARGET_GLES
             Geometry = GL_GEOMETRY_SHADER,
+            #else
+            Geometry = GL_GEOMETRY_SHADER_EXT,
             #endif
 
-            #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
             /**
              * Compute shader
              * @requires_gl43 Extension @extension{ARB,compute_shader}
@@ -125,16 +141,18 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
 
         /** @todo `GL_MAX_PATCH_VERTICES`, `GL_MAX_TESS_GEN_LEVEL`, `GL_MAX_TESS_PATCH_COMPONENTS` when @extension{ARB,tessellation_shader} is done */
 
-        #ifndef MAGNUM_TARGET_GLES
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         /**
          * @brief Max supported component count of tessellation control shader input vertex
          *
          * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If extension @extension{ARB,tessellation_shader} (part
-         * of OpenGL 4.0) is not available, returns `0`.
+         * OpenGL calls. If neither @extension{ARB,tessellation_shader} (part
+         * of OpenGL 4.0) nor @es_extension{ANDROID,extension_pack_es31a}/
+         * @es_extension{EXT,tessellation_shader} ES extension is available,
+         * returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_TESS_CONTROL_INPUT_COMPONENTS}
-         * @requires_gl Tessellation shaders are not available in OpenGL ES or
-         *      WebGL.
+         * @requires_gles30 Not defined in OpenGL ES 2.0.
+         * @requires_gl Tessellation shaders are not available in WebGL.
          */
         static Int maxTessellationControlInputComponents();
 
@@ -142,11 +160,13 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          * @brief Max supported component count of tessellation control shader output vertex
          *
          * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If extension @extension{ARB,tessellation_shader} (part
-         * of OpenGL 4.0) is not available, returns `0`.
+         * OpenGL calls. If neither @extension{ARB,tessellation_shader} (part
+         * of OpenGL 4.0) nor @es_extension{ANDROID,extension_pack_es31a}/
+         * @es_extension{EXT,tessellation_shader} ES extension is available,
+         * returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_TESS_CONTROL_OUTPUT_COMPONENTS}
-         * @requires_gl Tessellation shaders are not available in OpenGL ES or
-         *      WebGL.
+         * @requires_gles30 Not defined in OpenGL ES 2.0.
+         * @requires_gl Tessellation shaders are not available in WebGL.
          */
         static Int maxTessellationControlOutputComponents();
 
@@ -154,11 +174,13 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          * @brief Max supported component count of all tessellation control shader output vertices combined
          *
          * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If extension @extension{ARB,tessellation_shader} (part
-         * of OpenGL 4.0) is not available, returns `0`.
+         * OpenGL calls. If neither @extension{ARB,tessellation_shader} (part
+         * of OpenGL 4.0) nor @es_extension{ANDROID,extension_pack_es31a}/
+         * @es_extension{EXT,tessellation_shader} ES extension is available,
+         * returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS}
-         * @requires_gl Tessellation shaders are not available in OpenGL ES or
-         *      WebGL.
+         * @requires_gles30 Not defined in OpenGL ES 2.0.
+         * @requires_gl Tessellation shaders are not available in WebGL.
          */
         static Int maxTessellationControlTotalOutputComponents();
 
@@ -166,11 +188,13 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          * @brief Max supported component count of tessellation evaluation shader input vertex
          *
          * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If extension @extension{ARB,tessellation_shader} (part
-         * of OpenGL 4.0) is not available, returns `0`.
+         * OpenGL calls. If neither @extension{ARB,tessellation_shader} (part
+         * of OpenGL 4.0) nor @es_extension{ANDROID,extension_pack_es31a}/
+         * @es_extension{EXT,tessellation_shader} ES extension is available,
+         * returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_TESS_EVALUATION_INPUT_COMPONENTS}
-         * @requires_gl Tessellation shaders are not available in OpenGL ES or
-         *      WebGL.
+         * @requires_gles30 Not defined in OpenGL ES 2.0.
+         * @requires_gl Tessellation shaders are not available in WebGL.
          */
         static Int maxTessellationEvaluationInputComponents();
 
@@ -178,11 +202,13 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          * @brief Max supported component count of tessellation evaluation shader output vertex
          *
          * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If extension @extension{ARB,tessellation_shader} (part
-         * of OpenGL 4.0) is not available, returns `0`.
+         * OpenGL calls. If neither @extension{ARB,tessellation_shader} (part
+         * of OpenGL 4.0) nor @es_extension{ANDROID,extension_pack_es31a}/
+         * @es_extension{EXT,tessellation_shader} ES extension is available,
+         * returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_TESS_EVALUATION_OUTPUT_COMPONENTS}
-         * @requires_gl Tessellation shaders are not available in OpenGL ES or
-         *      WebGL.
+         * @requires_gles30 Not defined in OpenGL ES 2.0.
+         * @requires_gl Tessellation shaders are not available in WebGL.
          */
         static Int maxTessellationEvaluationOutputComponents();
 
@@ -190,11 +216,13 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          * @brief Max supported component count of geometry shader input vertex
          *
          * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If extension @extension{ARB,geometry_shader4} (part of
-         * OpenGL 3.2) is not available, returns `0`.
+         * OpenGL calls. If neither @extension{ARB,geometry_shader4} (part of
+         * OpenGL 3.2) nor @es_extension{ANDROID,extension_pack_es31a}/
+         * @es_extension{EXT,geometry_shader} ES extension is not available,
+         * returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_GEOMETRY_INPUT_COMPONENTS}
-         * @requires_gl Geometry shaders are not available in OpenGL ES or
-         *      WebGL.
+         * @requires_gles30 Not defined in OpenGL ES 2.0.
+         * @requires_gles Geometry shaders are not available in WebGL.
          */
         static Int maxGeometryInputComponents();
 
@@ -202,11 +230,13 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          * @brief Max supported component count of geometry shader output vertex
          *
          * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If extension @extension{ARB,geometry_shader4} (part of
-         * OpenGL 3.2) is not available, returns `0`.
+         * OpenGL calls. If neither @extension{ARB,geometry_shader4} (part of
+         * OpenGL 3.2) nor @es_extension{ANDROID,extension_pack_es31a}/
+         * @es_extension{EXT,geometry_shader} ES extension is not available,
+         * returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_GEOMETRY_OUTPUT_COMPONENTS}
-         * @requires_gl Geometry shaders are not available in OpenGL ES or
-         *      WebGL.
+         * @requires_gles30 Not defined in OpenGL ES 2.0.
+         * @requires_gles Geometry shaders are not available in WebGL.
          */
         static Int maxGeometryOutputComponents();
 
@@ -214,11 +244,13 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          * @brief Max supported component count of all geometry shader output vertices combined
          *
          * The result is cached, repeated queries don't result in repeated
-         * OpenGL calls. If extension @extension{ARB,geometry_shader4} (part of
-         * OpenGL 3.2) is not available, returns `0`.
+         * OpenGL calls. If neither @extension{ARB,geometry_shader4} (part of
+         * OpenGL 3.2) nor @es_extension{ANDROID,extension_pack_es31a}/
+         * @es_extension{EXT,geometry_shader} ES extension is not available,
+         * returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS}
-         * @requires_gl Geometry shaders are not available in OpenGL ES or
-         *      WebGL.
+         * @requires_gles30 Not defined in OpenGL ES 2.0.
+         * @requires_gles Geometry shaders are not available in WebGL.
          */
         static Int maxGeometryTotalOutputComponents();
         #endif
@@ -521,8 +553,9 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          *
          * The result is *not* cached, repeated queries will result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function returns empty string.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function returns empty string.
          * @see @fn_gl{GetObjectLabel} with @def_gl{SHADER} or
          *      @fn_gl_extension2{GetObjectLabel,EXT,debug_label} with
          *      @def_gl{SHADER_OBJECT_EXT}
@@ -535,8 +568,9 @@ class MAGNUM_EXPORT Shader: public AbstractObject {
          * @return Reference to self (for method chaining)
          *
          * Default is empty string. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function does nothing.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function does nothing.
          * @see @ref maxLabelLength(), @fn_gl{ObjectLabel} with
          *      @def_gl{SHADER} or @fn_gl_extension2{LabelObject,EXT,debug_label}
          *      with @def_gl{SHADER_OBJECT_EXT}

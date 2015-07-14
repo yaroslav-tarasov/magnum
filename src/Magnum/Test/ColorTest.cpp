@@ -36,6 +36,8 @@ struct ColorTest: TestSuite::Tester {
 
     void construct();
     void constructDefault();
+    void constructZero();
+    void constructNoInit();
     void constructOneValue();
     void constructParts();
     void constructConversion();
@@ -64,6 +66,8 @@ struct ColorTest: TestSuite::Tester {
 ColorTest::ColorTest() {
     addTests<ColorTest>({&ColorTest::construct,
               &ColorTest::constructDefault,
+              &ColorTest::constructZero,
+              &ColorTest::constructNoInit,
               &ColorTest::constructOneValue,
               &ColorTest::constructParts,
               &ColorTest::constructConversion,
@@ -119,13 +123,31 @@ void ColorTest::construct() {
 }
 
 void ColorTest::constructDefault() {
-    constexpr Vector3 a;
-    CORRADE_COMPARE(a, Color3(0.0f, 0.0f, 0.0f));
+    constexpr Color3 a1;
+    constexpr Color3 a2{Math::ZeroInit};
+    CORRADE_COMPARE(a1, Color3(0.0f, 0.0f, 0.0f));
+    CORRADE_COMPARE(a2, Color3(0.0f, 0.0f, 0.0f));
 
     constexpr Color4 b;
     constexpr Color4ub c;
     CORRADE_COMPARE(b, Color4(0.0f, 0.0f, 0.0f, 1.0f));
     CORRADE_COMPARE(c, Color4ub(0, 0, 0, 255));
+}
+
+void ColorTest::constructZero() {
+    constexpr Color3 a{Math::ZeroInit};
+    constexpr Color4 b{Math::ZeroInit};
+    CORRADE_COMPARE(a, Color3(0.0f, 0.0f, 0.0f));
+    CORRADE_COMPARE(b, Color4(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+void ColorTest::constructNoInit() {
+    Color3 a{1.0f, 0.5f, 0.75f};
+    Color4 b{1.0f, 0.5f, 0.75f, 0.5f};
+    new(&a) Color3{Math::NoInit};
+    new(&b) Color4{Math::NoInit};
+    CORRADE_COMPARE(a, (Color3{1.0f, 0.5f, 0.75f}));
+    CORRADE_COMPARE(b, (Color4{1.0f, 0.5f, 0.75f, 0.5f}));
 }
 
 void ColorTest::constructOneValue() {

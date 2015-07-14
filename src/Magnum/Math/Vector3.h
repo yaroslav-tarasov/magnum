@@ -133,8 +133,21 @@ template<class T> class Vector3: public Vector<3, T> {
         }
         #endif
 
-        /** @copydoc Vector::Vector() */
-        constexpr /*implicit*/ Vector3() {}
+        /** @copydoc Vector::Vector(ZeroInitT) */
+        constexpr /*implicit*/ Vector3(ZeroInitT = ZeroInit)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Vector<3, T>{ZeroInit}
+            #endif
+            {}
+
+        /** @copydoc Vector::Vector(NoInitT) */
+        explicit Vector3(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Vector<3, T>{NoInit}
+            #endif
+            {}
 
         /** @copydoc Vector::Vector(T) */
         constexpr explicit Vector3(T value): Vector<3, T>(value) {}

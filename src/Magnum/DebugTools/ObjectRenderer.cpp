@@ -29,7 +29,7 @@
 #include "Magnum/Mesh.h"
 #include "Magnum/DebugTools/ResourceManager.h"
 #include "Magnum/MeshTools/Interleave.h"
-#include "Magnum/SceneGraph/AbstractCamera.h"
+#include "Magnum/SceneGraph/Camera.h"
 #include "Magnum/Shaders/VertexColor.h"
 
 namespace Magnum { namespace DebugTools {
@@ -180,7 +180,7 @@ template<UnsignedInt dimensions> ObjectRenderer<dimensions>::ObjectRenderer(Scen
 /* GCC 4.4 has linker error when using =default */
 template<UnsignedInt dimensions> ObjectRenderer<dimensions>::~ObjectRenderer() {}
 
-template<UnsignedInt dimensions> void ObjectRenderer<dimensions>::draw(const typename DimensionTraits<dimensions, Float>::MatrixType& transformationMatrix, SceneGraph::AbstractCamera<dimensions, Float>& camera) {
+template<UnsignedInt dimensions> void ObjectRenderer<dimensions>::draw(const typename DimensionTraits<dimensions, Float>::MatrixType& transformationMatrix, SceneGraph::Camera<dimensions, Float>& camera) {
     shader->setTransformationProjectionMatrix(camera.projectionMatrix()*transformationMatrix*DimensionTraits<dimensions, Float>::MatrixType::scaling(typename DimensionTraits<dimensions, Float>::VectorType(options->size())));
     mesh->draw(*shader);
 }

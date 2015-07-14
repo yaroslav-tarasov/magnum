@@ -531,7 +531,7 @@ typedef BufferImage<2> BufferImage2D;
 typedef BufferImage<3> BufferImage3D;
 #endif
 
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 class BufferTexture;
 #ifndef CORRADE_GCC45_COMPATIBILITY
 enum class BufferTextureFormat: GLenum;
@@ -553,7 +553,7 @@ enum class ColorType: GLenum;
 class Context;
 
 class CubeMapTexture;
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 class CubeMapTextureArray;
 #endif
 
@@ -585,9 +585,7 @@ class MeshView;
 /* MultisampleTextureSampleLocations enum used only in the function */
 template<UnsignedInt> class MultisampleTexture;
 typedef MultisampleTexture<2> MultisampleTexture2D;
-#ifndef MAGNUM_TARGET_GLES
 typedef MultisampleTexture<3> MultisampleTexture2DArray;
-#endif
 #endif
 
 /* ObjectFlag, ObjectFlags are used only in conjunction with *::wrap() function */

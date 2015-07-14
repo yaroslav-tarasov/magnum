@@ -35,6 +35,7 @@
 
 #include "Magnum/AbstractObject.h"
 #include "Magnum/Attribute.h"
+#include "Magnum/Tags.h"
 
 #ifdef MAGNUM_BUILD_DEPRECATED
 #include <Corrade/Utility/Macros.h>
@@ -463,10 +464,21 @@ class MAGNUM_EXPORT Mesh: public AbstractObject {
          * available, vertex array object is created. If @extension{ARB,direct_state_access}
          * (part of OpenGL 4.5) is not available, the vertex array object is
          * created on first use.
-         * @see @ref setPrimitive(), @ref setCount(), @ref wrap(),
-         *      @fn_gl{CreateVertexArrays}, eventually @fn_gl{GenVertexArrays}
+         * @see @ref Mesh(NoCreateT), @ref wrap(), @ref setPrimitive(),
+         *      @ref setCount(), @fn_gl{CreateVertexArrays}, eventually
+         *      @fn_gl{GenVertexArrays}
          */
         explicit Mesh(MeshPrimitive primitive = MeshPrimitive::Triangles);
+
+        /**
+         * @brief Construct without creating the underlying OpenGL object
+         *
+         * The constructed instance is equivalent to moved-from state. Useful
+         * in cases where you will overwrite the instance later anyway. Move
+         * another object over it to make it useful.
+         * @see @ref Mesh(MeshPrimitive), @ref wrap()
+         */
+        explicit Mesh(NoCreateT) noexcept;
 
         /** @brief Copying is not allowed */
         Mesh(const Mesh&) = delete;
@@ -522,8 +534,9 @@ class MAGNUM_EXPORT Mesh: public AbstractObject {
          *
          * The result is *not* cached, repeated queries will result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function returns empty string.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function returns empty string.
          * @see @fn_gl{GetObjectLabel} with @def_gl{VERTEX_ARRAY} or
          *      @fn_gl_extension2{GetObjectLabel,EXT,debug_label} with
          *      @def_gl{VERTEX_ARRAY_OBJECT_EXT}
@@ -536,8 +549,9 @@ class MAGNUM_EXPORT Mesh: public AbstractObject {
          * @return Reference to self (for method chaining)
          *
          * Default is empty string. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function does nothing.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function does nothing.
          * @see @ref maxLabelLength(), @fn_gl{ObjectLabel} with
          *      @def_gl{VERTEX_ARRAY} or @fn_gl_extension2{LabelObject,EXT,debug_label}
          *      with @def_gl{VERTEX_ARRAY_OBJECT_EXT}

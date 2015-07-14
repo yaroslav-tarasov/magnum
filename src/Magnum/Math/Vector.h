@@ -94,8 +94,11 @@ template<std::size_t size, class T> class Vector {
     #endif
 
     public:
-        typedef T Type;                         /**< @brief Underlying data type */
-        const static std::size_t Size = size;   /**< @brief Vector size */
+        typedef T Type;         /**< @brief Underlying data type */
+
+        enum: std::size_t {
+            Size = size         /**< Vector size */
+        };
 
         /**
          * @brief Vector from array
@@ -151,7 +154,10 @@ template<std::size_t size, class T> class Vector {
          *      \boldsymbol v = \boldsymbol 0
          * @f]
          */
-        constexpr /*implicit*/ Vector(): _data() {}
+        constexpr /*implicit*/ Vector(ZeroInitT = ZeroInit): _data{} {}
+
+        /** @brief Construct vector without initializing the contents */
+        explicit Vector(NoInitT) {}
 
         /** @todo Creating Vector from combination of vector and scalar types */
 

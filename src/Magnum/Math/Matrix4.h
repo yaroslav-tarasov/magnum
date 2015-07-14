@@ -249,17 +249,34 @@ template<class T> class Matrix4: public Matrix<4, T> {
                     {       translation, T(1)}};
         }
 
-        /** @copydoc Matrix::Matrix(ZeroType) */
-        constexpr explicit Matrix4(typename Matrix<4, T>::ZeroType): Matrix<4, T>(Matrix<4, T>::Zero) {}
-
         /**
          * @brief Default constructor
          *
-         * Creates identity matrix. You can also explicitly call this
-         * constructor with `Matrix4 m(Matrix4::Identity);`. Optional
-         * parameter @p value allows you to specify value on diagonal.
+         * Creates identity matrix. @p value allows you to specify value on
+         * diagonal.
          */
-        constexpr /*implicit*/ Matrix4(typename Matrix<4, T>::IdentityType = (Matrix<4, T>::Identity), T value = T(1)): Matrix<4, T>(Matrix<4, T>::Identity, value) {}
+        constexpr /*implicit*/ Matrix4(IdentityInitT = IdentityInit, T value = T{1})
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Matrix<4, T>{IdentityInit, value}
+            #endif
+            {}
+
+        /** @copydoc Matrix::Matrix(ZeroInitT) */
+        constexpr explicit Matrix4(ZeroInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Matrix<4, T>{ZeroInit}
+            #endif
+            {}
+
+        /** @copydoc Matrix::Matrix(NoInitT) */
+        constexpr explicit Matrix4(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Matrix<4, T>{NoInit}
+            #endif
+            {}
 
         /** @brief Matrix from column vectors */
         constexpr /*implicit*/ Matrix4(const Vector4<T>& first, const Vector4<T>& second, const Vector4<T>& third, const Vector4<T>& fourth): Matrix<4, T>(first, second, third, fourth) {}

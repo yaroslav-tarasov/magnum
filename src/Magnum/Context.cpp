@@ -88,7 +88,9 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,EXT,debug_marker),
         _extension(GL,GREMEDY,string_marker),
         _extension(GL,KHR,texture_compression_astc_ldr),
-        _extension(GL,KHR,texture_compression_astc_hdr)};
+        _extension(GL,KHR,texture_compression_astc_hdr),
+        _extension(GL,KHR,blend_equation_advanced),
+        _extension(GL,KHR,blend_equation_advanced_coherent)};
     static const std::vector<Extension> extensions300{
         _extension(GL,ARB,map_buffer_range),
         _extension(GL,ARB,color_buffer_float),
@@ -240,6 +242,9 @@ const std::vector<Extension>& Extension::extensions(Version version) {
     #endif
     #else
     static const std::vector<Extension> extensions{
+        #ifndef MAGNUM_TARGET_GLES2
+        _extension(GL,ANDROID,extension_pack_es31a),
+        #endif
         _extension(GL,APPLE,texture_format_BGRA8888),
         #ifdef CORRADE_TARGET_NACL
         _extension(GL,CHROMIUM,map_sub),
@@ -253,12 +258,31 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,EXT,disjoint_timer_query),
         _extension(GL,EXT,texture_sRGB_decode),
         _extension(GL,EXT,sRGB_write_control),
+        #ifndef MAGNUM_TARGET_GLES2
+        _extension(GL,EXT,shader_integer_mix),
+        _extension(GL,EXT,copy_image),
+        #endif
+        _extension(GL,EXT,draw_buffers_indexed),
+        #ifndef MAGNUM_TARGET_GLES2
+        _extension(GL,EXT,geometry_shader),
+        _extension(GL,EXT,gpu_shader5),
+        _extension(GL,EXT,shader_io_blocks),
+        _extension(GL,EXT,tessellation_shader),
+        #endif
+        _extension(GL,EXT,texture_border_clamp),
+        #ifndef MAGNUM_TARGET_GLES2
+        _extension(GL,EXT,texture_buffer),
+        _extension(GL,EXT,texture_cube_map_array),
+        _extension(GL,EXT,primitive_bounding_box),
+        #endif
         _extension(GL,EXT,separate_shader_objects),
         _extension(GL,EXT,multisampled_render_to_texture),
         _extension(GL,EXT,robustness),
         _extension(GL,KHR,texture_compression_astc_ldr),
         _extension(GL,KHR,texture_compression_astc_hdr),
         _extension(GL,KHR,debug),
+        _extension(GL,KHR,blend_equation_advanced),
+        _extension(GL,KHR,blend_equation_advanced_coherent),
         _extension(GL,KHR,robustness),
         _extension(GL,KHR,robust_buffer_access_behavior),
         _extension(GL,KHR,context_flush_control),
@@ -267,11 +291,25 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,NV,read_stencil),
         _extension(GL,NV,read_depth_stencil),
         _extension(GL,NV,texture_border_clamp),
+        #ifndef MAGNUM_TARGET_GLES2
+        _extension(GL,NV,shader_noperspective_interpolation),
+        #endif
         _extension(GL,NV,polygon_mode),
         _extension(GL,OES,depth32),
         _extension(GL,OES,mapbuffer),
         _extension(GL,OES,stencil1),
-        _extension(GL,OES,stencil4)};
+        _extension(GL,OES,stencil4),
+        #ifndef MAGNUM_TARGET_GLES2
+        _extension(GL,OES,sample_shading),
+        _extension(GL,OES,sample_variables),
+        _extension(GL,OES,shader_image_atomic),
+        _extension(GL,OES,shader_multisample_interpolation),
+        #endif
+        _extension(GL,OES,texture_stencil8),
+        #ifndef MAGNUM_TARGET_GLES2
+        _extension(GL,OES,texture_storage_multisample_2d_array)
+        #endif
+        };
     #ifdef MAGNUM_TARGET_GLES2
     static const std::vector<Extension> extensionsES300{
         _extension(GL,ANGLE,framebuffer_blit),

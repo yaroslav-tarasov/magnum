@@ -62,6 +62,7 @@ struct MatrixTest: Corrade::TestSuite::Tester {
     void construct();
     void constructIdentity();
     void constructZero();
+    void constructNoInit();
     void constructConversion();
     void constructCopy();
     void convert();
@@ -93,6 +94,7 @@ MatrixTest::MatrixTest() {
     addTests<MatrixTest>({&MatrixTest::construct,
               &MatrixTest::constructIdentity,
               &MatrixTest::constructZero,
+              &MatrixTest::constructNoInit,
               &MatrixTest::constructConversion,
               &MatrixTest::constructCopy,
               &MatrixTest::convert,
@@ -133,8 +135,8 @@ void MatrixTest::construct() {
 
 void MatrixTest::constructIdentity() {
     constexpr Matrix4x4 identity;
-    constexpr Matrix4x4 identity2(Matrix4x4::Identity);
-    constexpr Matrix4x4 identity3(Matrix4x4::Identity, 4.0f);
+    constexpr Matrix4x4 identity2{IdentityInit};
+    constexpr Matrix4x4 identity3{IdentityInit, 4.0f};
 
     Matrix4x4 identityExpected(Vector4(1.0f, 0.0f, 0.0f, 0.0f),
                                Vector4(0.0f, 1.0f, 0.0f, 0.0f),
@@ -152,11 +154,23 @@ void MatrixTest::constructIdentity() {
 }
 
 void MatrixTest::constructZero() {
-    constexpr Matrix4x4 a(Matrix4x4::Zero);
+    constexpr Matrix4x4 a{ZeroInit};
     CORRADE_COMPARE(a, Matrix4x4(Vector4(0.0f, 0.0f, 0.0f, 0.0f),
                                  Vector4(0.0f, 0.0f, 0.0f, 0.0f),
                                  Vector4(0.0f, 0.0f, 0.0f, 0.0f),
                                  Vector4(0.0f, 0.0f, 0.0f, 0.0f)));
+}
+
+void MatrixTest::constructNoInit() {
+    Matrix4x4 a{Vector4(3.0f,  5.0f, 8.0f, -3.0f),
+                Vector4(4.5f,  4.0f, 7.0f,  2.0f),
+                Vector4(1.0f,  2.0f, 3.0f, -1.0f),
+                Vector4(7.9f, -1.0f, 8.0f, -1.5f)};
+    new(&a) Matrix4x4{NoInit};
+    CORRADE_COMPARE(a, Matrix4x4(Vector4(3.0f,  5.0f, 8.0f, -3.0f),
+                                 Vector4(4.5f,  4.0f, 7.0f,  2.0f),
+                                 Vector4(1.0f,  2.0f, 3.0f, -1.0f),
+                                 Vector4(7.9f, -1.0f, 8.0f, -1.5f)));
 }
 
 void MatrixTest::constructConversion() {
@@ -300,13 +314,13 @@ void MatrixTest::invertedOrthogonal() {
 template<class T> class BasicVec2: public Math::Vector<2, T> {
     public:
         /* MSVC 2013 can't cope with {} here */
-        template<class ...U> constexpr BasicVec2(U&&... args): Math::Vector<2, T>(std::forward<U>(args)...) {}
+        template<class ...U> constexpr BasicVec2(U&&... args): Math::Vector<2, T>(args...) {}
 };
 
 template<class T> class BasicMat2: public Math::Matrix<2, T> {
     public:
         /* MSVC 2013 can't cope with {} here */
-        template<class ...U> constexpr BasicMat2(U&&... args): Math::Matrix<2, T>(std::forward<U>(args)...) {}
+        template<class ...U> constexpr BasicMat2(U&&... args): Math::Matrix<2, T>(args...) {}
 
         MAGNUM_MATRIX_SUBCLASS_IMPLEMENTATION(2, BasicMat2, BasicVec2)
 };
@@ -333,8 +347,9 @@ void MatrixTest::subclassTypes() {
 }
 
 void MatrixTest::subclass() {
-    const Mat2 a(Vec2(2.0f, 3.5f),
-                 Vec2(3.0f, 1.0f));
+    /* Constexpr constructor */
+    constexpr Mat2 a(Vec2(2.0f, 3.5f),
+                     Vec2(3.0f, 1.0f));
     Mat2 b(Vec2(2.0f, 3.5f),
            Vec2(3.0f, 1.0f));
     CORRADE_COMPARE(a[1], Vec2(3.0f, 1.0f));

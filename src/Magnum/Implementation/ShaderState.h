@@ -34,11 +34,8 @@ namespace Magnum { namespace Implementation {
 struct ShaderState {
     explicit ShaderState():
         maxVertexOutputComponents{}, maxFragmentInputComponents{},
-        #ifndef MAGNUM_TARGET_GLES
-        maxTessellationControlInputComponents{}, maxTessellationControlOutputComponents{}, maxTessellationControlTotalOutputComponents{}, maxTessellationEvaluationInputComponents{}, maxTessellationEvaluationOutputComponents{}, maxGeometryInputComponents{}, maxGeometryOutputComponents{}, maxGeometryTotalOutputComponents{},
-        #endif
         #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
-        maxAtomicCounterBuffers{}, maxCombinedAtomicCounterBuffers{}, maxAtomicCounters{}, maxCombinedAtomicCounters{}, maxImageUniforms{}, maxCombinedImageUniforms{}, maxShaderStorageBlocks{}, maxCombinedShaderStorageBlocks{},
+        maxTessellationControlInputComponents{}, maxTessellationControlOutputComponents{}, maxTessellationControlTotalOutputComponents{}, maxTessellationEvaluationInputComponents{}, maxTessellationEvaluationOutputComponents{}, maxGeometryInputComponents{}, maxGeometryOutputComponents{}, maxGeometryTotalOutputComponents{}, maxAtomicCounterBuffers{}, maxCombinedAtomicCounterBuffers{}, maxAtomicCounters{}, maxCombinedAtomicCounters{}, maxImageUniforms{}, maxCombinedImageUniforms{}, maxShaderStorageBlocks{}, maxCombinedShaderStorageBlocks{},
         #endif
         maxTextureImageUnits{}, maxTextureImageUnitsCombined{},
         #ifndef MAGNUM_TARGET_GLES2
@@ -51,8 +48,8 @@ struct ShaderState {
         {}
 
     enum: std::size_t {
-        #ifndef MAGNUM_TARGET_GLES
-        StageCount = 5
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
+        StageCount = 4
         #else
         StageCount = 2
         #endif
@@ -60,7 +57,7 @@ struct ShaderState {
 
     GLint maxVertexOutputComponents,
         maxFragmentInputComponents;
-    #ifndef MAGNUM_TARGET_GLES
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     GLint maxTessellationControlInputComponents,
         maxTessellationControlOutputComponents,
         maxTessellationControlTotalOutputComponents,
@@ -69,8 +66,6 @@ struct ShaderState {
         maxGeometryInputComponents,
         maxGeometryOutputComponents,
         maxGeometryTotalOutputComponents;
-    #endif
-    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     GLint maxAtomicCounterBuffers[StageCount];
     GLint maxCombinedAtomicCounterBuffers;
     GLint maxAtomicCounters[StageCount];

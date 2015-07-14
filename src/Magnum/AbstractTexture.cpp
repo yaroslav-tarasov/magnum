@@ -333,22 +333,36 @@ void AbstractTexture::setLodBias(const Float bias) {
 
 #ifndef MAGNUM_TARGET_WEBGL
 void AbstractTexture::setBorderColor(const Color4& color) {
-    #ifndef MAGNUM_TARGET_GLES
-    (this->*Context::current()->state().texture->parameterfvImplementation)(GL_TEXTURE_BORDER_COLOR, color.data());
-    #else
-    (this->*Context::current()->state().texture->parameterfvImplementation)(GL_TEXTURE_BORDER_COLOR_NV, color.data());
-    #endif
+    (this->*Context::current()->state().texture->parameterfvImplementation)(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_TEXTURE_BORDER_COLOR,
+        #else
+        GL_TEXTURE_BORDER_COLOR_EXT,
+        #endif
+        color.data());
 }
-#endif
 
-#ifndef MAGNUM_TARGET_GLES
+#ifndef MAGNUM_TARGET_GLES2
 void AbstractTexture::setBorderColor(const Vector4ui& color) {
-    (this->*Context::current()->state().texture->parameterIuivImplementation)(GL_TEXTURE_BORDER_COLOR, color.data());
+    (this->*Context::current()->state().texture->parameterIuivImplementation)(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_TEXTURE_BORDER_COLOR,
+        #else
+        GL_TEXTURE_BORDER_COLOR_EXT,
+        #endif
+        color.data());
 }
 
 void AbstractTexture::setBorderColor(const Vector4i& color) {
-    (this->*Context::current()->state().texture->parameterIivImplementation)(GL_TEXTURE_BORDER_COLOR, color.data());
+    (this->*Context::current()->state().texture->parameterIivImplementation)(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_TEXTURE_BORDER_COLOR,
+        #else
+        GL_TEXTURE_BORDER_COLOR_EXT,
+        #endif
+        color.data());
 }
+#endif
 #endif
 
 void AbstractTexture::setMaxAnisotropy(const Float anisotropy) {
@@ -644,7 +658,7 @@ ColorFormat AbstractTexture::imageFormatForInternalFormat(const TextureFormat in
         #endif
             return ColorFormat::DepthComponent;
 
-        #ifndef MAGNUM_TARGET_GLES
+        #ifndef MAGNUM_TARGET_WEBGL
         case TextureFormat::StencilIndex8:
             return ColorFormat::StencilIndex;
         #endif
@@ -841,7 +855,7 @@ ColorType AbstractTexture::imageTypeForInternalFormat(const TextureFormat intern
             return ColorType::Float;
         #endif
 
-        #ifndef MAGNUM_TARGET_GLES
+        #ifndef MAGNUM_TARGET_WEBGL
         case TextureFormat::StencilIndex8:
             return ColorType::UnsignedByte;
         #endif
@@ -927,12 +941,18 @@ void AbstractTexture::parameterImplementationDSAEXT(GLenum parameter, const GLfl
 }
 #endif
 
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractTexture::parameterIImplementationDefault(GLenum parameter, const GLuint* values) {
     bindInternal();
-    glTexParameterIuiv(_target, parameter, values);
+    #ifndef MAGNUM_TARGET_GLES
+    glTexParameterIuiv
+    #else
+    glTexParameterIuivEXT
+    #endif
+        (_target, parameter, values);
 }
 
+#ifndef MAGNUM_TARGET_GLES
 void AbstractTexture::parameterIImplementationDSA(const GLenum parameter, const GLuint* const values) {
     glTextureParameterIuiv(_id, parameter, values);
 }
@@ -941,12 +961,19 @@ void AbstractTexture::parameterIImplementationDSAEXT(GLenum parameter, const GLu
     _flags |= ObjectFlag::Created;
     glTextureParameterIuivEXT(_id, _target, parameter, values);
 }
+#endif
 
 void AbstractTexture::parameterIImplementationDefault(GLenum parameter, const GLint* values) {
     bindInternal();
-    glTexParameterIiv(_target, parameter, values);
+    #ifndef MAGNUM_TARGET_GLES
+    glTexParameterIiv
+    #else
+    glTexParameterIivEXT
+    #endif
+        (_target, parameter, values);
 }
 
+#ifndef MAGNUM_TARGET_GLES
 void AbstractTexture::parameterIImplementationDSA(const GLenum parameter, const GLint* const values) {
     glTextureParameterIiv(_id, parameter, values);
 }
@@ -955,6 +982,7 @@ void AbstractTexture::parameterIImplementationDSAEXT(GLenum parameter, const GLi
     _flags |= ObjectFlag::Created;
     glTextureParameterIivEXT(_id, _target, parameter, values);
 }
+#endif
 #endif
 
 void AbstractTexture::setMaxAnisotropyImplementationNoOp(GLfloat) {}
@@ -1165,12 +1193,21 @@ void AbstractTexture::storageMultisampleImplementationFallback(const GLsizei sam
     bindInternal();
     glTexImage3DMultisample(_target, samples, GLenum(internalFormat), size.x(), size.y(), size.z(), fixedSampleLocations);
 }
+#endif
 
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void AbstractTexture::storageMultisampleImplementationDefault(const GLsizei samples, const TextureFormat internalFormat, const Vector3i& size, const GLboolean fixedSampleLocations) {
     bindInternal();
-    glTexStorage3DMultisample(_target, samples, GLenum(internalFormat), size.x(), size.y(), size.z(), fixedSampleLocations);
+    #ifndef MAGNUM_TARGET_GLES
+    glTexStorage3DMultisample
+    #else
+    glTexStorage3DMultisampleOES
+    #endif
+        (_target, samples, GLenum(internalFormat), size.x(), size.y(), size.z(), fixedSampleLocations);
 }
+#endif
 
+#ifndef MAGNUM_TARGET_GLES
 void AbstractTexture::storageMultisampleImplementationDSA(const GLsizei samples, const TextureFormat internalFormat, const Vector3i& size, const GLboolean fixedSampleLocations) {
     glTextureStorage3DMultisample(_id, samples, GLenum(internalFormat), size.x(), size.y(), size.z(), fixedSampleLocations);
 }
@@ -1399,9 +1436,7 @@ void AbstractTexture::DataHelper<3>::setStorage(AbstractTexture& texture, const 
 void AbstractTexture::DataHelper<2>::setStorageMultisample(AbstractTexture& texture, const GLsizei samples, const TextureFormat internalFormat, const Vector2i& size, const GLboolean fixedSampleLocations) {
     (texture.*Context::current()->state().texture->storage2DMultisampleImplementation)(samples, internalFormat, size, fixedSampleLocations);
 }
-#endif
 
-#ifndef MAGNUM_TARGET_GLES
 void AbstractTexture::DataHelper<3>::setStorageMultisample(AbstractTexture& texture, const GLsizei samples, const TextureFormat internalFormat, const Vector3i& size, const GLboolean fixedSampleLocations) {
     (texture.*Context::current()->state().texture->storage3DMultisampleImplementation)(samples, internalFormat, size, fixedSampleLocations);
 }

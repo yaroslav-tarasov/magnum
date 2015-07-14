@@ -59,9 +59,10 @@ stream in various graphics debuggers, such as Apitrace or gDEBugger.
 ## Basic usage
 
 Support for debug output is provided by OpenGL 4.3 or @extension{KHR,debug}
-(desktop/ES extension). Subset of the functionality is provided also by
-@extension2{EXT,debug_marker} (desktop/ES extensions) or
-@extension{GREMEDY,string_marker} (desktop only extension).
+(desktop/ES extension, covered also by @es_extension{ANDROID,extension_pack_es31a}).
+Subset of the functionality is provided also by @extension2{EXT,debug_marker}
+(desktop/ES extensions) or @extension{GREMEDY,string_marker} (desktop only
+extension).
 
 With OpenGL 4.3 or @extension{KHR,debug} desktop/ES extension, the debug output
 needs to be enabled first. It can be enabled globally using
@@ -301,7 +302,8 @@ class MAGNUM_EXPORT DebugOutput {
          *
          * The result is cached, repeated queries don't result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and @extension{KHR,debug}
-         * desktop or ES extension is not available, returns `0`.
+         * desktop or ES extension (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * is not available, returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_DEBUG_LOGGED_MESSAGES}
          */
         static Int maxLoggedMessages();
@@ -311,7 +313,8 @@ class MAGNUM_EXPORT DebugOutput {
          *
          * The result is cached, repeated queries don't result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and @extension{KHR,debug}
-         * desktop or ES extension is not available, returns `0`.
+         * desktop or ES extension (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * is not available, returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_DEBUG_MESSAGE_LENGTH}
          */
         static Int maxMessageLength();
@@ -326,7 +329,8 @@ class MAGNUM_EXPORT DebugOutput {
          *      for more information.
          *
          * If OpenGL 4.3 is not supported and @extension{KHR,debug} desktop or
-         * ES extension is not available, this function does nothing.
+         * ES extension (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * is not available, this function does nothing.
          * @see @ref Renderer::Feature::DebugOutput, @fn_gl{DebugMessageControl}
          */
         static void setEnabled(Source source, Type type, std::initializer_list<UnsignedInt> ids, bool enabled) {
@@ -378,7 +382,8 @@ class MAGNUM_EXPORT DebugOutput {
          *
          * The messages are sent to the callback only if
          * @ref Renderer::Feature::DebugOutput is enabled. If OpenGL 4.3 is not
-         * supported and @extension{KHR,debug} desktop or ES extension is not
+         * supported and @extension{KHR,debug} desktop or ES extension (covered
+         * also by @es_extension{ANDROID,extension_pack_es31a}) is not
          * available, this function does nothing.
          * @see @ref setDefaultCallback(),
          *      @ref Renderer::Feature::DebugOutputSynchronous,
@@ -433,10 +438,10 @@ gDEBugger.
 
 See @ref DebugOutput for introduction.
 
-If OpenGL 4.3 is supported or @extension{KHR,debug} desktop or ES extension is
-available and default debug output callback is enabled for given kind of
-messages, the inserted message will be printed on standard output in the
-following form:
+If OpenGL 4.3 is supported or @extension{KHR,debug} desktop or ES extension
+(covered also by @es_extension{ANDROID,extension_pack_es31a}) is available and
+default debug output callback is enabled for given kind of messages, the
+inserted message will be printed on standard output in the following form:
 
 @code
 DebugMessage::insert(DebugMessage::Source::Application, DebugMessage::Type::Marker,
@@ -652,7 +657,8 @@ class MAGNUM_EXPORT DebugMessage {
          * @param severity  Message severity
          * @param string    The actual message
          *
-         * If OpenGL 4.3 is not supported and neither @extension{KHR,debug} nor
+         * If OpenGL 4.3 is not supported and neither @extension{KHR,debug}
+         * (covered also by @es_extension{ANDROID,extension_pack_es31a}) nor
          * @extension2{EXT,debug_marker} (desktop or ES extensions) nor
          * @extension{GREMEDY,string_marker} (desktop only extension) are
          * available, this function does nothing.
@@ -731,10 +737,11 @@ Renderer::disable(Renderer::Feature::Blending);
 group.pop();
 @endcode
 
-If OpenGL 4.3 is supported or @extension{KHR,debug} desktop or ES extension is
-available and the default debug output callback is enabled for these kinds of
-messages, the group entering and leaving will be printed on standard output in
-the following form:
+If OpenGL 4.3 is supported or @extension{KHR,debug} desktop or ES extension
+(covered also by @es_extension{ANDROID,extension_pack_es31a}) is available and
+the default debug output callback is enabled for these kinds of messages, the
+group entering and leaving will be printed on standard output in the following
+form:
 
 > Debug output: application debug group enter (42): Scene rendering\n
 > Debug output: application debug group leave (42): Scene rendering
@@ -803,7 +810,8 @@ class MAGNUM_EXPORT DebugGroup {
          *
          * The result is cached, repeated queries don't result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and @extension{KHR,debug}
-         * desktop or ES extension is not available, returns `0`.
+         * desktop or ES extension (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * is not available, returns `0`.
          * @see @fn_gl{Get} with @def_gl{MAX_DEBUG_GROUP_STACK_DEPTH}
          */
         static Int maxStackDepth();
@@ -847,7 +855,8 @@ class MAGNUM_EXPORT DebugGroup {
          * @ref DebugOutput::Type::PushGroup and
          * @ref DebugOutput::Severity::Notification.
          *
-         * If OpenGL 4.3 is not supported and neither @extension{KHR,debug} nor
+         * If OpenGL 4.3 is not supported and neither @extension{KHR,debug}
+         * (covered also by @es_extension{ANDROID,extension_pack_es31a}) nor
          * @extension2{EXT,debug_marker} is available, this function does
          * nothing. If @extension{KHR,debug} is not available and only
          * @extension2{EXT,debug_marker} is available, only @p message is used
@@ -875,7 +884,8 @@ class MAGNUM_EXPORT DebugGroup {
          * @ref DebugOutput::Type::PopGroup and
          * @ref DebugOutput::Severity::Notification.
          *
-         * If OpenGL 4.3 is not supported and neither @extension{KHR,debug} nor
+         * If OpenGL 4.3 is not supported and neither @extension{KHR,debug}
+         * (covered also by @es_extension{ANDROID,extension_pack_es31a}) nor
          * @extension2{EXT,debug_marker} is available, this function does
          * nothing.
          * @see @ref push(), @ref Renderer::Error::StackUnderflow,

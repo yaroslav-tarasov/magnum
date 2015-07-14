@@ -97,7 +97,9 @@ documentation for more information about usage in shaders.
  */
 template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
     public:
-        static const UnsignedInt Dimensions = dimensions; /**< @brief Texture dimension count */
+        enum: UnsignedInt {
+            Dimensions = dimensions /**< Texture dimension count */
+        };
 
         /**
          * @brief Max supported texture array size
@@ -133,8 +135,8 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          * Creates new OpenGL texture object. If @extension{ARB,direct_state_access}
          * (part of OpenGL 4.5) is not available, the texture is created on
          * first use.
-         * @see @ref wrap(), @fn_gl{CreateTextures} with
-         *      @def_gl{TEXTURE_1D_ARRAY} or @def_gl{TEXTURE_2D_ARRAY},
+         * @see @ref TextureArray(NoCreateT), @ref wrap(), @fn_gl{CreateTextures}
+         *      with @def_gl{TEXTURE_1D_ARRAY} or @def_gl{TEXTURE_2D_ARRAY},
          *      eventually @fn_gl{GenTextures}
          */
         explicit TextureArray(): AbstractTexture(Implementation::textureArrayTarget<dimensions>()) {}
@@ -149,6 +151,16 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
             return *this;
         }
         #endif
+
+        /**
+         * @brief Construct without creating the underlying OpenGL object
+         *
+         * The constructed instance is equivalent to moved-from state. Useful
+         * in cases where you will overwrite the instance later anyway. Move
+         * another object over it to make it useful.
+         * @see @ref TextureArray(), @ref wrap()
+         */
+        explicit TextureArray(NoCreateT) noexcept: AbstractTexture{NoCreate, Implementation::textureArrayTarget<dimensions>()} {}
 
         /**
          * @copybrief Texture::setBaseLevel()
@@ -249,16 +261,16 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          *
          * See @ref Texture::setBorderColor(const Color4&) for more
          * information.
-         * @requires_es_extension Extension @es_extension{NV,texture_border_clamp}
+         * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+         *      @es_extension{EXT,texture_border_clamp} or
+         *      @es_extension{NV,texture_border_clamp}
          * @requires_gles Border clamp is not available in WebGL.
          */
         TextureArray<dimensions>& setBorderColor(const Color4& color) {
             AbstractTexture::setBorderColor(color);
             return *this;
         }
-        #endif
 
-        #ifndef MAGNUM_TARGET_GLES
         /**
          * @copybrief Texture::setBorderColor(const Vector4ui&)
          * @return Reference to self (for method chaining)
@@ -266,8 +278,9 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          * See @ref Texture::setBorderColor(const Vector4ui&) for more
          * information.
          * @requires_gl30 Extension @extension{EXT,texture_integer}
-         * @requires_gl Border clamp is available only for float textures in
-         *      OpenGL ES. Border clamp is not available in WebGL.
+         * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+         *      @es_extension{EXT,texture_border_clamp}
+         * @requires_gles Border clamp is not available in WebGL.
          */
         TextureArray<dimensions>& setBorderColor(const Vector4ui& color) {
             AbstractTexture::setBorderColor(color);
@@ -276,8 +289,9 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
 
         /** @overload
          * @requires_gl30 Extension @extension{EXT,texture_integer}
-         * @requires_gl Border clamp is available only for float textures in
-         *      OpenGL ES. Border clamp is not available in WebGL.
+         * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+         *      @es_extension{EXT,texture_border_clamp}
+         * @requires_gles Border clamp is not available in WebGL.
          */
         TextureArray<dimensions>& setBorderColor(const Vector4i& color) {
             AbstractTexture::setBorderColor(color);
@@ -303,7 +317,8 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          *
          * See @ref Texture::setSRGBDecode() for more information.
          * @requires_extension Extension @extension{EXT,texture_sRGB_decode}
-         * @requires_es_extension Extension @es_extension2{EXT,texture_sRGB_decode,texture_sRGB_decode}
+         * @requires_es_extension Extension  @es_extension{ANDROID,extension_pack_es31a}/
+         *      @es_extension2{EXT,texture_sRGB_decode,texture_sRGB_decode}
          * @requires_gles SRGB decode is not available in WebGL.
          */
         TextureArray<dimensions>& setSRGBDecode(bool decode) {

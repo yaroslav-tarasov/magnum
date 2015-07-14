@@ -61,12 +61,10 @@ namespace {
 std::string shaderName(const Shader::Type type) {
     switch(type) {
         case Shader::Type::Vertex:                  return "vertex";
-        #ifndef MAGNUM_TARGET_GLES
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         case Shader::Type::Geometry:                return "geometry";
         case Shader::Type::TessellationControl:     return "tessellation control";
         case Shader::Type::TessellationEvaluation:  return "tessellation evaluation";
-        #endif
-        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         case Shader::Type::Compute:                 return "compute";
         #endif
         case Shader::Type::Fragment:                return "fragment";
@@ -81,8 +79,6 @@ UnsignedInt typeToIndex(const Shader::Type type) {
         case Shader::Type::Fragment:                return 1;
         #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         case Shader::Type::Compute:                 return 2;
-        #endif
-        #ifndef MAGNUM_TARGET_GLES
         case Shader::Type::Geometry:                return 3;
         case Shader::Type::TessellationControl:     return 4;
         case Shader::Type::TessellationEvaluation:  return 5;
@@ -101,6 +97,19 @@ bool isTypeSupported(const Shader::Type type) {
         return false;
 
     if(type == Shader::Type::Compute && !Context::current()->isExtensionSupported<Extensions::GL::ARB::compute_shader>())
+        return false;
+
+    return true;
+}
+#elif !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
+bool isTypeSupported(const Shader::Type type) {
+    if(type == Shader::Type::Geometry && !Context::current()->isExtensionSupported<Extensions::GL::EXT::geometry_shader>())
+        return false;
+
+    if((type == Shader::Type::TessellationControl || type == Shader::Type::TessellationEvaluation) && !Context::current()->isExtensionSupported<Extensions::GL::EXT::tessellation_shader>())
+        return false;
+
+    if(type == Shader::Type::Compute && !Context::current()->isVersionSupported(Version::GLES310))
         return false;
 
     return true;
@@ -132,109 +141,189 @@ Int Shader::maxVertexOutputComponents() {
     return value;
 }
 
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 Int Shader::maxTessellationControlInputComponents() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::tessellation_shader>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::tessellation_shader>())
+        return 0;
+    #endif
 
     GLint& value = Context::current()->state().shader->maxTessellationControlInputComponents;
 
     /* Get the value, if not already cached */
-    if(value == 0)
-        glGetIntegerv(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS, &value);
+    if(value == 0) glGetIntegerv(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_MAX_TESS_CONTROL_INPUT_COMPONENTS,
+        #else
+        GL_MAX_TESS_CONTROL_INPUT_COMPONENTS_EXT,
+        #endif
+        &value);
 
     return value;
 }
 
 Int Shader::maxTessellationControlOutputComponents() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::tessellation_shader>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::tessellation_shader>())
+        return 0;
+    #endif
 
     GLint& value = Context::current()->state().shader->maxTessellationControlOutputComponents;
 
     /* Get the value, if not already cached */
-    if(value == 0)
-        glGetIntegerv(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS, &value);
+    if(value == 0) glGetIntegerv(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS,
+        #else
+        GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS_EXT,
+        #endif
+        &value);
 
     return value;
 }
 
 Int Shader::maxTessellationControlTotalOutputComponents() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::tessellation_shader>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::tessellation_shader>())
+        return 0;
+    #endif
 
     GLint& value = Context::current()->state().shader->maxTessellationControlTotalOutputComponents;
 
     /* Get the value, if not already cached */
-    if(value == 0)
-        glGetIntegerv(GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS, &value);
+    if(value == 0) glGetIntegerv(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS,
+        #else
+        GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS_EXT,
+        #endif
+        &value);
 
     return value;
 }
 
 Int Shader::maxTessellationEvaluationInputComponents() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::tessellation_shader>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::tessellation_shader>())
+        return 0;
+    #endif
 
     GLint& value = Context::current()->state().shader->maxTessellationEvaluationInputComponents;
 
     /* Get the value, if not already cached */
-    if(value == 0)
-        glGetIntegerv(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS, &value);
+    if(value == 0) glGetIntegerv(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS,
+        #else
+        GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS_EXT,
+        #endif
+        &value);
 
     return value;
 }
 
 Int Shader::maxTessellationEvaluationOutputComponents() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::tessellation_shader>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::tessellation_shader>())
+        return 0;
+    #endif
 
     GLint& value = Context::current()->state().shader->maxTessellationEvaluationOutputComponents;
 
     /* Get the value, if not already cached */
-    if(value == 0)
-        glGetIntegerv(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS, &value);
+    if(value == 0) glGetIntegerv(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS,
+        #else
+        GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS_EXT,
+        #endif
+        &value);
 
     return value;
 }
 
 Int Shader::maxGeometryInputComponents() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::geometry_shader4>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::geometry_shader>())
+        return 0;
+    #endif
 
     GLint& value = Context::current()->state().shader->maxGeometryInputComponents;
 
     /* Get the value, if not already cached */
     /** @todo The extension has only `GL_MAX_GEOMETRY_VARYING_COMPONENTS_ARB`, this is supported since GL 3.2 (wtf?) */
-    if(value == 0)
-        glGetIntegerv(GL_MAX_GEOMETRY_INPUT_COMPONENTS, &value);
+    if(value == 0) glGetIntegerv(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_MAX_GEOMETRY_INPUT_COMPONENTS,
+        #else
+        GL_MAX_GEOMETRY_INPUT_COMPONENTS_EXT,
+        #endif
+        &value);
 
     return value;
 }
 
 Int Shader::maxGeometryOutputComponents() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::geometry_shader4>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::geometry_shader>())
+        return 0;
+    #endif
 
     GLint& value = Context::current()->state().shader->maxGeometryOutputComponents;
 
     /* Get the value, if not already cached */
     /** @todo The extension has only `GL_MAX_GEOMETRY_OUTPUT_VERTICES_ARB`, this is supported since GL 3.2 (wtf?) */
-    if(value == 0)
-        glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS, &value);
+    if(value == 0) glGetIntegerv(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_MAX_GEOMETRY_OUTPUT_COMPONENTS,
+        #else
+        GL_MAX_GEOMETRY_OUTPUT_COMPONENTS_EXT,
+        #endif
+        &value);
 
     return value;
 }
 
 Int Shader::maxGeometryTotalOutputComponents() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::geometry_shader4>())
         return 0;
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::geometry_shader>())
+        return 0;
+    #endif
 
     GLint& value = Context::current()->state().shader->maxGeometryTotalOutputComponents;
 
     /* Get the value, if not already cached */
-    if(value == 0)
-        glGetIntegerv(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, &value);
+    if(value == 0) glGetIntegerv(
+        #ifndef MAGNUM_TARGET_GLES
+        GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS,
+        #else
+        GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS_EXT,
+        #endif
+        &value);
 
     return value;
 }
@@ -281,13 +370,13 @@ Int Shader::maxAtomicCounterBuffers(const Type type) {
     constexpr static GLenum what[] = {
         GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS,
         GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS,
-        #ifndef MAGNUM_TARGET_GLES2
         GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS,
-        #endif
         #ifndef MAGNUM_TARGET_GLES
         GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS,
         GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS,
         GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS
+        #else
+        GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS_EXT
         #endif
     };
     if(value == 0)
@@ -332,13 +421,13 @@ Int Shader::maxAtomicCounters(const Type type) {
     constexpr static GLenum what[] = {
         GL_MAX_VERTEX_ATOMIC_COUNTERS,
         GL_MAX_FRAGMENT_ATOMIC_COUNTERS,
-        #ifndef MAGNUM_TARGET_GLES2
         GL_MAX_COMPUTE_ATOMIC_COUNTERS,
-        #endif
         #ifndef MAGNUM_TARGET_GLES
         GL_MAX_GEOMETRY_ATOMIC_COUNTERS,
         GL_MAX_TESS_CONTROL_ATOMIC_COUNTERS,
         GL_MAX_TESS_EVALUATION_ATOMIC_COUNTERS,
+        #else
+        GL_MAX_GEOMETRY_ATOMIC_COUNTERS_EXT
         #endif
     };
     if(value == 0)
@@ -383,13 +472,13 @@ Int Shader::maxImageUniforms(const Type type) {
     constexpr static GLenum what[] = {
         GL_MAX_VERTEX_IMAGE_UNIFORMS,
         GL_MAX_FRAGMENT_IMAGE_UNIFORMS,
-        #ifndef MAGNUM_TARGET_GLES2
         GL_MAX_COMPUTE_IMAGE_UNIFORMS,
-        #endif
         #ifndef MAGNUM_TARGET_GLES
         GL_MAX_GEOMETRY_IMAGE_UNIFORMS,
         GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS,
         GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS
+        #else
+        GL_MAX_GEOMETRY_IMAGE_UNIFORMS_EXT
         #endif
     };
     if(value == 0)
@@ -434,13 +523,13 @@ Int Shader::maxShaderStorageBlocks(const Type type) {
     constexpr static GLenum what[] = {
         GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS,
         GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS,
-        #ifndef MAGNUM_TARGET_GLES2
         GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS,
-        #endif
         #ifndef MAGNUM_TARGET_GLES
         GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS,
         GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS,
         GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS
+        #else
+        GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS_EXT
         #endif
     };
     if(value == 0)
@@ -485,6 +574,8 @@ Int Shader::maxTextureImageUnits(const Type type) {
         GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS,
         GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS,
         GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS
+        #elif !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
+        GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS_EXT
         #endif
     };
     if(value == 0)
@@ -526,6 +617,8 @@ Int Shader::maxUniformBlocks(const Type type) {
         GL_MAX_GEOMETRY_UNIFORM_BLOCKS,
         GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS,
         GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS
+        #elif !defined(MAGNUM_TARGET_WEBGL)
+        GL_MAX_GEOMETRY_UNIFORM_BLOCKS_EXT
         #endif
     };
     if(value == 0)
@@ -569,6 +662,8 @@ Int Shader::maxUniformComponents(const Type type) {
         GL_MAX_GEOMETRY_UNIFORM_COMPONENTS,
         GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS,
         GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS
+        #elif !defined(MAGNUM_TARGET_WEBGL)
+        GL_MAX_GEOMETRY_UNIFORM_COMPONENTS_EXT
         #endif
     };
     if(value == 0)
@@ -612,6 +707,8 @@ Int Shader::maxCombinedUniformComponents(const Type type) {
         GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS,
         GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS,
         GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS
+        #elif !defined(MAGNUM_TARGET_WEBGL)
+        GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS_EXT,
         #endif
     };
     if(value == 0)
@@ -823,12 +920,10 @@ Debug operator<<(Debug debug, const Shader::Type value) {
     switch(value) {
         #define _c(value) case Shader::Type::value: return debug << "Shader::Type::" #value;
         _c(Vertex)
-        #ifndef MAGNUM_TARGET_GLES
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         _c(TessellationControl)
         _c(TessellationEvaluation)
         _c(Geometry)
-        #endif
-        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         _c(Compute)
         #endif
         _c(Fragment)

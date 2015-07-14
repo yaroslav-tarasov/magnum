@@ -254,7 +254,20 @@ template<class T> class BasicColor3: public Math::Vector3<T> {
          *
          * All components are set to zero.
          */
-        constexpr /*implicit*/ BasicColor3() {}
+        constexpr /*implicit*/ BasicColor3(Math::ZeroInitT = Math::ZeroInit)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Math::Vector3<T>{Math::ZeroInit}
+            #endif
+            {}
+
+        /** @copydoc Math::Vector::Vector(NoInitT) */
+        explicit BasicColor3(Math::NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Math::Vector3<T>{Math::NoInit}
+            #endif
+            {}
 
         /**
          * @brief Gray constructor
@@ -441,6 +454,22 @@ class BasicColor4: public Math::Vector4<T> {
          * floating-point types and maximum positive value for integral types.
          */
         constexpr /*implicit*/ BasicColor4(): Math::Vector4<T>(T(0), T(0), T(0), Implementation::fullChannel<T>()) {}
+
+        /** @copydoc Math::Vector::Vector(ZeroInitT) */
+        constexpr explicit BasicColor4(Math::ZeroInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Math::Vector4<T>{Math::ZeroInit}
+            #endif
+            {}
+
+        /** @copydoc Math::Vector::Vector(NoInitT) */
+        explicit BasicColor4(Math::NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Math::Vector4<T>{Math::NoInit}
+            #endif
+            {}
 
         /**
          * @copydoc BasicColor3::BasicColor3(T)

@@ -60,7 +60,9 @@ struct DualQuaternionTest: Corrade::TestSuite::Tester {
     explicit DualQuaternionTest();
 
     void construct();
-    void constructDefault();
+    void constructIdentity();
+    void constructZero();
+    void constructNoInit();
     void constructFromVector();
     void constructCopy();
     void convert();
@@ -97,7 +99,9 @@ typedef Math::Vector3<Float> Vector3;
 
 DualQuaternionTest::DualQuaternionTest() {
     addTests<DualQuaternionTest>({&DualQuaternionTest::construct,
-              &DualQuaternionTest::constructDefault,
+              &DualQuaternionTest::constructIdentity,
+              &DualQuaternionTest::constructZero,
+              &DualQuaternionTest::constructNoInit,
               &DualQuaternionTest::constructFromVector,
               &DualQuaternionTest::constructCopy,
               &DualQuaternionTest::convert,
@@ -125,7 +129,7 @@ DualQuaternionTest::DualQuaternionTest() {
 }
 
 void DualQuaternionTest::construct() {
-    constexpr DualQuaternion a({{1.0f, 2.0f, 3.0f}, -4.0f}, {{0.5f, -3.1f, 3.3f}, 2.0f});
+    constexpr DualQuaternion a = {{{1.0f, 2.0f, 3.0f}, -4.0f}, {{0.5f, -3.1f, 3.3f}, 2.0f}};
     CORRADE_COMPARE(a, DualQuaternion({{1.0f, 2.0f, 3.0f}, -4.0f}, {{0.5f, -3.1f, 3.3f}, 2.0f}));
 
     constexpr Quaternion b = a.real();
@@ -138,10 +142,24 @@ void DualQuaternionTest::construct() {
     CORRADE_COMPARE(d, DualQuaternion({{1.0f, 2.0f, 3.0f}, -4.0f}, {{0.0f, 0.0f, 0.0f}, 0.0f}));
 }
 
-void DualQuaternionTest::constructDefault() {
+void DualQuaternionTest::constructIdentity() {
     constexpr DualQuaternion a;
+    constexpr DualQuaternion b{IdentityInit};
     CORRADE_COMPARE(a, DualQuaternion({{0.0f, 0.0f, 0.0f}, 1.0f}, {{0.0f, 0.0f, 0.0f}, 0.0f}));
+    CORRADE_COMPARE(b, DualQuaternion({{0.0f, 0.0f, 0.0f}, 1.0f}, {{0.0f, 0.0f, 0.0f}, 0.0f}));
     CORRADE_COMPARE(a.length(), 1.0f);
+    CORRADE_COMPARE(b.length(), 1.0f);
+}
+
+void DualQuaternionTest::constructZero() {
+    constexpr DualQuaternion a{ZeroInit};
+    CORRADE_COMPARE(a, DualQuaternion({{0.0f, 0.0f, 0.0f}, 0.0f}, {{0.0f, 0.0f, 0.0f}, 0.0f}));
+}
+
+void DualQuaternionTest::constructNoInit() {
+    DualQuaternion a{{{1.0f, 2.0f, 3.0f}, -4.0f}, {{0.5f, -3.1f, 3.3f}, 2.0f}};
+    new(&a) DualQuaternion{NoInit};
+    CORRADE_COMPARE(a, DualQuaternion({{1.0f, 2.0f, 3.0f}, -4.0f}, {{0.5f, -3.1f, 3.3f}, 2.0f}));
 }
 
 void DualQuaternionTest::constructFromVector() {

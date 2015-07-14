@@ -111,8 +111,21 @@ template<class T> class Vector2: public Vector<2, T> {
         }
         #endif
 
-        /** @copydoc Vector::Vector() */
-        constexpr /*implicit*/ Vector2() {}
+        /** @copydoc Vector::Vector(ZeroInitT) */
+        constexpr /*implicit*/ Vector2(ZeroInitT = ZeroInit)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Vector<2, T>{ZeroInit}
+            #endif
+            {}
+
+        /** @copydoc Vector::Vector(NoInitT) */
+        explicit Vector2(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Vector<2, T>{NoInit}
+            #endif
+            {}
 
         /** @copydoc Vector::Vector(T) */
         constexpr explicit Vector2(T value): Vector<2, T>(value) {}

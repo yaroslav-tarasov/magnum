@@ -422,8 +422,8 @@ Int AbstractShaderProgram::uniformLocationInternal(const Containers::ArrayView<c
     return location;
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Float* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform1fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Float> values) {
+    (this->*Context::current()->state().shaderProgram->uniform1fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const GLfloat* const values) {
@@ -450,8 +450,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<2, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform2fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location,  const Containers::ArrayView<const Math::Vector<2, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform2fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<2, GLfloat>* const values) {
@@ -478,8 +478,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<3, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform3fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<3, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform3fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<3, GLfloat>* const values) {
@@ -506,8 +506,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<4, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform4fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<4, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform4fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<4, GLfloat>* const values) {
@@ -534,11 +534,11 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Int* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform1ivImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Int> values) {
+    (this->*Context::current()->state().shaderProgram->uniform1ivImplementation)(location, values.size(), values);
 }
 
-void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const GLint* const values) {
+void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const GLint* values) {
     use();
     glUniform1iv(location, count, values);
 }
@@ -562,8 +562,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<2, Int>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform2ivImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<2, Int>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform2ivImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<2, GLint>* const values) {
@@ -590,8 +590,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<3, Int>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform3ivImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<3, Int>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform3ivImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<3, GLint>* const values) {
@@ -618,8 +618,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<4, Int>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform4ivImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<4, Int>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform4ivImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<4, GLint>* const values) {
@@ -647,8 +647,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 #endif
 
 #ifndef MAGNUM_TARGET_GLES2
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const UnsignedInt* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform1uivImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const UnsignedInt> values) {
+    (this->*Context::current()->state().shaderProgram->uniform1uivImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const GLuint* const values) {
@@ -666,8 +666,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<2, UnsignedInt>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform2uivImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<2, UnsignedInt>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform2uivImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<2, GLuint>* const values) {
@@ -685,8 +685,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<3, UnsignedInt>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform3uivImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<3, UnsignedInt>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform3uivImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<3, GLuint>* const values) {
@@ -704,8 +704,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<4, UnsignedInt>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform4uivImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<4, UnsignedInt>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform4uivImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<4, GLuint>* const values) {
@@ -725,8 +725,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 #endif
 
 #ifndef MAGNUM_TARGET_GLES
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Double* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform1dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Double> values) {
+    (this->*Context::current()->state().shaderProgram->uniform1dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const GLdouble* const values) {
@@ -742,8 +742,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniform1dvEXT(_id, location, count, values);
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<2, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform2dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<2, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform2dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<2, GLdouble>* const values) {
@@ -759,8 +759,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniform2dvEXT(_id, location, count, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<3, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform3dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<3, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform3dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<3, GLdouble>* const values) {
@@ -776,8 +776,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniform3dvEXT(_id, location, count, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::Vector<4, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniform4dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::Vector<4, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniform4dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::Vector<4, GLdouble>* const values) {
@@ -794,8 +794,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<2, 2, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix2fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<2, 2, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix2fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 2, GLfloat>* const values) {
@@ -822,8 +822,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 3, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix3fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<3, 3, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix3fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 3, GLfloat>* const values) {
@@ -850,8 +850,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 4, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix4fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<4, 4, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix4fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 4, GLfloat>* const values) {
@@ -879,8 +879,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 #endif
 
 #ifndef MAGNUM_TARGET_GLES2
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<2, 3, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix2x3fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<2, 3, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix2x3fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 3, GLfloat>* const values) {
@@ -898,8 +898,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 2, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix3x2fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<3, 2, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix3x2fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 2, GLfloat>* const values) {
@@ -917,8 +917,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<2, 4, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix2x4fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<2, 4, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix2x4fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 4, GLfloat>* const values) {
@@ -936,8 +936,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 2, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix4x2fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<4, 2, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix4x2fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 2, GLfloat>* const values) {
@@ -955,8 +955,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 4, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix3x4fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<3, 4, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix3x4fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 4, GLfloat>* const values) {
@@ -974,8 +974,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 }
 #endif
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 3, Float>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix4x3fvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<4, 3, Float>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix4x3fvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 3, GLfloat>* const values) {
@@ -995,8 +995,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT_SSOEXT(const GLint locat
 #endif
 
 #ifndef MAGNUM_TARGET_GLES
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<2, 2, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix2dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<2, 2, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix2dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 2, GLdouble>* const values) {
@@ -1012,8 +1012,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniformMatrix2dvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 3, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix3dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<3, 3, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix3dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 3, GLdouble>* const values) {
@@ -1029,8 +1029,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniformMatrix3dvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 4, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix4dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<4, 4, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix4dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 4, GLdouble>* const values) {
@@ -1046,8 +1046,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniformMatrix4dvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<2, 3, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix2x3dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<2, 3, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix2x3dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 3, GLdouble>* const values) {
@@ -1063,8 +1063,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniformMatrix2x3dvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 2, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix3x2dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<3, 2, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix3x2dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 2, GLdouble>* const values) {
@@ -1080,8 +1080,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniformMatrix3x2dvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<2, 4, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix2x4dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<2, 4, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix2x4dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<2, 4, GLdouble>* const values) {
@@ -1097,8 +1097,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniformMatrix2x4dvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 2, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix4x2dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<4, 2, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix4x2dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 2, GLdouble>* const values) {
@@ -1114,8 +1114,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniformMatrix4x2dvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<3, 4, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix3x4dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<3, 4, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix3x4dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<3, 4, GLdouble>* const values) {
@@ -1131,8 +1131,8 @@ void AbstractShaderProgram::uniformImplementationDSAEXT(const GLint location, co
     glProgramUniformMatrix3x4dvEXT(_id, location, count, GL_FALSE, values[0].data());
 }
 
-void AbstractShaderProgram::setUniform(const Int location, const UnsignedInt count, const Math::RectangularMatrix<4, 3, Double>* const values) {
-    (this->*Context::current()->state().shaderProgram->uniformMatrix4x3dvImplementation)(location, count, values);
+void AbstractShaderProgram::setUniform(const Int location, const Containers::ArrayView<const Math::RectangularMatrix<4, 3, Double>> values) {
+    (this->*Context::current()->state().shaderProgram->uniformMatrix4x3dvImplementation)(location, values.size(), values);
 }
 
 void AbstractShaderProgram::uniformImplementationDefault(const GLint location, const GLsizei count, const Math::RectangularMatrix<4, 3, GLdouble>* const values) {

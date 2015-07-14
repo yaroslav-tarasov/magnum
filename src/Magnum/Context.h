@@ -114,8 +114,9 @@ class MAGNUM_EXPORT Context {
         enum class Flag: GLint {
             /**
              * Debug context
-             * @requires_gl43 Extension @es_extension{KHR,debug}
-             * @requires_es_extension Extension @es_extension{KHR,debug}
+             * @requires_gl43 Extension @extension{KHR,debug}
+             * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+             *      @es_extension2{KHR,debug,debug}
              */
             #ifndef MAGNUM_TARGET_GLES
             Debug = GL_CONTEXT_FLAG_DEBUG_BIT,
@@ -476,8 +477,8 @@ class MAGNUM_EXPORT Context {
         Flags _flags;
         #endif
 
-        std::array<Version, 160> _extensionRequiredVersion;
-        std::bitset<160> _extensionStatus;
+        std::array<Version, 256> _extensionRequiredVersion;
+        std::bitset<256> _extensionStatus;
         std::vector<Extension> _supportedExtensions;
 
         Implementation::State* _state;

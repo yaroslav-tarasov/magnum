@@ -34,6 +34,7 @@
 #include "Magnum/AbstractObject.h"
 #include "Magnum/DimensionTraits.h"
 #include "Magnum/Sampler.h"
+#include "Magnum/Tags.h"
 
 #ifdef CORRADE_GCC45_COMPATIBILITY
 #include "Buffer.h"
@@ -290,8 +291,9 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
          *
          * The result is *not* cached, repeated queries will result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function returns empty string.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function returns empty string.
          * @see @fn_gl{GetObjectLabel} or
          *      @fn_gl_extension2{GetObjectLabel,EXT,debug_label} with
          *      @def_gl{TEXTURE}
@@ -304,8 +306,9 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
          * @return Reference to self (for method chaining)
          *
          * Default is empty string. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function does nothing.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function does nothing.
          * @see @ref maxLabelLength(), @fn_gl{ObjectLabel} or
          *      @fn_gl_extension2{LabelObject,EXT,debug_label} with
          *      @def_gl{TEXTURE}
@@ -347,6 +350,7 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
         template<UnsignedInt textureDimensions> struct DataHelper {};
 
         explicit AbstractTexture(GLenum target);
+        explicit AbstractTexture(NoCreateT, GLenum target) noexcept: _target{target}, _id{0}, _flags{ObjectFlag::DeleteOnDestruction} {}
         explicit AbstractTexture(GLuint id, GLenum target, ObjectFlags flags) noexcept: _target{target}, _id{id}, _flags{flags} {}
 
         #ifndef MAGNUM_TARGET_WEBGL
@@ -373,10 +377,10 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
         #endif
         #ifndef MAGNUM_TARGET_WEBGL
         void setBorderColor(const Color4& color);
-        #endif
-        #ifndef MAGNUM_TARGET_GLES
+        #ifndef MAGNUM_TARGET_GLES2
         void setBorderColor(const Vector4i& color);
         void setBorderColor(const Vector4ui& color);
+        #endif
         #endif
         void setMaxAnisotropy(Float anisotropy);
         #ifndef MAGNUM_TARGET_WEBGL
@@ -445,7 +449,7 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
         void MAGNUM_LOCAL parameterImplementationDefault(GLenum parameter, const GLint* values);
         #endif
         void MAGNUM_LOCAL parameterImplementationDefault(GLenum parameter, const GLfloat* values);
-        #ifndef MAGNUM_TARGET_GLES
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         void MAGNUM_LOCAL parameterIImplementationDefault(GLenum parameter, const GLuint* values);
         void MAGNUM_LOCAL parameterIImplementationDefault(GLenum parameter, const GLint* values);
         #endif
@@ -512,19 +516,16 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
 
         #ifndef MAGNUM_TARGET_GLES
         void MAGNUM_LOCAL storageMultisampleImplementationFallback(GLsizei samples, TextureFormat internalFormat, const Vector2i& size, GLboolean fixedsamplelocations);
+        void MAGNUM_LOCAL storageMultisampleImplementationFallback(GLsizei samples, TextureFormat internalFormat, const Vector3i& size, GLboolean fixedsamplelocations);
         #endif
         #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         void MAGNUM_LOCAL storageMultisampleImplementationDefault(GLsizei samples, TextureFormat internalFormat, const Vector2i& size, GLboolean fixedsamplelocations);
+        void MAGNUM_LOCAL storageMultisampleImplementationDefault(GLsizei samples, TextureFormat internalFormat, const Vector3i& size, GLboolean fixedsamplelocations);
         #endif
         #ifndef MAGNUM_TARGET_GLES
         void MAGNUM_LOCAL storageMultisampleImplementationDSA(GLsizei samples, TextureFormat internalFormat, const Vector2i& size, GLboolean fixedsamplelocations);
-        void MAGNUM_LOCAL storageMultisampleImplementationDSAEXT(GLsizei samples, TextureFormat internalFormat, const Vector2i& size, GLboolean fixedsamplelocations);
-        #endif
-
-        #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL storageMultisampleImplementationFallback(GLsizei samples, TextureFormat internalFormat, const Vector3i& size, GLboolean fixedsamplelocations);
-        void MAGNUM_LOCAL storageMultisampleImplementationDefault(GLsizei samples, TextureFormat internalFormat, const Vector3i& size, GLboolean fixedsamplelocations);
         void MAGNUM_LOCAL storageMultisampleImplementationDSA(GLsizei samples, TextureFormat internalFormat, const Vector3i& size, GLboolean fixedsamplelocations);
+        void MAGNUM_LOCAL storageMultisampleImplementationDSAEXT(GLsizei samples, TextureFormat internalFormat, const Vector2i& size, GLboolean fixedsamplelocations);
         void MAGNUM_LOCAL storageMultisampleImplementationDSAEXT(GLsizei samples, TextureFormat internalFormat, const Vector3i& size, GLboolean fixedsamplelocations);
         #endif
 
@@ -631,7 +632,7 @@ template<> struct MAGNUM_EXPORT AbstractTexture::DataHelper<3> {
 
     static void setStorage(AbstractTexture& texture, GLsizei levels, TextureFormat internalFormat, const Vector3i& size);
 
-    #ifndef MAGNUM_TARGET_GLES
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     static void setStorageMultisample(AbstractTexture& texture, GLsizei samples, TextureFormat internalFormat, const Vector3i& size, GLboolean fixedSampleLocations);
     #endif
 

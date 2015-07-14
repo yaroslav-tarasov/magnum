@@ -34,6 +34,7 @@ struct AngleTest: Corrade::TestSuite::Tester {
     explicit AngleTest();
 
     void construct();
+    void constructNoInit();
     void literals();
     void conversion();
 
@@ -50,6 +51,7 @@ typedef Math::Rad<Double> Radd;
 
 AngleTest::AngleTest() {
     addTests<AngleTest>({&AngleTest::construct,
+              &AngleTest::constructNoInit,
               &AngleTest::literals,
               &AngleTest::conversion,
 
@@ -59,14 +61,20 @@ AngleTest::AngleTest() {
 
 void AngleTest::construct() {
     /* Default constructor */
-    constexpr Deg m;
-    CORRADE_COMPARE(m.toUnderlyingType(), 0.0f);
+    constexpr Deg m1;
+    constexpr Deg m2{ZeroInit};
+    CORRADE_COMPARE(m1.toUnderlyingType(), 0.0f);
+    CORRADE_COMPARE(m2.toUnderlyingType(), 0.0f);
     #ifndef MAGNUM_TARGET_GLES
-    constexpr Degd a;
-    CORRADE_COMPARE(a.toUnderlyingType(), 0.0);
+    constexpr Radd a1;
+    constexpr Radd a2{ZeroInit};
+    CORRADE_COMPARE(a1.toUnderlyingType(), 0.0);
+    CORRADE_COMPARE(a2.toUnderlyingType(), 0.0);
     #else
-    constexpr Deg a;
-    CORRADE_COMPARE(a.toUnderlyingType(), 0.0f);
+    constexpr Rad a1;
+    constexpr Rad a2{ZeroInit};
+    CORRADE_COMPARE(a1.toUnderlyingType(), 0.0f);
+    CORRADE_COMPARE(a2.toUnderlyingType(), 0.0f);
     #endif
 
     /* Value constructor */
@@ -101,6 +109,15 @@ void AngleTest::construct() {
     constexpr Deg d(b);
     CORRADE_COMPARE(d.toUnderlyingType(), 25.0f);
     #endif
+}
+
+void AngleTest::constructNoInit() {
+    Deg a{25.0f};
+    Rad b{3.14f};
+    new(&a) Deg{NoInit};
+    new(&b) Rad{NoInit};
+    CORRADE_COMPARE(Float(a), 25.0f);
+    CORRADE_COMPARE(Float(b), 3.14f);
 }
 
 void AngleTest::literals() {

@@ -108,6 +108,7 @@ struct RangeTest: Corrade::TestSuite::Tester {
 
     void construct();
     void constructDefault();
+    void constructNoInit();
     void constructFromSize();
     void constructConversion();
     void constructCopy();
@@ -149,6 +150,7 @@ typedef Vector3<Int> Vector3i;
 RangeTest::RangeTest() {
     addTests<RangeTest>({&RangeTest::construct,
               &RangeTest::constructDefault,
+              &RangeTest::constructNoInit,
               &RangeTest::constructFromSize,
               &RangeTest::constructConversion,
               &RangeTest::constructCopy,
@@ -171,9 +173,9 @@ RangeTest::RangeTest() {
 }
 
 void RangeTest::construct() {
-    constexpr Range1Di a(3, 23);
-    constexpr Range2Di b({3, 5}, {23, 78});
-    constexpr Range3Di c({3, 5, -7}, {23, 78, 2});
+    constexpr Range1Di a = {3, 23};
+    constexpr Range2Di b = {{3, 5}, {23, 78}};
+    constexpr Range3Di c = {{3, 5, -7}, {23, 78, 2}};
 
     CORRADE_COMPARE(a, (Range<1, Int>(3, 23)));
     CORRADE_COMPARE(b, (Range<2, Int>({3, 5}, {23, 78})));
@@ -181,13 +183,33 @@ void RangeTest::construct() {
 }
 
 void RangeTest::constructDefault() {
-    constexpr Range1Di a;
-    constexpr Range2Di b;
-    constexpr Range3Di c;
+    constexpr Range1Di a1;
+    constexpr Range2Di b1;
+    constexpr Range3Di c1;
+    constexpr Range1Di a2{ZeroInit};
+    constexpr Range2Di b2{ZeroInit};
+    constexpr Range3Di c2{ZeroInit};
 
-    CORRADE_COMPARE(a, Range1Di(0, 0));
-    CORRADE_COMPARE(b, Range2Di({0, 0}, {0, 0}));
-    CORRADE_COMPARE(c, Range3Di({0, 0, 0}, {0, 0, 0}));
+    CORRADE_COMPARE(a1, Range1Di(0, 0));
+    CORRADE_COMPARE(a2, Range1Di(0, 0));
+    CORRADE_COMPARE(b1, Range2Di({0, 0}, {0, 0}));
+    CORRADE_COMPARE(b2, Range2Di({0, 0}, {0, 0}));
+    CORRADE_COMPARE(c1, Range3Di({0, 0, 0}, {0, 0, 0}));
+    CORRADE_COMPARE(c2, Range3Di({0, 0, 0}, {0, 0, 0}));
+}
+
+void RangeTest::constructNoInit() {
+    Range1Di a{3, 23};
+    Range2Di b{{3, 5}, {23, 78}};
+    Range3Di c{{3, 5, -7}, {23, 78, 2}};
+
+    new(&a) Range1Di{NoInit};
+    new(&b) Range2Di{NoInit};
+    new(&c) Range3Di{NoInit};
+
+    CORRADE_COMPARE(a, (Range1Di{3, 23}));
+    CORRADE_COMPARE(b, (Range2Di{{3, 5}, {23, 78}}));
+    CORRADE_COMPARE(c, (Range3Di{{3, 5, -7}, {23, 78, 2}}));
 }
 
 void RangeTest::constructFromSize() {
@@ -458,7 +480,7 @@ void RangeTest::scaled() {
 template<class T> class BasicRect: public Math::Range<2, T> {
     public:
         /* MSVC 2013 can't cope with {} here */
-        template<class ...U> BasicRect(U&&... args): Math::Range<2, T>(std::forward<U>(args)...) {}
+        template<class ...U> constexpr BasicRect(U&&... args): Math::Range<2, T>(args...) {}
 
         MAGNUM_RANGE_SUBCLASS_IMPLEMENTATION(2, BasicRect, Vector2)
 };
@@ -476,6 +498,10 @@ void RangeTest::subclassTypes() {
 }
 
 void RangeTest::subclass() {
+    /* Constexpr constructor */
+    constexpr Recti a{Vector2i{34, 23}, Vector2i{47, 30}};
+    CORRADE_COMPARE(a.min(), (Vector2i{34, 23}));
+
     CORRADE_COMPARE(Recti::fromSize({3, 5}, {23, 78}),
                     Recti(Vector2i{3, 5}, Vector2i{26, 83}));
 

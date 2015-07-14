@@ -61,6 +61,7 @@ struct VectorTest: Corrade::TestSuite::Tester {
     void constructFromData();
     void constructPad();
     void constructDefault();
+    void constructNoInit();
     void constructOneValue();
     void constructOneComponent();
     void constructConversion();
@@ -117,6 +118,7 @@ VectorTest::VectorTest() {
               &VectorTest::constructFromData,
               &VectorTest::constructPad,
               &VectorTest::constructDefault,
+              &VectorTest::constructNoInit,
               &VectorTest::constructOneValue,
               &VectorTest::constructOneComponent,
               &VectorTest::constructConversion,
@@ -187,7 +189,15 @@ void VectorTest::constructPad() {
 
 void VectorTest::constructDefault() {
     constexpr Vector4 a;
+    constexpr Vector4 b{ZeroInit};
     CORRADE_COMPARE(a, Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+    CORRADE_COMPARE(b, Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+void VectorTest::constructNoInit() {
+    Vector4 a{1.0f, 2.0f, -3.0f, 4.5f};
+    new(&a) Vector4{NoInit};
+    CORRADE_COMPARE(a, (Vector4{1.0f, 2.0f, -3.0f, 4.5f}));
 }
 
 void VectorTest::constructOneValue() {
@@ -569,6 +579,10 @@ void VectorTest::subclass() {
         CORRADE_COMPARE(b, Vec2(5.0f, 0.0f));
         CORRADE_COMPARE(c, Vec2(5.0f, -1.0f));
     }
+
+    /* Constexpr constructor */
+    constexpr const Vec2 a{-2.0f, 5.0f};
+    CORRADE_COMPARE(a[0], -2.0f);
 
     CORRADE_COMPARE(Vec2(-2.0f, 5.0f) + Vec2(1.0f, -3.0f), Vec2(-1.0f, 2.0f));
     CORRADE_COMPARE(Vec2(-2.0f, 5.0f) - Vec2(1.0f, -3.0f), Vec2(-3.0f, 8.0f));

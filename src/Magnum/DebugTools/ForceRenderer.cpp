@@ -28,7 +28,7 @@
 #include "Magnum/Buffer.h"
 #include "Magnum/Mesh.h"
 #include "Magnum/DebugTools/ResourceManager.h"
-#include "Magnum/SceneGraph/AbstractCamera.h"
+#include "Magnum/SceneGraph/Camera.h"
 #include "Magnum/Shaders/Flat.h"
 
 #include "Implementation/ForceRendererTransformation.h"
@@ -100,7 +100,7 @@ template<UnsignedInt dimensions> ForceRenderer<dimensions>::ForceRenderer(SceneG
 /* GCC 4.4 has linker error when using =default */
 template<UnsignedInt dimensions> ForceRenderer<dimensions>::~ForceRenderer() {}
 
-template<UnsignedInt dimensions> void ForceRenderer<dimensions>::draw(const typename DimensionTraits<dimensions, Float>::MatrixType& transformationMatrix, SceneGraph::AbstractCamera<dimensions, Float>& camera) {
+template<UnsignedInt dimensions> void ForceRenderer<dimensions>::draw(const typename DimensionTraits<dimensions, Float>::MatrixType& transformationMatrix, SceneGraph::Camera<dimensions, Float>& camera) {
     shader->setTransformationProjectionMatrix(camera.projectionMatrix()*Implementation::forceRendererTransformation<dimensions>(transformationMatrix.transformPoint(forcePosition), force)*DimensionTraits<dimensions, Float>::MatrixType::scaling(typename DimensionTraits<dimensions, Float>::VectorType(options->scale())))
         .setColor(options->color());
     mesh->draw(*shader);

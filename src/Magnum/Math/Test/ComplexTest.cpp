@@ -58,7 +58,9 @@ struct ComplexTest: Corrade::TestSuite::Tester {
     explicit ComplexTest();
 
     void construct();
-    void constructDefault();
+    void constructIdentity();
+    void constructZero();
+    void constructNoInit();
     void constructFromVector();
     void constructCopy();
     void convert();
@@ -90,7 +92,9 @@ struct ComplexTest: Corrade::TestSuite::Tester {
 
 ComplexTest::ComplexTest() {
     addTests<ComplexTest>({&ComplexTest::construct,
-              &ComplexTest::constructDefault,
+              &ComplexTest::constructIdentity,
+              &ComplexTest::constructZero,
+              &ComplexTest::constructNoInit,
               &ComplexTest::constructFromVector,
               &ComplexTest::constructCopy,
               &ComplexTest::convert,
@@ -128,7 +132,7 @@ typedef Math::Matrix3<Float> Matrix3;
 typedef Math::Matrix<2, Float> Matrix2x2;
 
 void ComplexTest::construct() {
-    constexpr Complex a(0.5f, -3.7f);
+    constexpr Complex a = {0.5f, -3.7f};
     CORRADE_COMPARE(a, Complex(0.5f, -3.7f));
 
     constexpr Float b = a.real();
@@ -137,10 +141,24 @@ void ComplexTest::construct() {
     CORRADE_COMPARE(c, -3.7f);
 }
 
-void ComplexTest::constructDefault() {
+void ComplexTest::constructIdentity() {
     constexpr Complex a;
+    constexpr Complex b{IdentityInit};
     CORRADE_COMPARE(a, Complex(1.0f, 0.0f));
+    CORRADE_COMPARE(b, Complex(1.0f, 0.0f));
     CORRADE_COMPARE(a.length(), 1.0f);
+    CORRADE_COMPARE(b.length(), 1.0f);
+}
+
+void ComplexTest::constructZero() {
+    constexpr Complex a{ZeroInit};
+    CORRADE_COMPARE(a, Complex(0.0f, 0.0f));
+}
+
+void ComplexTest::constructNoInit() {
+    Complex a{0.5f, -3.7f};
+    new(&a) Complex{NoInit};
+    CORRADE_COMPARE(a, Complex(0.5f, -3.7f));
 }
 
 void ComplexTest::constructFromVector() {

@@ -160,7 +160,7 @@ Framebuffer& Framebuffer::mapForDraw(std::initializer_list<std::pair<UnsignedInt
     /* Create linear array from associative */
     /** @todo C++14: use VLA to avoid heap allocation */
     static_assert(GL_NONE == 0, "Expecting zero GL_NONE for zero-initialization");
-    auto _attachments = Containers::Array<GLenum>::zeroInitialized(max+1);
+    Containers::Array<GLenum> _attachments{Containers::ValueInit, max+1};
     for(auto it = attachments.begin(); it != attachments.end(); ++it)
         _attachments[it->first] = GLenum(it->second);
 

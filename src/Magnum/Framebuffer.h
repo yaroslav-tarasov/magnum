@@ -359,10 +359,20 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * Generates new OpenGL framebuffer object. If @extension{ARB,direct_state_access}
          * (part of OpenGL 4.5) is not available, the framebuffer is created on
          * first use.
-         * @see @ref setViewport(), @ref wrap(), @fn_gl{CreateFramebuffers},
-         *      eventually @fn_gl{GenFramebuffers}
+         * @see @ref Framebuffer(NoCreateT), @ref wrap(), @ref setViewport(),
+         *      @fn_gl{CreateFramebuffers}, eventually @fn_gl{GenFramebuffers}
          */
         explicit Framebuffer(const Range2Di& viewport);
+
+        /**
+         * @brief Construct without creating the underlying OpenGL object
+         *
+         * The constructed instance is equivalent to moved-from state. Useful
+         * in cases where you will overwrite the instance later anyway. Move
+         * another object over it to make it useful.
+         * @see @ref Framebuffer(const Range2Di&), @ref wrap()
+         */
+        explicit Framebuffer(NoCreateT) noexcept { _id = 0; }
 
         /** @brief Copying is not allowed */
         Framebuffer(const Framebuffer&) = delete;
@@ -403,8 +413,9 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          *
          * The result is *not* cached, repeated queries will result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function returns empty string.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function returns empty string.
          * @see @fn_gl{GetObjectLabel} or
          *      @fn_gl_extension2{GetObjectLabel,EXT,debug_label} with
          *      @def_gl{FRAMEBUFFER}
@@ -417,8 +428,9 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * @return Reference to self (for method chaining)
          *
          * Default is empty string. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function does nothing.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function does nothing.
          * @see @ref maxLabelLength(), @fn_gl{ObjectLabel} or
          *      @fn_gl_extension2{LabelObject,EXT,debug_label} with
          *      @def_gl{FRAMEBUFFER}

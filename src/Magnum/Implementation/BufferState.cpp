@@ -185,8 +185,9 @@ BufferState::BufferState(Context& context, std::vector<std::string>& extensions)
 }
 
 void BufferState::reset() {
-    /* GCC 4.4 (?) needs explicit cast to GLuint */
-    std::fill_n(bindings, TargetCount, GLuint(State::DisengagedBinding));
+    /* libc++ complains about decrementing enum value otherwise, GCC 4.4 (?)
+       needs explicit cast to GLuint */
+    std::fill_n(bindings, std::size_t{TargetCount}, GLuint(State::DisengagedBinding));
 }
 
 }}

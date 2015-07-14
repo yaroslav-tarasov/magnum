@@ -42,15 +42,17 @@ namespace Implementation {
     template<UnsignedInt> constexpr GLenum multisampleTextureTarget();
     /* GCC 4.5 doesn't have constexpr, so it needs inline */
     template<> constexpr inline GLenum multisampleTextureTarget<2>() { return GL_TEXTURE_2D_MULTISAMPLE; }
-    #ifndef MAGNUM_TARGET_GLES
-    template<> constexpr inline GLenum multisampleTextureTarget<3>() { return GL_TEXTURE_2D_MULTISAMPLE_ARRAY; }
-    #endif
+    template<> constexpr inline GLenum multisampleTextureTarget<3>() {
+        #ifndef MAGNUM_TARGET_GLES
+        return GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
+        #else
+        return GL_TEXTURE_2D_MULTISAMPLE_ARRAY_OES;
+        #endif
+    }
 
     template<UnsignedInt dimensions> typename DimensionTraits<dimensions, Int>::VectorType maxMultisampleTextureSize();
     template<> MAGNUM_EXPORT Vector2i maxMultisampleTextureSize<2>();
-    #ifndef MAGNUM_TARGET_GLES
     template<> MAGNUM_EXPORT Vector3i maxMultisampleTextureSize<3>();
-    #endif
 }
 
 /**
@@ -88,15 +90,20 @@ shaders.
     @ref TextureArray, @ref CubeMapTexture, @ref CubeMapTextureArray,
     @ref RectangleTexture, @ref BufferTexture
 @requires_gl32 Extension @extension{ARB,texture_multisample}
-@requires_gles31 Multisample textures are not available in OpenGL ES 3.0 and
+@requires_gles31 Multisample 2D textures are not available in OpenGL ES 3.0 and
     older.
-@requires_gl 2D array multisample textures are not available in OpenGL ES, only
-    2D ones. No multisample textures are available in WebGL.
+@requires_gles30 Multisample 2D array textures are not defined in OpenGL ES
+    2.0.
+@requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+    @es_extension{OES,texture_storage_multisample_2d_array} for multisample 2D
+    array textures.
 @requires_gles Multisample textures are not available in WebGL.
  */
 template<UnsignedInt dimensions> class MultisampleTexture: public AbstractTexture {
     public:
-        static const UnsignedInt Dimensions = dimensions; /**< @brief Texture dimension count */
+        enum: UnsignedInt {
+            Dimensions = dimensions /**< Texture dimension count */
+        };
 
         /**
          * @brief Max supported multisample texture size
@@ -136,8 +143,8 @@ template<UnsignedInt dimensions> class MultisampleTexture: public AbstractTextur
          * Creates new OpenGL texture object. If @extension{ARB,direct_state_access}
          * (part of OpenGL 4.5) is not available, the texture is created on
          * first use.
-         * @see @ref wrap(), @fn_gl{CreateTextures} with
-         *      @def_gl{TEXTURE_2D_MULTISAMPLE} or
+         * @see @ref MultisampleTexture(NoCreateT), @ref wrap(),
+         *      @fn_gl{CreateTextures} with @def_gl{TEXTURE_2D_MULTISAMPLE} or
          *      @def_gl{TEXTURE_2D_MULTISAMPLE_ARRAY}, eventually
          *      @fn_gl{GenTextures}
          */
@@ -153,6 +160,16 @@ template<UnsignedInt dimensions> class MultisampleTexture: public AbstractTextur
             return *this;
         }
         #endif
+
+        /**
+         * @brief Construct without creating the underlying OpenGL object
+         *
+         * The constructed instance is equivalent to moved-from state. Useful
+         * in cases where you will overwrite the instance later anyway. Move
+         * another object over it to make it useful.
+         * @see @ref MultisampleTexture(), @ref wrap()
+         */
+        explicit MultisampleTexture(NoCreateT) noexcept: AbstractTexture{NoCreate, Implementation::multisampleTextureTarget<dimensions>()} {}
 
         /**
          * @brief Set storage
@@ -251,16 +268,16 @@ template<UnsignedInt dimensions> class MultisampleTexture: public AbstractTextur
 */
 typedef MultisampleTexture<2> MultisampleTexture2D;
 
-#ifndef MAGNUM_TARGET_GLES
 /**
 @brief Two-dimensional multisample texture array
 
 @requires_gl32 Extension @extension{ARB,texture_multisample}
-@requires_gl Only @ref MultisampleTexture2D is available in OpenGL ES.
-    No multisample textures are available in WebGL.
+@requires_gles30 Not defined in OpenGL ES 2.0.
+@requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+    @es_extension{OES,texture_storage_multisample_2d_array}
+@requires_gles Multisample textures are not available in WebGL.
 */
 typedef MultisampleTexture<3> MultisampleTexture2DArray;
-#endif
 
 }
 #else

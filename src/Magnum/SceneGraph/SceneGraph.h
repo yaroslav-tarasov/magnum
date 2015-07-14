@@ -33,22 +33,15 @@
 
 #include "Magnum/Types.h"
 
+#ifdef MAGNUM_BUILD_DEPRECATED
+#include <Corrade/Utility/Macros.h>
+#endif
+
 namespace Magnum { namespace SceneGraph {
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 #ifndef CORRADE_GCC45_COMPATIBILITY
 enum class AspectRatioPolicy: UnsignedByte;
-#endif
-
-template<UnsignedInt, class> class AbstractCamera;
-#ifndef CORRADE_GCC46_COMPATIBILITY
-template<class T> using AbstractBasicCamera2D = AbstractCamera<2, T>;
-template<class T> using AbstractBasicCamera3D = AbstractCamera<3, T>;
-typedef AbstractBasicCamera2D<Float> AbstractCamera2D;
-typedef AbstractBasicCamera3D<Float> AbstractCamera3D;
-#else
-typedef AbstractCamera<2, Float> AbstractCamera2D;
-typedef AbstractCamera<3, Float> AbstractCamera3D;
 #endif
 
 /* Enum CachedTransformation and CachedTransformations used only directly */
@@ -143,10 +136,19 @@ typedef AnimableGroup<2, Float> AnimableGroup2D;
 typedef AnimableGroup<3, Float> AnimableGroup3D;
 #endif
 
-template<class> class BasicCamera2D;
-template<class> class BasicCamera3D;
+template<UnsignedInt, class> class Camera;
+template<class T> using BasicCamera2D = Camera<2, T>;
+template<class T> using BasicCamera3D = Camera<3, T>;
 typedef BasicCamera2D<Float> Camera2D;
 typedef BasicCamera3D<Float> Camera3D;
+
+#ifdef MAGNUM_BUILD_DEPRECATED
+template<UnsignedInt dimensions, class T> using AbstractCamera CORRADE_DEPRECATED("use BasicCamera2D instead") = Camera<dimensions, T>;
+template<class T> using AbstractBasicCamera2D CORRADE_DEPRECATED("use BasicCamera2D instead") = BasicCamera2D<T>;
+CORRADE_DEPRECATED("use Camera2D instead") typedef Camera2D AbstractCamera2D;
+template<class T> using AbstractBasicCamera3D CORRADE_DEPRECATED("use BasicCamera3D instead") = BasicCamera3D<T>;
+CORRADE_DEPRECATED("use Camera3D instead") typedef Camera3D AbstractCamera3D;
+#endif
 
 template<UnsignedInt, class> class Drawable;
 #ifndef CORRADE_GCC46_COMPATIBILITY

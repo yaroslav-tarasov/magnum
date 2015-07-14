@@ -66,7 +66,7 @@ struct TextureState {
     void(AbstractTexture::*parameterivImplementation)(GLenum, const GLint*);
     #endif
     void(AbstractTexture::*parameterfvImplementation)(GLenum, const GLfloat*);
-    #ifndef MAGNUM_TARGET_GLES
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     void(AbstractTexture::*parameterIuivImplementation)(GLenum, const GLuint*);
     void(AbstractTexture::*parameterIivImplementation)(GLenum, const GLint*);
     #endif
@@ -84,9 +84,9 @@ struct TextureState {
     #endif
     #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     void(AbstractTexture::*storage2DMultisampleImplementation)(GLsizei, TextureFormat, const Vector2i&, GLboolean);
+    void(AbstractTexture::*storage3DMultisampleImplementation)(GLsizei, TextureFormat, const Vector3i&, GLboolean);
     #endif
     #ifndef MAGNUM_TARGET_GLES
-    void(AbstractTexture::*storage3DMultisampleImplementation)(GLsizei, TextureFormat, const Vector3i&, GLboolean);
     void(AbstractTexture::*getImageImplementation)(GLint, ColorFormat, ColorType, std::size_t, GLvoid*);
     #endif
     #ifndef MAGNUM_TARGET_GLES
@@ -99,7 +99,7 @@ struct TextureState {
     void(AbstractTexture::*invalidateImageImplementation)(GLint);
     void(AbstractTexture::*invalidateSubImageImplementation)(GLint, const Vector3i&, const Vector3i&);
 
-    #ifndef MAGNUM_TARGET_GLES
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     void(BufferTexture::*setBufferImplementation)(BufferTextureFormat, Buffer&);
     void(BufferTexture::*setBufferRangeImplementation)(BufferTextureFormat, Buffer&, GLintptr, GLsizeiptr);
     #endif
@@ -121,8 +121,10 @@ struct TextureState {
     GLint maxArrayLayers;
     #endif
     #ifndef MAGNUM_TARGET_GLES
-    GLint maxRectangleSize,
-        maxBufferSize;
+    GLint maxRectangleSize;
+    #endif
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
+    GLint maxBufferSize;
     #endif
     GLint maxTextureUnits;
     #ifndef MAGNUM_TARGET_GLES2
@@ -135,7 +137,7 @@ struct TextureState {
         maxDepthSamples,
         maxIntegerSamples;
     #endif
-    #ifndef MAGNUM_TARGET_GLES
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     GLint bufferOffsetAlignment;
     #endif
 

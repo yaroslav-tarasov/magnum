@@ -35,6 +35,7 @@ struct DualTest: Corrade::TestSuite::Tester {
 
     void construct();
     void constructDefault();
+    void constructNoInit();
     void constructCopy();
 
     void compare();
@@ -54,6 +55,7 @@ typedef Math::Dual<Float> Dual;
 DualTest::DualTest() {
     addTests<DualTest>({&DualTest::construct,
               &DualTest::constructDefault,
+              &DualTest::constructNoInit,
               &DualTest::constructCopy,
 
               &DualTest::compare,
@@ -69,7 +71,7 @@ DualTest::DualTest() {
 }
 
 void DualTest::construct() {
-    constexpr Dual a(2.0f, -7.5f);
+    constexpr Dual a = {2.0f, -7.5f};
     constexpr Float b = a.real();
     constexpr Float c = a.dual();
     CORRADE_COMPARE(b, 2.0f);
@@ -83,6 +85,12 @@ void DualTest::construct() {
 void DualTest::constructDefault() {
     constexpr Dual a;
     CORRADE_COMPARE(a, Dual(0.0f, 0.0f));
+}
+
+void DualTest::constructNoInit() {
+    Dual a{2.0f, -7.5f};
+    new(&a) Dual{NoInit};
+    CORRADE_COMPARE(a, Dual(2.0f, -7.5f));
 }
 
 void DualTest::constructCopy() {

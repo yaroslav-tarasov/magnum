@@ -28,7 +28,7 @@
 #include <Corrade/Utility/Assert.h>
 
 #include "Magnum/AbstractTexture.h"
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 #include "Magnum/BufferTexture.h"
 #endif
 #include "Magnum/Context.h"
@@ -165,7 +165,7 @@ TextureState::TextureState(Context& context, std::vector<std::string>& extension
         parameterivImplementation = &AbstractTexture::parameterImplementationDefault;
         #endif
         parameterfvImplementation = &AbstractTexture::parameterImplementationDefault;
-        #ifndef MAGNUM_TARGET_GLES
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         parameterIuivImplementation = &AbstractTexture::parameterIImplementationDefault;
         parameterIivImplementation = &AbstractTexture::parameterIImplementationDefault;
         #endif
@@ -181,7 +181,7 @@ TextureState::TextureState(Context& context, std::vector<std::string>& extension
         subImage3DImplementation = &AbstractTexture::subImageImplementationDefault;
         #endif
 
-        #ifndef MAGNUM_TARGET_GLES
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         setBufferImplementation = &BufferTexture::setBufferImplementationDefault;
         setBufferRangeImplementation = &BufferTexture::setBufferRangeImplementationDefault;
         #endif
@@ -314,6 +314,7 @@ TextureState::TextureState(Context& context, std::vector<std::string>& extension
     }
     #elif !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     storage2DMultisampleImplementation = &AbstractTexture::storageMultisampleImplementationDefault;
+    storage3DMultisampleImplementation = &AbstractTexture::storageMultisampleImplementationDefault;
     #endif
 
     /* Anisotropic filter implementation */

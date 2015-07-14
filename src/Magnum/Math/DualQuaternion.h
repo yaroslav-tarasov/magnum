@@ -110,10 +110,26 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
          * @f]
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        constexpr /*implicit*/ DualQuaternion();
+        constexpr /*implicit*/ DualQuaternion(IdentityInitT = IdentityInit);
         #else
-        constexpr /*implicit*/ DualQuaternion(): Dual<Quaternion<T>>({}, {{}, T(0)}) {}
+        constexpr /*implicit*/ DualQuaternion(IdentityInitT = IdentityInit): Dual<Quaternion<T>>({}, {{}, T(0)}) {}
         #endif
+
+        /** @brief Construct zero-initialized dual quaternion */
+        constexpr explicit DualQuaternion(ZeroInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Dual<Quaternion<T>>{Quaternion<T>{ZeroInit}, Quaternion<T>{ZeroInit}}
+            #endif
+            {}
+
+        /** @brief Construct without initializing the contents */
+        explicit DualQuaternion(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Dual<Quaternion<T>>{NoInit}
+            #endif
+            {}
 
         /**
          * @brief Construct dual quaternion from real and dual part

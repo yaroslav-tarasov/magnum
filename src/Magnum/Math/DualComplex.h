@@ -104,10 +104,26 @@ template<class T> class DualComplex: public Dual<Complex<T>> {
          * @f]
          */
         #ifdef DOXYGEN_GENERATING_OUTPUT
-        constexpr /*implicit*/ DualComplex();
+        constexpr /*implicit*/ DualComplex(IdentityInitT = IdentityInit);
         #else
-        constexpr /*implicit*/ DualComplex(): Dual<Complex<T>>({}, {T(0), T(0)}) {}
+        constexpr /*implicit*/ DualComplex(IdentityInitT = IdentityInit): Dual<Complex<T>>({}, {T(0), T(0)}) {}
         #endif
+
+        /** @brief Construct zero-initialized dual complex number */
+        constexpr explicit DualComplex(ZeroInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Dual<Complex<T>>{Complex<T>{ZeroInit}, Complex<T>{ZeroInit}}
+            #endif
+            {}
+
+        /** @brief Construct without initializing the contents */
+        explicit DualComplex(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Dual<Complex<T>>{NoInit}
+            #endif
+            {}
 
         /**
          * @brief Construct dual complex number from real and dual part

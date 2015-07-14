@@ -49,36 +49,69 @@ See @ref matrix-vector for brief introduction.
  */
 template<std::size_t size, class T> class Matrix: public RectangularMatrix<size, size, T> {
     public:
-        const static std::size_t Size = size; /**< @brief Matrix size */
+        enum: std::size_t {
+            Size = size         /**< Matrix size */
+        };
 
-        /** @brief Pass to constructor to create zero-filled matrix */
+        #ifdef MAGNUM_BUILD_DEPRECATED
+        /**
+         * @brief Pass to constructor to create zero-filled matrix
+         * @deprecated Use @ref ZeroInitT and @ref ZeroInit instead.
+         */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         enum ZeroType { Zero };
+        #else
+        CORRADE_DEPRECATED("use Math::ZeroInitT instead") typedef ZeroInitT ZeroType;
+        CORRADE_DEPRECATED("use Math::ZeroInit instead") constexpr static ZeroInitT Zero{};
+        #endif
 
         /**
-         * @brief Zero-filled matrix constructor
-         *
-         * Use this constructor by calling `Matrix m(Matrix::Zero);`.
+         * @brief Pass to constructor to create identity matrix
+         * @deprecated Use @ref IdentityInitT and @ref IdentityInit instead.
          */
-        constexpr explicit Matrix(ZeroType) {}
-
-        /** @brief Pass to constructor to create identity matrix */
+        #ifdef DOXYGEN_GENERATING_OUTPUT
         enum IdentityType { Identity };
+        #else
+        CORRADE_DEPRECATED("use Math::IdentityInitT instead") typedef IdentityInitT IdentityType;
+        CORRADE_DEPRECATED("use Math::IdentityInit instead") constexpr static IdentityInitT Identity{};
+        #endif
+        #endif
 
         /**
          * @brief Default constructor
          *
-         * You can also explicitly call this constructor with
-         * `Matrix m(Matrix::Identity);`. Optional parameter @p value allows
-         * you to specify value on diagonal.
+         * Creates identity matrix. @p value allows you to specify value on
+         * diagonal.
          */
-        constexpr /*implicit*/ Matrix(IdentityType = Identity, T value = T(1)): RectangularMatrix<size, size, T>(typename Implementation::GenerateSequence<size>::Type(),
-            /* The original one is not constexpr under GCC 4.6 */
-            #ifndef CORRADE_GCC46_COMPATIBILITY
-            Vector<size, T>(value)
-            #else
-            Vector<size, T>(typename Implementation::GenerateSequence<size>::Type(), value)
+        constexpr /*implicit*/ Matrix(IdentityInitT = IdentityInit, T value = T(1))
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : RectangularMatrix<size, size, T>{typename Implementation::GenerateSequence<size>::Type(),
+                /* The original one is not constexpr under GCC 4.6 */
+                #ifndef CORRADE_GCC46_COMPATIBILITY
+                Vector<size, T>(value)
+                #else
+                Vector<size, T>(typename Implementation::GenerateSequence<size>::Type(), value)
+                #endif
+            }
             #endif
-        ) {}
+            {}
+
+        /** @copydoc RectangularMatrix::RectangularMatrix(ZeroInitT) */
+        constexpr explicit Matrix(ZeroInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : RectangularMatrix<size, size, T>{ZeroInit}
+            #endif
+            {}
+
+        /** @copydoc RectangularMatrix::RectangularMatrix(NoInitT) */
+        constexpr explicit Matrix(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : RectangularMatrix<size, size, T>{NoInit}
+            #endif
+            {}
 
         /**
          * @brief Matrix from column vectors
@@ -313,7 +346,7 @@ template<std::size_t size, class T> bool Matrix<size, T>::isOrthogonal() const {
 }
 
 template<std::size_t size, class T> Matrix<size-1, T> Matrix<size, T>::ij(const std::size_t skipCol, const std::size_t skipRow) const {
-    Matrix<size-1, T> out(Matrix<size-1, T>::Zero);
+    Matrix<size-1, T> out{ZeroInit};
 
     for(std::size_t col = 0; col != size-1; ++col)
         for(std::size_t row = 0; row != size-1; ++row)
@@ -324,7 +357,7 @@ template<std::size_t size, class T> Matrix<size-1, T> Matrix<size, T>::ij(const 
 }
 
 template<std::size_t size, class T> Matrix<size, T> Matrix<size, T>::inverted() const {
-    Matrix<size, T> out(Zero);
+    Matrix<size, T> out{ZeroInit};
 
     const T _determinant = determinant();
 

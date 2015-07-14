@@ -386,16 +386,16 @@ void ObjectTest::setClean() {
     CORRADE_VERIFY(childThree->isDirty());
 
     /* If the object itself is already clean, it shouldn't clean it again */
-    childOne->cleanedAbsoluteTransformation = Matrix4(Matrix4::Zero);
+    childOne->cleanedAbsoluteTransformation = Matrix4{Math::ZeroInit};
     CORRADE_VERIFY(!childOne->isDirty());
     childOne->setClean();
-    CORRADE_COMPARE(childOne->cleanedAbsoluteTransformation, Matrix4(Matrix4::Zero));
+    CORRADE_COMPARE(childOne->cleanedAbsoluteTransformation, Matrix4{Math::ZeroInit});
 
     /* If any object in the hierarchy is already clean, it shouldn't clean it again */
     CORRADE_VERIFY(!childOne->isDirty());
     CORRADE_VERIFY(childTwo->isDirty());
     childTwo->setClean();
-    CORRADE_COMPARE(childOne->cleanedAbsoluteTransformation, Matrix4(Matrix4::Zero));
+    CORRADE_COMPARE(childOne->cleanedAbsoluteTransformation, Matrix4{Math::ZeroInit});
 
     /* Remove object from tree => make it and its children dirty */
     childThree->setClean();
@@ -457,18 +457,18 @@ void ObjectTest::setCleanListHierarchy() {
     CORRADE_COMPARE(childTwoFeature->cleanedAbsoluteTransformation, childTwo->absoluteTransformationMatrix());
 
     /* If the object itself is already clean, it shouldn't clean it again */
-    childOne->cleanedAbsoluteTransformation = Matrix4(Matrix4::Zero);
+    childOne->cleanedAbsoluteTransformation = Matrix4{Math::ZeroInit};
     CORRADE_VERIFY(!childOne->isDirty());
     /* GCC 4.4 has explicit constructor for std::reference_wrapper. WHY ON EARTH. WHY. */
     Scene3D::setClean({std::reference_wrapper<Object3D>(*childOne)});
-    CORRADE_COMPARE(childOne->cleanedAbsoluteTransformation, Matrix4(Matrix4::Zero));
+    CORRADE_COMPARE(childOne->cleanedAbsoluteTransformation, Matrix4{Math::ZeroInit});
 
     /* If any object in the hierarchy is already clean, it shouldn't clean it again */
     CORRADE_VERIFY(!childOne->isDirty());
     childTwo->setDirty();
     /* GCC 4.4 has explicit constructor for std::reference_wrapper. WHY ON EARTH. WHY. */
     Scene3D::setClean({std::reference_wrapper<Object3D>(*childTwo)});
-    CORRADE_COMPARE(childOne->cleanedAbsoluteTransformation, Matrix4(Matrix4::Zero));
+    CORRADE_COMPARE(childOne->cleanedAbsoluteTransformation, Matrix4{Math::ZeroInit});
 }
 
 void ObjectTest::setCleanListBulk() {

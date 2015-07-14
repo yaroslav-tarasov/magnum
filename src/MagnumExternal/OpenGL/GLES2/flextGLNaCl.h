@@ -734,6 +734,46 @@ typedef khronos_ssize_t GLsizeiptr;
 #define GL_DECODE_EXT 0x8A49
 #define GL_SKIP_DECODE_EXT 0x8A4A
 
+/* GL_EXT_sRGB_write_control */
+
+#define GL_FRAMEBUFFER_SRGB_EXT 0x8DB9
+
+/* GL_EXT_draw_buffers_indexed */
+
+#define GL_BLEND_EQUATION_RGB 0x8009
+#define GL_BLEND_EQUATION_ALPHA 0x883D
+#define GL_BLEND_SRC_RGB 0x80C9
+#define GL_BLEND_SRC_ALPHA 0x80CB
+#define GL_BLEND_DST_RGB 0x80C8
+#define GL_BLEND_DST_ALPHA 0x80CA
+#define GL_COLOR_WRITEMASK 0x0C23
+#define GL_BLEND 0x0BE2
+#define GL_FUNC_ADD 0x8006
+#define GL_FUNC_SUBTRACT 0x800A
+#define GL_FUNC_REVERSE_SUBTRACT 0x800B
+#define GL_MIN 0x8007
+#define GL_MAX 0x8008
+#define GL_ZERO 0
+#define GL_ONE 1
+#define GL_SRC_COLOR 0x0300
+#define GL_ONE_MINUS_SRC_COLOR 0x0301
+#define GL_DST_COLOR 0x0306
+#define GL_ONE_MINUS_DST_COLOR 0x0307
+#define GL_SRC_ALPHA 0x0302
+#define GL_ONE_MINUS_SRC_ALPHA 0x0303
+#define GL_DST_ALPHA 0x0304
+#define GL_ONE_MINUS_DST_ALPHA 0x0305
+#define GL_CONSTANT_COLOR 0x8001
+#define GL_ONE_MINUS_CONSTANT_COLOR 0x8002
+#define GL_CONSTANT_ALPHA 0x8003
+#define GL_ONE_MINUS_CONSTANT_ALPHA 0x8004
+#define GL_SRC_ALPHA_SATURATE 0x0308
+
+/* GL_EXT_texture_border_clamp */
+
+#define GL_TEXTURE_BORDER_COLOR_EXT 0x1004
+#define GL_CLAMP_TO_BORDER_EXT 0x812D
+
 /* GL_EXT_separate_shader_objects */
 
 #define GL_ACTIVE_PROGRAM_EXT 0x8259
@@ -761,6 +801,68 @@ typedef khronos_ssize_t GLsizeiptr;
 #define GL_RESET_NOTIFICATION_STRATEGY_EXT 0x8256
 #define GL_LOSE_CONTEXT_ON_RESET_EXT 0x8252
 #define GL_NO_RESET_NOTIFICATION_EXT 0x8261
+
+/* GL_KHR_texture_compression_astc_ldr */
+
+#define GL_COMPRESSED_RGBA_ASTC_4x4_KHR 0x93B0
+#define GL_COMPRESSED_RGBA_ASTC_5x4_KHR 0x93B1
+#define GL_COMPRESSED_RGBA_ASTC_5x5_KHR 0x93B2
+#define GL_COMPRESSED_RGBA_ASTC_6x5_KHR 0x93B3
+#define GL_COMPRESSED_RGBA_ASTC_6x6_KHR 0x93B4
+#define GL_COMPRESSED_RGBA_ASTC_8x5_KHR 0x93B5
+#define GL_COMPRESSED_RGBA_ASTC_8x6_KHR 0x93B6
+#define GL_COMPRESSED_RGBA_ASTC_8x8_KHR 0x93B7
+#define GL_COMPRESSED_RGBA_ASTC_10x5_KHR 0x93B8
+#define GL_COMPRESSED_RGBA_ASTC_10x6_KHR 0x93B9
+#define GL_COMPRESSED_RGBA_ASTC_10x8_KHR 0x93BA
+#define GL_COMPRESSED_RGBA_ASTC_10x10_KHR 0x93BB
+#define GL_COMPRESSED_RGBA_ASTC_12x10_KHR 0x93BC
+#define GL_COMPRESSED_RGBA_ASTC_12x12_KHR 0x93BD
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR 0x93D0
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR 0x93D1
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR 0x93D2
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR 0x93D3
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR 0x93D4
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR 0x93D5
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR 0x93D6
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR 0x93D7
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR 0x93D8
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR 0x93D9
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR 0x93DA
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR 0x93DB
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR 0x93DC
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR 0x93DD
+
+/* GL_KHR_texture_compression_astc_hdr */
+
+#define GL_COMPRESSED_RGBA_ASTC_4x4_KHR 0x93B0
+#define GL_COMPRESSED_RGBA_ASTC_5x4_KHR 0x93B1
+#define GL_COMPRESSED_RGBA_ASTC_5x5_KHR 0x93B2
+#define GL_COMPRESSED_RGBA_ASTC_6x5_KHR 0x93B3
+#define GL_COMPRESSED_RGBA_ASTC_6x6_KHR 0x93B4
+#define GL_COMPRESSED_RGBA_ASTC_8x5_KHR 0x93B5
+#define GL_COMPRESSED_RGBA_ASTC_8x6_KHR 0x93B6
+#define GL_COMPRESSED_RGBA_ASTC_8x8_KHR 0x93B7
+#define GL_COMPRESSED_RGBA_ASTC_10x5_KHR 0x93B8
+#define GL_COMPRESSED_RGBA_ASTC_10x6_KHR 0x93B9
+#define GL_COMPRESSED_RGBA_ASTC_10x8_KHR 0x93BA
+#define GL_COMPRESSED_RGBA_ASTC_10x10_KHR 0x93BB
+#define GL_COMPRESSED_RGBA_ASTC_12x10_KHR 0x93BC
+#define GL_COMPRESSED_RGBA_ASTC_12x12_KHR 0x93BD
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR 0x93D0
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR 0x93D1
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR 0x93D2
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR 0x93D3
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR 0x93D4
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR 0x93D5
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR 0x93D6
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR 0x93D7
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR 0x93D8
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR 0x93D9
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR 0x93DA
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR 0x93DB
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR 0x93DC
+#define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR 0x93DD
 
 /* GL_KHR_debug */
 
@@ -846,10 +948,71 @@ typedef khronos_ssize_t GLsizeiptr;
 #define GL_STACK_UNDERFLOW_KHR 0x0504
 #define GL_DISPLAY_LIST 0x82E7
 
+/* GL_KHR_blend_equation_advanced */
+
+#define GL_MULTIPLY_KHR 0x9294
+#define GL_SCREEN_KHR 0x9295
+#define GL_OVERLAY_KHR 0x9296
+#define GL_DARKEN_KHR 0x9297
+#define GL_LIGHTEN_KHR 0x9298
+#define GL_COLORDODGE_KHR 0x9299
+#define GL_COLORBURN_KHR 0x929A
+#define GL_HARDLIGHT_KHR 0x929B
+#define GL_SOFTLIGHT_KHR 0x929C
+#define GL_DIFFERENCE_KHR 0x929E
+#define GL_EXCLUSION_KHR 0x92A0
+#define GL_HSL_HUE_KHR 0x92AD
+#define GL_HSL_SATURATION_KHR 0x92AE
+#define GL_HSL_COLOR_KHR 0x92AF
+#define GL_HSL_LUMINOSITY_KHR 0x92B0
+
+/* GL_KHR_blend_equation_advanced_coherent */
+
+#define GL_BLEND_ADVANCED_COHERENT_KHR 0x9285
+
+/* GL_KHR_robustness */
+
+#define GL_NO_ERROR 0
+#define GL_CONTEXT_ROBUST_ACCESS 0x90F3
+#define GL_LOSE_CONTEXT_ON_RESET 0x8252
+#define GL_GUILTY_CONTEXT_RESET 0x8253
+#define GL_INNOCENT_CONTEXT_RESET 0x8254
+#define GL_UNKNOWN_CONTEXT_RESET 0x8255
+#define GL_RESET_NOTIFICATION_STRATEGY 0x8256
+#define GL_NO_RESET_NOTIFICATION 0x8261
+#define GL_CONTEXT_LOST 0x0507
+#define GL_NO_ERROR 0
+#define GL_CONTEXT_ROBUST_ACCESS_KHR 0x90F3
+#define GL_LOSE_CONTEXT_ON_RESET_KHR 0x8252
+#define GL_GUILTY_CONTEXT_RESET_KHR 0x8253
+#define GL_INNOCENT_CONTEXT_RESET_KHR 0x8254
+#define GL_UNKNOWN_CONTEXT_RESET_KHR 0x8255
+#define GL_RESET_NOTIFICATION_STRATEGY_KHR 0x8256
+#define GL_NO_RESET_NOTIFICATION_KHR 0x8261
+#define GL_CONTEXT_LOST_KHR 0x0507
+
+/* GL_KHR_context_flush_control */
+
+#define GL_CONTEXT_RELEASE_BEHAVIOR 0x82FB
+#define GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH 0x82FC
+#define GL_NONE 0
+#define GL_CONTEXT_RELEASE_BEHAVIOR_KHR 0x82FB
+#define GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_KHR 0x82FC
+#define GL_NONE 0
+
 /* GL_NV_texture_border_clamp */
 
 #define GL_TEXTURE_BORDER_COLOR_NV 0x1004
 #define GL_CLAMP_TO_BORDER_NV 0x812D
+
+/* GL_NV_polygon_mode */
+
+#define GL_POLYGON_MODE_NV 0x0B40
+#define GL_POLYGON_OFFSET_POINT_NV 0x2A01
+#define GL_POLYGON_OFFSET_LINE_NV 0x2A02
+#define GL_POINT_NV 0x1B00
+#define GL_LINE_NV 0x1B01
+#define GL_FILL_NV 0x1B02
 
 /* GL_OES_depth32 */
 
@@ -869,6 +1032,11 @@ typedef khronos_ssize_t GLsizeiptr;
 /* GL_OES_stencil4 */
 
 #define GL_STENCIL_INDEX4_OES 0x8D47
+
+/* GL_OES_texture_stencil8 */
+
+#define GL_STENCIL_INDEX_OES 0x1901
+#define GL_STENCIL_INDEX8_OES 0x8D48
 
 /* Function prototypes */
 
@@ -1428,6 +1596,11 @@ GL_APICALL void GL_APIENTRY GLES2FramebufferTexture3DOES(GLenum, GLenum, GLenum,
 #define GL_OES_texture_float 1
 #endif
 
+/* GL_OES_texture_npot */
+#ifndef GL_OES_texture_npot
+#define GL_OES_texture_npot 1
+#endif
+
 /* GL_OES_vertex_half_float */
 #ifndef GL_OES_vertex_half_float
 #define GL_OES_vertex_half_float 1
@@ -1536,6 +1709,53 @@ GL_APICALL void GL_APIENTRY GLES2GetQueryObjectui64vEXT(GLuint, GLenum, GLuint64
 /* GL_EXT_texture_sRGB_decode */
 #ifndef GL_EXT_texture_sRGB_decode
 #define GL_EXT_texture_sRGB_decode 1
+#endif
+
+/* GL_EXT_sRGB_write_control */
+#ifndef GL_EXT_sRGB_write_control
+#define GL_EXT_sRGB_write_control 1
+#endif
+
+/* GL_EXT_draw_buffers_indexed */
+#ifndef GL_EXT_draw_buffers_indexed
+#define GL_EXT_draw_buffers_indexed 1
+GL_APICALL void GL_APIENTRY GLES2EnableiEXT(GLenum, GLuint);
+#define glEnableiEXT GLES2EnableiEXT
+GL_APICALL void GL_APIENTRY GLES2DisableiEXT(GLenum, GLuint);
+#define glDisableiEXT GLES2DisableiEXT
+GL_APICALL void GL_APIENTRY GLES2BlendEquationiEXT(GLuint, GLenum);
+#define glBlendEquationiEXT GLES2BlendEquationiEXT
+GL_APICALL void GL_APIENTRY GLES2BlendEquationSeparateiEXT(GLuint, GLenum, GLenum);
+#define glBlendEquationSeparateiEXT GLES2BlendEquationSeparateiEXT
+GL_APICALL void GL_APIENTRY GLES2BlendFunciEXT(GLuint, GLenum, GLenum);
+#define glBlendFunciEXT GLES2BlendFunciEXT
+GL_APICALL void GL_APIENTRY GLES2BlendFuncSeparateiEXT(GLuint, GLenum, GLenum, GLenum, GLenum);
+#define glBlendFuncSeparateiEXT GLES2BlendFuncSeparateiEXT
+GL_APICALL void GL_APIENTRY GLES2ColorMaskiEXT(GLuint, GLboolean, GLboolean, GLboolean, GLboolean);
+#define glColorMaskiEXT GLES2ColorMaskiEXT
+GL_APICALL GLboolean GL_APIENTRY GLES2IsEnablediEXT(GLenum, GLuint);
+#define glIsEnablediEXT GLES2IsEnablediEXT
+#endif
+
+/* GL_EXT_texture_border_clamp */
+#ifndef GL_EXT_texture_border_clamp
+#define GL_EXT_texture_border_clamp 1
+GL_APICALL void GL_APIENTRY GLES2TexParameterIivEXT(GLenum, GLenum, const GLint *);
+#define glTexParameterIivEXT GLES2TexParameterIivEXT
+GL_APICALL void GL_APIENTRY GLES2TexParameterIuivEXT(GLenum, GLenum, const GLuint *);
+#define glTexParameterIuivEXT GLES2TexParameterIuivEXT
+GL_APICALL void GL_APIENTRY GLES2GetTexParameterIivEXT(GLenum, GLenum, GLint *);
+#define glGetTexParameterIivEXT GLES2GetTexParameterIivEXT
+GL_APICALL void GL_APIENTRY GLES2GetTexParameterIuivEXT(GLenum, GLenum, GLuint *);
+#define glGetTexParameterIuivEXT GLES2GetTexParameterIuivEXT
+GL_APICALL void GL_APIENTRY GLES2SamplerParameterIivEXT(GLuint, GLenum, const GLint *);
+#define glSamplerParameterIivEXT GLES2SamplerParameterIivEXT
+GL_APICALL void GL_APIENTRY GLES2SamplerParameterIuivEXT(GLuint, GLenum, const GLuint *);
+#define glSamplerParameterIuivEXT GLES2SamplerParameterIuivEXT
+GL_APICALL void GL_APIENTRY GLES2GetSamplerParameterIivEXT(GLuint, GLenum, GLint *);
+#define glGetSamplerParameterIivEXT GLES2GetSamplerParameterIivEXT
+GL_APICALL void GL_APIENTRY GLES2GetSamplerParameterIuivEXT(GLuint, GLenum, GLuint *);
+#define glGetSamplerParameterIuivEXT GLES2GetSamplerParameterIuivEXT
 #endif
 
 /* GL_EXT_separate_shader_objects */
@@ -1659,6 +1879,16 @@ GL_APICALL void GL_APIENTRY GLES2GetnUniformivEXT(GLuint, GLint, GLsizei, GLint 
 #define glGetnUniformivEXT GLES2GetnUniformivEXT
 #endif
 
+/* GL_KHR_texture_compression_astc_ldr */
+#ifndef GL_KHR_texture_compression_astc_ldr
+#define GL_KHR_texture_compression_astc_ldr 1
+#endif
+
+/* GL_KHR_texture_compression_astc_hdr */
+#ifndef GL_KHR_texture_compression_astc_hdr
+#define GL_KHR_texture_compression_astc_hdr 1
+#endif
+
 /* GL_KHR_debug */
 #ifndef GL_KHR_debug
 #define GL_KHR_debug 1
@@ -1708,6 +1938,53 @@ GL_APICALL void GL_APIENTRY GLES2GetPointervKHR(GLenum, void **);
 #define glGetPointervKHR GLES2GetPointervKHR
 #endif
 
+/* GL_KHR_blend_equation_advanced */
+#ifndef GL_KHR_blend_equation_advanced
+#define GL_KHR_blend_equation_advanced 1
+GL_APICALL void GL_APIENTRY GLES2BlendBarrierKHR(void);
+#define glBlendBarrierKHR GLES2BlendBarrierKHR
+#endif
+
+/* GL_KHR_blend_equation_advanced_coherent */
+#ifndef GL_KHR_blend_equation_advanced_coherent
+#define GL_KHR_blend_equation_advanced_coherent 1
+#endif
+
+/* GL_KHR_robustness */
+#ifndef GL_KHR_robustness
+#define GL_KHR_robustness 1
+GL_APICALL GLenum GL_APIENTRY GLES2GetGraphicsResetStatus(void);
+#define glGetGraphicsResetStatus GLES2GetGraphicsResetStatus
+GL_APICALL void GL_APIENTRY GLES2ReadnPixels(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLsizei, void *);
+#define glReadnPixels GLES2ReadnPixels
+GL_APICALL void GL_APIENTRY GLES2GetnUniformfv(GLuint, GLint, GLsizei, GLfloat *);
+#define glGetnUniformfv GLES2GetnUniformfv
+GL_APICALL void GL_APIENTRY GLES2GetnUniformiv(GLuint, GLint, GLsizei, GLint *);
+#define glGetnUniformiv GLES2GetnUniformiv
+GL_APICALL void GL_APIENTRY GLES2GetnUniformuiv(GLuint, GLint, GLsizei, GLuint *);
+#define glGetnUniformuiv GLES2GetnUniformuiv
+GL_APICALL GLenum GL_APIENTRY GLES2GetGraphicsResetStatusKHR(void);
+#define glGetGraphicsResetStatusKHR GLES2GetGraphicsResetStatusKHR
+GL_APICALL void GL_APIENTRY GLES2ReadnPixelsKHR(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLsizei, void *);
+#define glReadnPixelsKHR GLES2ReadnPixelsKHR
+GL_APICALL void GL_APIENTRY GLES2GetnUniformfvKHR(GLuint, GLint, GLsizei, GLfloat *);
+#define glGetnUniformfvKHR GLES2GetnUniformfvKHR
+GL_APICALL void GL_APIENTRY GLES2GetnUniformivKHR(GLuint, GLint, GLsizei, GLint *);
+#define glGetnUniformivKHR GLES2GetnUniformivKHR
+GL_APICALL void GL_APIENTRY GLES2GetnUniformuivKHR(GLuint, GLint, GLsizei, GLuint *);
+#define glGetnUniformuivKHR GLES2GetnUniformuivKHR
+#endif
+
+/* GL_KHR_robust_buffer_access_behavior */
+#ifndef GL_KHR_robust_buffer_access_behavior
+#define GL_KHR_robust_buffer_access_behavior 1
+#endif
+
+/* GL_KHR_context_flush_control */
+#ifndef GL_KHR_context_flush_control
+#define GL_KHR_context_flush_control 1
+#endif
+
 /* GL_NV_read_buffer_front */
 #ifndef GL_NV_read_buffer_front
 #define GL_NV_read_buffer_front 1
@@ -1731,6 +2008,13 @@ GL_APICALL void GL_APIENTRY GLES2GetPointervKHR(GLenum, void **);
 /* GL_NV_texture_border_clamp */
 #ifndef GL_NV_texture_border_clamp
 #define GL_NV_texture_border_clamp 1
+#endif
+
+/* GL_NV_polygon_mode */
+#ifndef GL_NV_polygon_mode
+#define GL_NV_polygon_mode 1
+GL_APICALL void GL_APIENTRY GLES2PolygonModeNV(GLenum, GLenum);
+#define glPolygonModeNV GLES2PolygonModeNV
 #endif
 
 /* GL_OES_depth32 */
@@ -1757,6 +2041,11 @@ GL_APICALL void GL_APIENTRY GLES2GetBufferPointervOES(GLenum, GLenum, void **);
 /* GL_OES_stencil4 */
 #ifndef GL_OES_stencil4
 #define GL_OES_stencil4 1
+#endif
+
+/* GL_OES_texture_stencil8 */
+#ifndef GL_OES_texture_stencil8
+#define GL_OES_texture_stencil8 1
 #endif
 
 #ifdef __cplusplus

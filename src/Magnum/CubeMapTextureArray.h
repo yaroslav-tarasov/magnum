@@ -25,7 +25,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 /** @file
  * @brief Class @ref Magnum::CubeMapTextureArray
  */
@@ -35,7 +35,7 @@
 #include "Magnum/Array.h"
 #include "Magnum/Math/Vector3.h"
 
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 namespace Magnum {
 
 /**
@@ -80,7 +80,10 @@ the six sides of the cube map, fourth part is layer in the array. See
     @ref Texture, @ref TextureArray, @ref RectangleTexture, @ref BufferTexture,
     @ref MultisampleTexture
 @requires_gl40 Extension @extension{ARB,texture_cube_map_array}
-@requires_gl Cube map texture arrays are not available in OpenGL ES or WebGL.
+@requires_gles30 Not defined in OpenGL ES 2.0.
+@requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+    @es_extension{EXT,texture_cube_map_array}
+@requires_gles Cube map texture arrays are not available in WebGL.
 */
 class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
     public:
@@ -117,10 +120,31 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          * Creates new OpenGL texture object. If @extension{ARB,direct_state_access}
          * (part of OpenGL 4.5) is not available, the texture is created on
          * first use.
-         * @see @ref wrap(), @fn_gl{CreateTextures} with
-         *      @def_gl{TEXTURE_CUBE_MAP_ARRAY}, eventually @fn_gl{GenTextures}
+         * @see @ref CubeMapTextureArray(NoCreateT), @ref wrap(),
+         *      @fn_gl{CreateTextures} with @def_gl{TEXTURE_CUBE_MAP_ARRAY},
+         *      eventually @fn_gl{GenTextures}
          */
-        explicit CubeMapTextureArray(): AbstractTexture(GL_TEXTURE_CUBE_MAP_ARRAY) {}
+        explicit CubeMapTextureArray():
+            #ifndef MAGNUM_TARGET_GLES
+            AbstractTexture{GL_TEXTURE_CUBE_MAP_ARRAY} {}
+            #else
+            AbstractTexture{GL_TEXTURE_CUBE_MAP_ARRAY_EXT} {}
+            #endif
+
+        /**
+         * @brief Construct without creating the underlying OpenGL object
+         *
+         * The constructed instance is equivalent to moved-from state. Useful
+         * in cases where you will overwrite the instance later anyway. Move
+         * another object over it to make it useful.
+         * @see @ref CubeMapTextureArray(), @ref wrap()
+         */
+        explicit CubeMapTextureArray(NoCreateT) noexcept:
+            #ifndef MAGNUM_TARGET_GLES
+            AbstractTexture{NoCreate, GL_TEXTURE_CUBE_MAP_ARRAY} {}
+            #else
+            AbstractTexture{NoCreate, GL_TEXTURE_CUBE_MAP_ARRAY_EXT} {}
+            #endif
 
         #if defined(CORRADE_GCC45_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
         /* GCC 4.5 somehow cannot do this on its own, MSVC 2013 comlains about using deleted function */
@@ -199,16 +223,20 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
             return *this;
         }
 
+        #ifndef MAGNUM_TARGET_GLES
         /**
          * @copybrief Texture::setLodBias()
          * @return Reference to self (for method chaining)
          *
          * See @ref Texture::setLodBias() for more information.
+         * @requires_gl Texture LOD bias can be specified only directly in
+         *      fragment shader in OpenGL ES.
          */
         CubeMapTextureArray& setLodBias(Float bias) {
             AbstractTexture::setLodBias(bias);
             return *this;
         }
+        #endif
 
         /**
          * @copybrief Texture::setWrapping()
@@ -227,6 +255,9 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          *
          * See @ref Texture::setBorderColor(const Color4&) for more
          * information.
+         * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+         *      @es_extension{EXT,texture_border_clamp} or
+         *      @es_extension{NV,texture_border_clamp}
          */
         CubeMapTextureArray& setBorderColor(const Color4& color) {
             AbstractTexture::setBorderColor(color);
@@ -240,6 +271,8 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          * See @ref Texture::setBorderColor(const Vector4ui&) for more
          * information.
          * @requires_gl30 Extension @extension{EXT,texture_integer}
+         * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+         *      @es_extension{EXT,texture_border_clamp}
          */
         CubeMapTextureArray& setBorderColor(const Vector4ui& color) {
             AbstractTexture::setBorderColor(color);
@@ -248,6 +281,8 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
 
         /** @overload
          * @requires_gl30 Extension @extension{EXT,texture_integer}
+         * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+         *      @es_extension{EXT,texture_border_clamp}
          */
         CubeMapTextureArray& setBorderColor(const Vector4i& color) {
             AbstractTexture::setBorderColor(color);
@@ -271,6 +306,8 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          *
          * See @ref Texture::setSRGBDecode() for more information.
          * @requires_extension Extension @extension{EXT,texture_sRGB_decode}
+         * @requires_es_extension Extension @es_extension{ANDROID,extension_pack_es31a}/
+         *      @es_extension2{EXT,texture_sRGB_decode,texture_sRGB_decode}
          */
         CubeMapTextureArray& setSRGBDecode(bool decode) {
             AbstractTexture::setSRGBDecode(decode);
@@ -346,10 +383,13 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
             return DataHelper<3>::imageSize(*this, level);
         }
 
+        #ifndef MAGNUM_TARGET_GLES
         /**
          * @copybrief Texture::image(Int, Image&)
          *
          * See @ref Texture::image(Int, Image&) for more information.
+         * @requires_gl Texture image queries are not available in OpenGL ES.
+         *      See @ref Framebuffer::read() for possible workaround.
          */
         void image(Int level, Image3D& image) {
             AbstractTexture::image<3>(level, image);
@@ -369,6 +409,8 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          *
          * See @ref Texture::image(Int, BufferImage&, BufferUsage) for more
          * information.
+         * @requires_gl Texture image queries are not available in OpenGL ES.
+         *      See @ref Framebuffer::read() for possible workaround.
          */
         void image(Int level, BufferImage3D& image, BufferUsage usage) {
             AbstractTexture::image<3>(level, image, usage);
@@ -389,6 +431,8 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          * See @ref Texture::subImage(Int, const RangeTypeFor<dimensions, Int>&, Image&)
          * for more information.
          * @requires_gl45 Extension @extension{ARB,get_texture_sub_image}
+         * @requires_gl Texture image queries are not available in OpenGL ES.
+         *      See @ref Framebuffer::read() for possible workaround.
          */
         void subImage(Int level, const Range3Di& range, Image3D& image) {
             AbstractTexture::subImage<3>(level, range, image);
@@ -409,6 +453,8 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          * See @ref Texture::subImage(Int, const RangeTypeFor<dimensions, Int>&, BufferImage&, BufferUsage)
          * for more information.
          * @requires_gl45 Extension @extension{ARB,get_texture_sub_image}
+         * @requires_gl Texture image queries are not available in OpenGL ES.
+         *      See @ref Framebuffer::read() for possible workaround.
          */
         void subImage(Int level, const Range3Di& range, BufferImage3D& image, BufferUsage usage) {
             AbstractTexture::subImage<3>(level, range, image, usage);
@@ -422,6 +468,7 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          * @endcode
          */
         BufferImage3D subImage(Int level, const Range3Di& range, BufferImage3D&& image, BufferUsage usage);
+        #endif
 
         /**
          * @copybrief Texture::setImage()
@@ -528,12 +575,18 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
         #endif
 
     private:
-        explicit CubeMapTextureArray(GLuint id, ObjectFlags flags) noexcept: AbstractTexture{id, GL_TEXTURE_CUBE_MAP_ARRAY, flags} {}
+        explicit CubeMapTextureArray(GLuint id, ObjectFlags flags) noexcept: AbstractTexture{id,
+            #ifndef MAGNUM_TARGET_GLES
+            GL_TEXTURE_CUBE_MAP_ARRAY,
+            #else
+            GL_TEXTURE_CUBE_MAP_ARRAY_EXT,
+            #endif
+            flags} {}
 };
 
 }
 #else
-#error this header is not available in OpenGL ES build
+#error this header is not available in OpenGL ES 2.0 and WebGL build
 #endif
 
 #endif

@@ -75,10 +75,13 @@ template<UnsignedInt dimensions, class T> class Range {
          *
          * Construct zero-size range positioned at origin.
          */
-        constexpr Range(): _min{}, _max{} {}
+        constexpr /*implicit*/ Range(ZeroInitT = ZeroInit): _min{ZeroInit}, _max{ZeroInit} {}
+
+        /** @brief Construct without initializing the contents */
+        explicit Range(NoInitT): _min{NoInit}, _max{NoInit} {}
 
         /** @brief Construct range from minimal and maximal coordinates */
-        constexpr Range(const VectorType& min, const VectorType& max): _min(min), _max(max) {}
+        constexpr /*implicit*/ Range(const VectorType& min, const VectorType& max): _min{min}, _max{max} {}
 
         /** @brief Copy constructor */
         constexpr Range(const Range<dimensions, T>&) = default;
@@ -240,8 +243,21 @@ See @ref Range for more information.
 */
 template<class T> class Range2D: public Range<2, T> {
     public:
-        /** @copydoc Range() */
-        constexpr /*implicit*/ Range2D() {}
+        /** @copydoc Range(ZeroInitT) */
+        constexpr /*implicit*/ Range2D(ZeroInitT = ZeroInit)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Range<2, T>{ZeroInit}
+            #endif
+            {}
+
+        /** @copydoc Range(NoInitT) */
+        explicit Range2D(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Range<2, T>{NoInit}
+            #endif
+            {}
 
         /** @copydoc Range(const VectorType&, const VectorType&) */
         constexpr /*implicit*/ Range2D(const Vector2<T>& min, const Vector2<T>& max): Range<2, T>(min, max) {}
@@ -252,12 +268,21 @@ template<class T> class Range2D: public Range<2, T> {
         /** @copydoc Range(const Range<dimensions, U>&) */
         template<class U> constexpr explicit Range2D(const Range2D<U>& other): Range<2, T>(other) {}
 
-        /** @brief Construct range from external representation */
-        #ifndef CORRADE_GCC44_COMPATIBILITY
-        template<class U, class V = decltype(Implementation::RangeConverter<2, T, U>::from(std::declval<U>()))> constexpr explicit Range2D(const U& other): Range<2, T>{Implementation::RangeConverter<2, T, U>::from(other)} {}
-        #else
-        template<class U, class V = decltype(Implementation::RangeConverter<2, T, U>::from(*static_cast<const U*>(nullptr)))> constexpr explicit Range2D(const U& other): Range<2, T>{Implementation::RangeConverter<2, T, U>::from(other)} {}
-        #endif
+        /**
+         * @brief Construct range from external representation
+         * @todoc Remove workaround when Doxygen no longer chokes on that line
+         */
+        template<class U, class V = decltype(Implementation::RangeConverter<2, T, U>::from(
+            #ifndef CORRADE_GCC44_COMPATIBILITY
+            std::declval<U>()
+            #else
+            *static_cast<const U*>(nullptr)
+            #endif
+        ))> constexpr explicit Range2D(const U& other)
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Range<2, T>{Implementation::RangeConverter<2, T, U>::from(other)}
+            #endif
+            {}
 
         /**
          * @brief Bottom left corner
@@ -348,8 +373,21 @@ See @ref Range for more information.
 */
 template<class T> class Range3D: public Range<3, T> {
     public:
-        /** @copydoc Range() */
-        constexpr /*implicit*/ Range3D() {}
+        /** @copydoc Range(ZeroInitT) */
+        constexpr /*implicit*/ Range3D(ZeroInitT = ZeroInit)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Range<3, T>{ZeroInit}
+            #endif
+            {}
+
+        /** @copybrief Range(NoInitT) */
+        explicit Range3D(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Range<3, T>{NoInit}
+            #endif
+            {}
 
         /** @copydoc Range(const VectorType&, const VectorType&) */
         constexpr /*implicit*/ Range3D(const Vector3<T>& min, const Vector3<T>& max): Range<3, T>(min, max) {}
@@ -360,12 +398,21 @@ template<class T> class Range3D: public Range<3, T> {
         /** @copydoc Range(const Range<dimensions, U>&) */
         template<class U> constexpr explicit Range3D(const Range3D<U>& other): Range<3, T>(other) {}
 
-        /** @brief Construct range from external representation */
-        #ifndef CORRADE_GCC44_COMPATIBILITY
-        template<class U, class V = decltype(Implementation::RangeConverter<3, T, U>::from(std::declval<U>()))> constexpr explicit Range3D(const U& other): Range<3, T>{Implementation::RangeConverter<3, T, U>::from(other)} {}
-        #else
-        template<class U, class V = decltype(Implementation::RangeConverter<3, T, U>::from(*static_cast<const U*>(nullptr)))> constexpr explicit Range3D(const U& other): Range<3, T>{Implementation::RangeConverter<3, T, U>::from(other)} {}
-        #endif
+        /**
+         * @brief Construct range from external representation
+         * @todoc Remove workaround when Doxygen no longer chokes on that line
+         */
+        template<class U, class V = decltype(Implementation::RangeConverter<3, T, U>::from(
+            #ifndef CORRADE_GCC44_COMPATIBILITY
+            std::declval<U>()
+            #else
+            *static_cast<const U*>(nullptr)
+            #endif
+        ))> constexpr explicit Range3D(const U& other)
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : Range<3, T>{Implementation::RangeConverter<3, T, U>::from(other)}
+            #endif
+            {}
 
         /**
          * @brief Back bottom left corner

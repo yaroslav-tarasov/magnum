@@ -197,7 +197,13 @@ template<class T> class Quaternion {
          *      q = [\boldsymbol 0, 1]
          * @f]
          */
-        constexpr /*implicit*/ Quaternion(): _scalar(T(1)) {}
+        constexpr /*implicit*/ Quaternion(IdentityInitT = IdentityInit): _vector{T(0)}, _scalar{T(1)} {}
+
+        /** @brief Construct zero-initialized quaternion */
+        constexpr explicit Quaternion(ZeroInitT): _vector{ZeroInit}, _scalar{T{0}} {}
+
+        /** @brief Construct without initializing the contents */
+        explicit Quaternion(NoInitT): _vector{NoInit} {}
 
         /**
          * @brief Construct quaternion from vector and scalar

@@ -46,6 +46,7 @@ struct MeshGLTest: AbstractOpenGLTester {
     explicit MeshGLTest();
 
     void construct();
+    void constructNoCreate();
     void constructCopy();
     void constructMove();
     void wrap();
@@ -138,6 +139,7 @@ struct MeshGLTest: AbstractOpenGLTester {
 
 MeshGLTest::MeshGLTest() {
     addTests<MeshGLTest>({&MeshGLTest::construct,
+              &MeshGLTest::constructNoCreate,
               &MeshGLTest::constructCopy,
               &MeshGLTest::constructMove,
               &MeshGLTest::wrap,
@@ -242,6 +244,17 @@ void MeshGLTest::construct() {
         {
             CORRADE_VERIFY(mesh.id() > 0);
         }
+    }
+
+    MAGNUM_VERIFY_NO_ERROR();
+}
+
+void MeshGLTest::constructNoCreate() {
+    {
+        Mesh mesh{NoCreate};
+
+        MAGNUM_VERIFY_NO_ERROR();
+        CORRADE_COMPARE(mesh.id(), 0);
     }
 
     MAGNUM_VERIFY_NO_ERROR();
@@ -1281,6 +1294,7 @@ namespace {
                 1.0f, -0.5f
     };
 
+    #ifndef MAGNUM_TARGET_GLES
     const Float indexedVertexDataBaseVertex[] = {
         0.0f, 0.0f, /* Offset */
 
@@ -1309,6 +1323,7 @@ namespace {
             0.4f, 0.0f, -0.9f,
                 1.0f, -0.5f
     };
+    #endif
 
     constexpr Color4ub indexedResult(64 + 15 + 97, 17 + 164 + 28, 56 + 17, 255);
 }

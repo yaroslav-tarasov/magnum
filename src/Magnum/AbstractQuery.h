@@ -35,6 +35,7 @@
 #include <Corrade/Utility/Assert.h>
 
 #include "Magnum/AbstractObject.h"
+#include "Magnum/Tags.h"
 #include "Magnum/configure.h"
 
 #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
@@ -87,8 +88,9 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
          *
          * The result is *not* cached, repeated queries will result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function returns empty string.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function returns empty string.
          * @see @fn_gl{GetObjectLabel} with @def_gl{QUERY} or
          *      @fn_gl_extension2{GetObjectLabel,EXT,debug_label} with
          *      @def_gl{QUERY_OBJECT_EXT}
@@ -101,8 +103,9 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
          * @return Reference to self (for method chaining)
          *
          * Default is empty string. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function does nothing.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function does nothing.
          * @see @ref maxLabelLength(), @fn_gl{ObjectLabel} with
          *      @def_gl{QUERY} or @fn_gl_extension2{LabelObject,EXT,debug_label}
          *      with @def_gl{QUERY_OBJECT_EXT}
@@ -174,6 +177,7 @@ class MAGNUM_EXPORT AbstractQuery: public AbstractObject {
     private:
     #endif
         explicit AbstractQuery(GLenum target);
+        explicit AbstractQuery(NoCreateT, GLenum target) noexcept: _id{0}, _target{target}, _flags{ObjectFlag::DeleteOnDestruction} {}
         explicit AbstractQuery(GLuint id, GLenum target, ObjectFlags flags) noexcept: _id{id}, _target{target}, _flags{flags} {}
 
         #ifdef MAGNUM_BUILD_DEPRECATED

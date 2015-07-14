@@ -140,7 +140,13 @@ template<class T> class Complex {
          *      c = 1 + i0
          * @f]
          */
-        constexpr /*implicit*/ Complex(): _real(T(1)), _imaginary(T(0)) {}
+        constexpr /*implicit*/ Complex(IdentityInitT = IdentityInit): _real(T(1)), _imaginary(T(0)) {}
+
+        /** @brief Construct zero-initialized complex number */
+        constexpr explicit Complex(ZeroInitT): _real{}, _imaginary{} {}
+
+        /** @brief Construct without initializing the contents */
+        explicit Complex(NoInitT) {}
 
         /**
          * @brief Construct complex number from real and imaginary part

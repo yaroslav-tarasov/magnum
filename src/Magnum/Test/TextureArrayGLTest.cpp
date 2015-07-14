@@ -42,8 +42,10 @@ struct TextureArrayGLTest: AbstractOpenGLTester {
 
     #ifndef MAGNUM_TARGET_GLES
     void construct1D();
+    void construct1DNoCreate();
     #endif
     void construct2D();
+    void construct2DNoCreate();
 
     #ifndef MAGNUM_TARGET_GLES
     void wrap1D();
@@ -77,7 +79,11 @@ struct TextureArrayGLTest: AbstractOpenGLTester {
 
     #ifndef MAGNUM_TARGET_GLES
     void samplingBorderInteger1D();
+    #endif
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     void samplingBorderInteger2D();
+    #endif
+    #ifndef MAGNUM_TARGET_GLES
     void samplingDepthStencilMode1D();
     #endif
     #ifndef MAGNUM_TARGET_GLES2
@@ -134,8 +140,10 @@ TextureArrayGLTest::TextureArrayGLTest() {
     addTests<TextureArrayGLTest>({
         #ifndef MAGNUM_TARGET_GLES
         &TextureArrayGLTest::construct1D,
+        &TextureArrayGLTest::construct1DNoCreate,
         #endif
         &TextureArrayGLTest::construct2D,
+        &TextureArrayGLTest::construct2DNoCreate,
 
         #ifndef MAGNUM_TARGET_GLES
         &TextureArrayGLTest::wrap1D,
@@ -168,10 +176,17 @@ TextureArrayGLTest::TextureArrayGLTest() {
 
         #ifndef MAGNUM_TARGET_GLES
         &TextureArrayGLTest::samplingBorderInteger1D,
+        #endif
+        #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
         &TextureArrayGLTest::samplingBorderInteger2D,
+        #endif
+        #ifndef MAGNUM_TARGET_GLES
         &TextureArrayGLTest::samplingDepthStencilMode1D,
+        #endif
+        #ifndef MAGNUM_TARGET_GLES2
         &TextureArrayGLTest::samplingDepthStencilMode2D,
-        #else
+        #endif
+        #ifdef MAGNUM_TARGET_GLES
         &TextureArrayGLTest::samplingBorder2D,
         #endif
 
@@ -231,6 +246,17 @@ void TextureArrayGLTest::construct1D() {
 
     MAGNUM_VERIFY_NO_ERROR();
 }
+
+void TextureArrayGLTest::construct1DNoCreate() {
+    {
+        Texture1DArray texture{NoCreate};
+
+        MAGNUM_VERIFY_NO_ERROR();
+        CORRADE_COMPARE(texture.id(), 0);
+    }
+
+    MAGNUM_VERIFY_NO_ERROR();
+}
 #endif
 
 void TextureArrayGLTest::construct2D() {
@@ -244,6 +270,17 @@ void TextureArrayGLTest::construct2D() {
 
         MAGNUM_VERIFY_NO_ERROR();
         CORRADE_VERIFY(texture.id() > 0);
+    }
+
+    MAGNUM_VERIFY_NO_ERROR();
+}
+
+void TextureArrayGLTest::construct2DNoCreate() {
+    {
+        Texture2DArray texture{NoCreate};
+
+        MAGNUM_VERIFY_NO_ERROR();
+        CORRADE_COMPARE(texture.id(), 0);
     }
 
     MAGNUM_VERIFY_NO_ERROR();
@@ -495,12 +532,17 @@ void TextureArrayGLTest::samplingCompare2D() {
 }
 #endif
 
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void TextureArrayGLTest::samplingBorderInteger2D() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::texture_array>())
         CORRADE_SKIP(Extensions::GL::EXT::texture_array::string() + std::string(" is not supported."));
     if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::texture_integer>())
         CORRADE_SKIP(Extensions::GL::EXT::texture_integer::string() + std::string(" is not supported."));
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::texture_border_clamp>())
+        CORRADE_SKIP(Extensions::GL::EXT::texture_border_clamp::string() + std::string(" is not supported."));
+    #endif
 
     Texture2DArray a;
     a.setWrapping(Sampler::Wrapping::ClampToBorder)
@@ -534,8 +576,9 @@ void TextureArrayGLTest::samplingDepthStencilMode2D() {
 
 #ifdef MAGNUM_TARGET_GLES
 void TextureArrayGLTest::samplingBorder2D() {
-    if(!Context::current()->isExtensionSupported<Extensions::GL::NV::texture_border_clamp>())
-        CORRADE_SKIP(Extensions::GL::NV::texture_border_clamp::string() + std::string(" is not supported."));
+    if(!Context::current()->isExtensionSupported<Extensions::GL::NV::texture_border_clamp>() &&
+       !Context::current()->isExtensionSupported<Extensions::GL::EXT::texture_border_clamp>())
+        CORRADE_SKIP("No required extension is supported.");
 
     Texture2DArray texture;
     texture.setWrapping(Sampler::Wrapping::ClampToBorder)

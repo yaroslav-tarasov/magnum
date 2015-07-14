@@ -43,6 +43,7 @@ struct CubeMapTextureGLTest: AbstractOpenGLTester {
     explicit CubeMapTextureGLTest();
 
     void construct();
+    void constructNoCreate();
     void wrap();
 
     void bind();
@@ -55,11 +56,14 @@ struct CubeMapTextureGLTest: AbstractOpenGLTester {
     void samplingMaxLevel();
     void samplingCompare();
     #endif
-    #ifndef MAGNUM_TARGET_GLES
+    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
     void samplingBorderInteger();
     #endif
     #ifndef MAGNUM_TARGET_GLES2
     void samplingDepthStencilMode();
+    #endif
+    #ifdef MAGNUM_TARGET_GLES
+    void samplingBorder();
     #endif
 
     void storage();
@@ -90,6 +94,7 @@ struct CubeMapTextureGLTest: AbstractOpenGLTester {
 
 CubeMapTextureGLTest::CubeMapTextureGLTest() {
     addTests<CubeMapTextureGLTest>({&CubeMapTextureGLTest::construct,
+              &CubeMapTextureGLTest::constructNoCreate,
               &CubeMapTextureGLTest::wrap,
 
               &CubeMapTextureGLTest::bind,
@@ -102,11 +107,14 @@ CubeMapTextureGLTest::CubeMapTextureGLTest() {
               &CubeMapTextureGLTest::samplingMaxLevel,
               &CubeMapTextureGLTest::samplingCompare,
               #endif
-              #ifndef MAGNUM_TARGET_GLES
+              #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
               &CubeMapTextureGLTest::samplingBorderInteger,
               #endif
               #ifndef MAGNUM_TARGET_GLES2
               &CubeMapTextureGLTest::samplingDepthStencilMode,
+              #endif
+              #ifdef MAGNUM_TARGET_GLES
+              &CubeMapTextureGLTest::samplingBorder,
               #endif
 
               &CubeMapTextureGLTest::storage,
@@ -141,6 +149,17 @@ void CubeMapTextureGLTest::construct() {
 
         MAGNUM_VERIFY_NO_ERROR();
         CORRADE_VERIFY(texture.id() > 0);
+    }
+
+    MAGNUM_VERIFY_NO_ERROR();
+}
+
+void CubeMapTextureGLTest::constructNoCreate() {
+    {
+        CubeMapTexture texture{NoCreate};
+
+        MAGNUM_VERIFY_NO_ERROR();
+        CORRADE_COMPARE(texture.id(), 0);
     }
 
     MAGNUM_VERIFY_NO_ERROR();
@@ -193,8 +212,12 @@ void CubeMapTextureGLTest::sampling() {
            .setBaseLevel(1)
            .setMaxLevel(750)
            #endif
+           #ifndef MAGNUM_TARGET_GLES
            .setWrapping(Sampler::Wrapping::ClampToBorder)
            .setBorderColor(Color3(0.5f))
+           #else
+           .setWrapping(Sampler::Wrapping::ClampToEdge)
+           #endif
            .setMaxAnisotropy(Sampler::maxMaxAnisotropy())
             #ifndef MAGNUM_TARGET_GLES2
            .setCompareMode(Sampler::CompareMode::CompareRefToTexture)
@@ -255,10 +278,15 @@ void CubeMapTextureGLTest::samplingCompare() {
 }
 #endif
 
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 void CubeMapTextureGLTest::samplingBorderInteger() {
+    #ifndef MAGNUM_TARGET_GLES
     if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::texture_integer>())
         CORRADE_SKIP(Extensions::GL::EXT::texture_integer::string() + std::string(" is not supported."));
+    #else
+    if(!Context::current()->isExtensionSupported<Extensions::GL::EXT::texture_border_clamp>())
+        CORRADE_SKIP(Extensions::GL::EXT::texture_border_clamp::string() + std::string(" is not supported."));
+    #endif
 
     CubeMapTexture a;
     a.setWrapping(Sampler::Wrapping::ClampToBorder)
@@ -283,6 +311,20 @@ void CubeMapTextureGLTest::samplingDepthStencilMode() {
 
     CubeMapTexture texture;
     texture.setDepthStencilMode(Sampler::DepthStencilMode::StencilIndex);
+
+    MAGNUM_VERIFY_NO_ERROR();
+}
+#endif
+
+#ifdef MAGNUM_TARGET_GLES
+void CubeMapTextureGLTest::samplingBorder() {
+    if(!Context::current()->isExtensionSupported<Extensions::GL::NV::texture_border_clamp>() &&
+       !Context::current()->isExtensionSupported<Extensions::GL::EXT::texture_border_clamp>())
+        CORRADE_SKIP("No required extension is supported.");
+
+    CubeMapTexture texture;
+    texture.setWrapping(Sampler::Wrapping::ClampToBorder)
+           .setBorderColor(Color3(0.5f));
 
     MAGNUM_VERIFY_NO_ERROR();
 }

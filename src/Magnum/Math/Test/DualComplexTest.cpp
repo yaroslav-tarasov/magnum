@@ -58,7 +58,9 @@ struct DualComplexTest: Corrade::TestSuite::Tester {
     explicit DualComplexTest();
 
     void construct();
-    void constructDefault();
+    void constructIdentity();
+    void constructZero();
+    void constructNoInit();
     void constructFromVector();
     void constructCopy();
     void convert();
@@ -96,7 +98,9 @@ typedef Math::Vector2<Float> Vector2;
 
 DualComplexTest::DualComplexTest() {
     addTests<DualComplexTest>({&DualComplexTest::construct,
-              &DualComplexTest::constructDefault,
+              &DualComplexTest::constructIdentity,
+              &DualComplexTest::constructZero,
+              &DualComplexTest::constructNoInit,
               &DualComplexTest::constructFromVector,
               &DualComplexTest::constructCopy,
               &DualComplexTest::convert,
@@ -125,7 +129,7 @@ DualComplexTest::DualComplexTest() {
 }
 
 void DualComplexTest::construct() {
-    constexpr DualComplex a({-1.0f, 2.5f}, {3.0f, -7.5f});
+    constexpr DualComplex a = {{-1.0f, 2.5f}, {3.0f, -7.5f}};
     CORRADE_COMPARE(a, DualComplex({-1.0f, 2.5f}, {3.0f, -7.5f}));
 
     constexpr Complex b = a.real();
@@ -137,10 +141,24 @@ void DualComplexTest::construct() {
     CORRADE_COMPARE(d, DualComplex({-1.0f, 2.5f}, {0.0f, 0.0f}));
 }
 
-void DualComplexTest::constructDefault() {
+void DualComplexTest::constructIdentity() {
     constexpr DualComplex a;
+    constexpr DualComplex b{IdentityInit};
     CORRADE_COMPARE(a, DualComplex({1.0f, 0.0f}, {0.0f, 0.0f}));
+    CORRADE_COMPARE(b, DualComplex({1.0f, 0.0f}, {0.0f, 0.0f}));
     CORRADE_COMPARE(a.length(), 1.0f);
+    CORRADE_COMPARE(b.length(), 1.0f);
+}
+
+void DualComplexTest::constructZero() {
+    constexpr DualComplex a{ZeroInit};
+    CORRADE_COMPARE(a, DualComplex({0.0f, 0.0f}, {0.0f, 0.0f}));
+}
+
+void DualComplexTest::constructNoInit() {
+    DualComplex a{{-1.0f, 2.5f}, {3.0f, -7.5f}};
+    new(&a) DualComplex{NoInit};
+    CORRADE_COMPARE(a, DualComplex({-1.0f, 2.5f}, {3.0f, -7.5f}));
 }
 
 void DualComplexTest::constructFromVector() {

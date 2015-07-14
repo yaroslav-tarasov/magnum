@@ -29,6 +29,7 @@
 #include <Corrade/Containers/ArrayView.h>
 
 #include "Magnum/AbstractObject.h"
+#include "Magnum/Tags.h"
 
 #ifndef MAGNUM_TARGET_GLES2
 /** @file
@@ -171,10 +172,21 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * Creates new OpenGL transform feedback object. If
          * @extension{ARB,direct_state_access} (part of OpenGL 4.5) is not
          * available, the transform feedback object is created on first use.
-         * @see @ref wrap(), @fn_gl{CreateTransformFeedbacks}, eventually
+         * @see @ref TransformFeedback(NoCreateT), @ref wrap(),
+         *      @fn_gl{CreateTransformFeedbacks}, eventually
          *      @fn_gl{GenTransformFeedbacks}
          */
         explicit TransformFeedback();
+
+        /**
+         * @brief Construct without creating the underlying OpenGL object
+         *
+         * The constructed instance is equivalent to moved-from state. Useful
+         * in cases where you will overwrite the instance later anyway. Move
+         * another object over it to make it useful.
+         * @see @ref TransformFeedback(), @ref wrap()
+         */
+        explicit TransformFeedback(NoCreateT) noexcept: _id{0}, _flags{ObjectFlag::DeleteOnDestruction} {}
 
         /** @brief Copying is not allowed */
         TransformFeedback(const TransformFeedback&) = delete;
@@ -215,8 +227,9 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          *
          * The result is *not* cached, repeated queries will result in repeated
          * OpenGL calls. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function returns empty string.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function returns empty string.
          * @see @fn_gl{GetObjectLabel} or @fn_gl_extension2{GetObjectLabel,EXT,debug_label}
          *      with @def_gl{TRANSFORM_FEEDBACK}
          * @requires_gles Debug output is not available in WebGL.
@@ -228,8 +241,9 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * @return Reference to self (for method chaining)
          *
          * Default is empty string. If OpenGL 4.3 is not supported and neither
-         * @extension{KHR,debug} nor @extension2{EXT,debug_label} desktop or ES
-         * extension is available, this function does nothing.
+         * @extension{KHR,debug} (covered also by @es_extension{ANDROID,extension_pack_es31a})
+         * nor @extension2{EXT,debug_label} desktop or ES extension is
+         * available, this function does nothing.
          * @see @ref maxLabelLength(), @fn_gl{ObjectLabel} or
          *      @fn_gl_extension2{LabelObject,EXT,debug_label} with
          *      @def_gl{TRANSFORM_FEEDBACK}

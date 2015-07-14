@@ -58,16 +58,18 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
     template<std::size_t, std::size_t, class> friend class RectangularMatrix;
 
     public:
-        typedef T Type;                         /**< @brief Underlying data type */
-        const static std::size_t Cols = cols;   /**< @brief Matrix column count */
-        const static std::size_t Rows = rows;   /**< @brief Matrix row count */
+        typedef T Type;         /**< @brief Underlying data type */
 
-        /**
-         * @brief Size of matrix diagonal
-         *
-         * @see @ref fromDiagonal(), @ref diagonal()
-         */
-        const static std::size_t DiagonalSize = (cols < rows ? cols : rows);
+        enum: std::size_t {
+            Cols = cols,        /**< Matrix column count */
+            Rows = rows,        /**< Matrix row count */
+
+            /**
+             * Size of matrix diagonal
+             * @see @ref fromDiagonal(), @ref diagonal()
+             */
+            DiagonalSize = (cols < rows ? cols : rows)
+        };
 
         /**
          * @brief Matrix from array
@@ -106,7 +108,20 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
         }
 
         /** @brief Construct zero-filled matrix */
-        constexpr /*implicit*/ RectangularMatrix() {}
+        constexpr /*implicit*/ RectangularMatrix(ZeroInitT = ZeroInit)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : RectangularMatrix<cols, rows, T>{typename Implementation::GenerateSequence<cols>::Type{}, ZeroInit}
+            #endif
+            {}
+
+        /** @brief Construct matrix without initializing the contents */
+        explicit RectangularMatrix(NoInitT)
+            /** @todoc remove workaround when doxygen is sane */
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            : RectangularMatrix<cols, rows, T>{typename Implementation::GenerateSequence<cols>::Type{}, NoInit}
+            #endif
+            {}
 
         /**
          * @brief Construct matrix from column vectors
@@ -413,6 +428,9 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
                 _data[i] = *(data.begin() + i);
         }
         #endif
+
+        /* Implementation for RectangularMatrix<cols, rows, T>::RectangularMatrix(ZeroInitT) and RectangularMatrix<cols, rows, T>::RectangularMatrix(NoInitT) */
+        template<class U, std::size_t ...sequence> constexpr explicit RectangularMatrix(Implementation::Sequence<sequence...>, U): _data{Vector<rows, T>{(static_cast<void>(sequence), U{})}...} {}
 
         template<std::size_t ...sequence> constexpr Vector<DiagonalSize, T> diagonalInternal(Implementation::Sequence<sequence...>) const;
 

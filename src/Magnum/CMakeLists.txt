@@ -108,6 +108,7 @@ set(Magnum_HEADERS
     ResourceManager.hpp
     Sampler.h
     Shader.h
+    Tags.h
     Texture.h
     TextureFormat.h
     Timeline.h
@@ -130,15 +131,8 @@ set(Magnum_PRIVATE_HEADERS
 
 # Desktop-only stuff
 if(NOT TARGET_GLES)
-    list(APPEND Magnum_SRCS
-        BufferTexture.cpp
-        CubeMapTextureArray.cpp
-        RectangleTexture.cpp)
-
-    list(APPEND Magnum_HEADERS
-        BufferTexture.h
-        CubeMapTextureArray.h
-        RectangleTexture.h)
+    list(APPEND Magnum_SRCS RectangleTexture.cpp)
+    list(APPEND Magnum_HEADERS RectangleTexture.h)
 endif()
 
 # OpenGL ES 3.0 and WebGL 2.0 stuff
@@ -175,9 +169,17 @@ if(NOT TARGET_WEBGL)
     list(APPEND Magnum_PRIVATE_HEADERS
         Implementation/DebugState.h)
 
+    # Desktop and OpenGL ES 3.0 stuff that is not available in ES2 and WebGL
     if(NOT TARGET_GLES2)
-        list(APPEND Magnum_SRCS MultisampleTexture.cpp)
-        list(APPEND Magnum_HEADERS MultisampleTexture.h)
+        list(APPEND Magnum_SRCS
+            BufferTexture.cpp
+            CubeMapTextureArray.cpp
+            MultisampleTexture.cpp)
+        list(APPEND Magnum_HEADERS
+            BufferTexture.h
+            BufferTextureFormat.h
+            CubeMapTextureArray.h
+            MultisampleTexture.h)
     endif()
 
     if(BUILD_DEPRECATED)

@@ -92,7 +92,7 @@ GLSL 1.40                                   | done
 Extension                                   | Status
 ------------------------------------------- | ------
 GLSL 1.50                                   | done
-@extension{ARB,geometry_shader4}            | missing layered attachments
+@extension{ARB,geometry_shader4}            | missing layered attachments and some limit queries
 @extension{ARB,depth_clamp}                 | done
 @extension{ARB,draw_elements_base_vertex}   | done
 @extension{ARB,fragment_coord_conventions}  | done (shading language only)
@@ -248,6 +248,8 @@ Extension                                   | Status
 @extension{ARB,pipeline_statistics_query}   | |
 @extension{ARB,sparse_buffer}               | |
 @extension{ARB,transform_feedback_overflow_query} | |
+@extension{KHR,blend_equation_advanced}     | |
+@extension3{KHR,blend_equation_advanced_coherent,blend_equation_advanced} | |
 
 @subsection opengl-support-extensions-vendor Vendor OpenGL extensions
 
@@ -342,6 +344,7 @@ Extension                                   | Status
 
 Extension                                   | Status
 ------------------------------------------- | ------
+@es_extension{ANDROID,extension_pack_es31a} | done (nothing to do)
 @es_extension{APPLE,texture_format_BGRA8888} | done
 @es_extension{CHROMIUM,map_sub} (NaCl only) | only buffer mapping
 @es_extension{EXT,texture_filter_anisotropic} | done
@@ -357,9 +360,21 @@ Extension                                   | Status
 @es_extension{EXT,texture_sRGB_decode}      | done
 @es_extension{EXT,sRGB_write_control}       | done
 @es_extension{EXT,shader_integer_mix}       | done (shading language only)
-@extension3{KHR,texture_compression_astc_ldr,texture_compression_astc_hdr} | |
-@extension{KHR,texture_compression_astc_hdr} | |
+@es_extension{EXT,copy_image}               | |
+@es_extension{EXT,draw_buffers_indexed}     | |
+@es_extension{EXT,geometry_shader}          | missing some ES-specific limit queries
+@es_extension{EXT,gpu_shader5}              | done (shading language only)
+@es_extension{EXT,shader_io_blocks}         | done (shading language only)
+@es_extension{EXT,tessellation_shader}      | see above
+@es_extension{EXT,texture_border_clamp}     | done
+@es_extension{EXT,texture_buffer}           | done
+@es_extension{EXT,texture_cube_map_array}   | done
+@es_extension{EXT,primitive_bounding_box}   | |
+@es_extension2{KHR,texture_compression_astc_ldr,texture_compression_astc_hdr} | |
+@es_extension2{KHR,texture_compression_astc_hdr,texture_compression_astc_hdr} | |
 @es_extension{KHR,debug}                    | see above
+@es_extension2{KHR,blend_equation_advanced,blend_equation_advanced}  | |
+@es_extension2{KHR,blend_equation_advanced_coherent,blend_equation_advanced} | |
 @es_extension{KHR,robustness}               | |
 @es_extension{KHR,robust_buffer_access_behavior} | done (nothing to do)
 @es_extension{KHR,context_flush_control}    | |
@@ -368,11 +383,18 @@ Extension                                   | Status
 @es_extension2{NV,read_stencil,NV_read_depth_stencil} | done
 @es_extension{NV,read_depth_stencil}        | done
 @es_extension{NV,texture_border_clamp}      | done
+@es_extension{NV,shader_noperspective_interpolation} | done (shading language only)
 @es_extension{NV,polygon_mode}              | done
 @es_extension{OES,depth32}                  | done
 @es_extension{OES,mapbuffer}                | done
 @es_extension{OES,stencil1}                 | done
 @es_extension{OES,stencil4}                 | done
+@es_extension{OES,sample_shading}           | |
+@es_extension{OES,sample_variables}         | done (shading language only)
+@es_extension{OES,shader_image_atomic}      | done (shading language only)
+@es_extension{OES,shader_multisample_interpolation} | |
+@es_extension{OES,texture_stencil8}         | done
+@es_extension{OES,texture_storage_multisample_2d_array} | done
 
 @subsection opengl-support-webgl10 WebGL 1.0
 
