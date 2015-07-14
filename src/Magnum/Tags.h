@@ -29,6 +29,8 @@
  * @brief Tag type @ref Magnum::NoCreateT, tag @ref Magnum::NoCreate
  */
 
+#include "Corrade/configure.h"
+
 namespace Magnum {
 
 /**
@@ -44,7 +46,12 @@ struct NoCreateT {};
 
 Use for construction without creating the underlying OpenGL object.
 */
-constexpr NoCreateT NoCreate{};
+#ifndef CORRADE_GCC45_COMPATIBILITY
+constexpr
+#else
+const
+#endif
+NoCreateT NoCreate{};
 
 }
 

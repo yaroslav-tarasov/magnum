@@ -73,14 +73,24 @@ using Corrade::Containers::NoInit;
 
 Use for construction with all elements set to zero.
 */
-constexpr ZeroInitT ZeroInit{};
+#ifndef CORRADE_GCC45_COMPATIBILITY
+constexpr
+#else
+const
+#endif
+ZeroInitT ZeroInit{};
 
 /**
 @brief Identity initialization tag
 
 Use for construction with transformation set to identity.
 */
-constexpr IdentityInitT IdentityInit{};
+#ifndef CORRADE_GCC45_COMPATIBILITY
+constexpr
+#else
+const
+#endif
+IdentityInitT IdentityInit{};
 
 }}
 
