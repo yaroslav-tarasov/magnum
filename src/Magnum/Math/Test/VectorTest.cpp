@@ -581,7 +581,8 @@ void VectorTest::subclass() {
     }
 
     /* Constexpr constructor */
-    constexpr const Vec2 a{-2.0f, 5.0f};
+    /* GCC 4.6 can't handle both const and constexpr */
+    constexpr Vec2 a{-2.0f, 5.0f};
     CORRADE_COMPARE(a[0], -2.0f);
 
     CORRADE_COMPARE(Vec2(-2.0f, 5.0f) + Vec2(1.0f, -3.0f), Vec2(-1.0f, 2.0f));
