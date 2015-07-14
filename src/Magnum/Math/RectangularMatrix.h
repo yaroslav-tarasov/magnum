@@ -57,6 +57,11 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
 
     template<std::size_t, std::size_t, class> friend class RectangularMatrix;
 
+    #ifdef CORRADE_GCC46_COMPATIBILITY
+    /* So it can call internal constexpr NoInit constructor */
+    template<std::size_t, class> friend class Matrix;
+    #endif
+
     public:
         typedef T Type;         /**< @brief Underlying data type */
 
@@ -108,18 +113,26 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
         }
 
         /** @brief Construct zero-filled matrix */
+        #ifndef CORRADE_GCC46_COMPATIBILITY
         constexpr /*implicit*/ RectangularMatrix(ZeroInitT = ZeroInit)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
             : RectangularMatrix<cols, rows, T>{typename Implementation::GenerateSequence<cols>::Type{}, ZeroInit}
             #endif
             {}
+        #else
+        /* GCC 4.6 doesn't know delegating constructors but it's the default anyway */
+        constexpr /*implicit*/ RectangularMatrix(ZeroInitT = ZeroInit) {}
+        #endif
 
         /** @brief Construct matrix without initializing the contents */
         explicit RectangularMatrix(NoInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
+            /* I can't invent a way to do this without delegating constructors, sorry */
+            #ifndef CORRADE_GCC46_COMPATIBILITY
             : RectangularMatrix<cols, rows, T>{typename Implementation::GenerateSequence<cols>::Type{}, NoInit}
+            #endif
             #endif
             {}
 

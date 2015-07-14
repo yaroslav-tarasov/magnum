@@ -109,7 +109,7 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
         constexpr explicit Matrix(NoInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            : RectangularMatrix<size, size, T>{NoInit}
+            : RectangularMatrix<size, size, T>{typename Implementation::GenerateSequence<size>::Type{}, NoInit}
             #endif
             {}
 

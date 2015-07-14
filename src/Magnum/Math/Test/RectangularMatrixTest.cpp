@@ -162,6 +162,10 @@ void RectangularMatrixTest::constructDefault() {
 }
 
 void RectangularMatrixTest::constructNoInit() {
+    #ifdef CORRADE_GCC46_COMPATIBILITY
+    CORRADE_EXPECT_FAIL("Not possible on GCC 4.6");
+    #endif
+
     Matrix3x4 a{Vector4(1.0f,  2.0f,  3.0f,  4.0f),
                 Vector4(5.0f,  6.0f,  7.0f,  8.0f),
                 Vector4(9.0f, 10.0f, 11.0f, 12.0f)};
