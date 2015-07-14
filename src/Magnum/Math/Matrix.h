@@ -62,7 +62,12 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
         enum ZeroType { Zero };
         #else
         CORRADE_DEPRECATED("use Math::ZeroInitT instead") typedef ZeroInitT ZeroType;
-        CORRADE_DEPRECATED("use Math::ZeroInit instead") constexpr static ZeroInitT Zero{};
+        CORRADE_DEPRECATED("use Math::ZeroInit instead")
+            #ifndef CORRADE_GCC46_COMPATIBILITY
+            constexpr static ZeroInitT Zero{};
+            #else
+            static const ZeroInitT Zero;
+            #endif
         #endif
 
         /**
@@ -73,7 +78,12 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
         enum IdentityType { Identity };
         #else
         CORRADE_DEPRECATED("use Math::IdentityInitT instead") typedef IdentityInitT IdentityType;
-        CORRADE_DEPRECATED("use Math::IdentityInit instead") constexpr static IdentityInitT Identity{};
+        CORRADE_DEPRECATED("use Math::IdentityInit instead")
+            #ifndef CORRADE_GCC46_COMPATIBILITY
+            constexpr static IdentityInitT Identity{};
+            #else
+            static const IdentityInitT Identity;
+            #endif
         #endif
         #endif
 
@@ -367,6 +377,11 @@ template<std::size_t size, class T> Matrix<size, T> Matrix<size, T>::inverted() 
 
     return out;
 }
+
+#ifdef MAGNUM_BUILD_DEPRECATED
+template<std::size_t size, class T> const ZeroInitT Matrix<size, T>::Zero{};
+template<std::size_t size, class T> const IdentityInitT Matrix<size, T>::Identity{};
+#endif
 
 }}
 
