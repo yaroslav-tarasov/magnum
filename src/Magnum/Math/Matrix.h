@@ -122,7 +122,8 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
             #ifndef CORRADE_GCC46_COMPATIBILITY
-            : RectangularMatrix<size, size, T>{NoInit}
+            /* MSVC 2013 can't handle {} here */
+            : RectangularMatrix<size, size, T>(NoInit)
             #else
             : RectangularMatrix<size, size, T>{typename Implementation::GenerateSequence<size>::Type{}, NoInit}
             #endif
