@@ -386,8 +386,10 @@ template<std::size_t size, class T> Matrix<size, T> Matrix<size, T>::inverted() 
 }
 
 #ifdef MAGNUM_BUILD_DEPRECATED
+#if defined(CORRADE_GCC46_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
 template<std::size_t size, class T> const ZeroInitT Matrix<size, T>::Zero{};
 template<std::size_t size, class T> const IdentityInitT Matrix<size, T>::Identity{};
+#endif
 #endif
 
 }}
