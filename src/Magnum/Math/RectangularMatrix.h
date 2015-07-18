@@ -446,7 +446,13 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
 
         /* Implementation for RectangularMatrix<cols, rows, T>::RectangularMatrix(ZeroInitT) and RectangularMatrix<cols, rows, T>::RectangularMatrix(NoInitT) */
         #ifndef CORRADE_GCC45_COMPATIBILITY
-        template<class U, std::size_t ...sequence> constexpr explicit RectangularMatrix(Implementation::Sequence<sequence...>, U): _data{Vector<rows, T>{(static_cast<void>(sequence), U{})}...} {}
+        template<class U, std::size_t ...sequence> constexpr explicit RectangularMatrix(Implementation::Sequence<sequence...>, U):
+            #ifndef CORRADE_MSVC2013_COMPATIBILITY
+            _data{Vector<rows, T>{(static_cast<void>(sequence), U{})}...} {}
+            #else
+            /* std::array, also MSVC 2013 can't handle {} here */
+            _data({Vector<rows, T>((static_cast<void>(sequence), U{}))...}) {}
+            #endif
         #else
         /* GCC < 4.6 produces "error: bad array initializer" for the above,
            thus NoInit support is impossible */
