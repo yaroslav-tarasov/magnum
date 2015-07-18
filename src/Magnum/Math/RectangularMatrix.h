@@ -117,7 +117,8 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
         constexpr /*implicit*/ RectangularMatrix(ZeroInitT = ZeroInit)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            : RectangularMatrix<cols, rows, T>{typename Implementation::GenerateSequence<cols>::Type{}, ZeroInit}
+            /* MSVC 2013 can't handle {} here */
+            : RectangularMatrix<cols, rows, T>(typename Implementation::GenerateSequence<cols>::Type{}, ZeroInit)
             #endif
             {}
         #else
@@ -131,7 +132,8 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
             #ifndef DOXYGEN_GENERATING_OUTPUT
             /* I can't invent a way to do this without delegating constructors, sorry */
             #ifndef CORRADE_GCC46_COMPATIBILITY
-            : RectangularMatrix<cols, rows, T>{typename Implementation::GenerateSequence<cols>::Type{}, NoInit}
+            /* MSVC 2013 can't handle {} here */
+            : RectangularMatrix<cols, rows, T>(typename Implementation::GenerateSequence<cols>::Type{}, NoInit)
             #endif
             #endif
             {}

@@ -257,7 +257,8 @@ template<class T> class BasicColor3: public Math::Vector3<T> {
         constexpr /*implicit*/ BasicColor3(Math::ZeroInitT = Math::ZeroInit)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            : Math::Vector3<T>{Math::ZeroInit}
+            /* MSVC 2013 can't handle {} here */
+            : Math::Vector3<T>(Math::ZeroInit)
             #endif
             {}
 
@@ -265,7 +266,8 @@ template<class T> class BasicColor3: public Math::Vector3<T> {
         explicit BasicColor3(Math::NoInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            : Math::Vector3<T>{Math::NoInit}
+            /* MSVC 2013 can't handle {} here */
+            : Math::Vector3<T>(Math::NoInit)
             #endif
             {}
 
@@ -459,7 +461,8 @@ class BasicColor4: public Math::Vector4<T> {
         constexpr explicit BasicColor4(Math::ZeroInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            : Math::Vector4<T>{Math::ZeroInit}
+            /* MSVC 2013 can't handle {} here */
+            : Math::Vector4<T>(Math::ZeroInit)
             #endif
             {}
 
@@ -467,7 +470,8 @@ class BasicColor4: public Math::Vector4<T> {
         explicit BasicColor4(Math::NoInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            : Math::Vector4<T>{Math::NoInit}
+            /* MSVC 2013 can't handle {} here */
+            : Math::Vector4<T>(Math::NoInit)
             #endif
             {}
 
