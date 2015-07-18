@@ -51,8 +51,8 @@ ContextGLTest::ContextGLTest() {
 
 void ContextGLTest::constructCopyMove() {
     /* Only move-construction allowed */
-    CORRADE_VERIFY(!(std::is_constructible<Context, const Context&>{}));
-    CORRADE_VERIFY((std::is_constructible<Context, Context&&>{}));
+    CORRADE_VERIFY(!(std::is_constructible<Context, const Context&>::value));
+    CORRADE_VERIFY((std::is_constructible<Context, Context&&>::value));
     /* GCC 4.6 doesn't have std::is_assignable */
     #ifndef CORRADE_GCC46_COMPATIBILITY
     CORRADE_VERIFY(!(std::is_assignable<Context, const Context&>{}));
