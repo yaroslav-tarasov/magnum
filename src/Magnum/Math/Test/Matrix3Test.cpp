@@ -164,6 +164,10 @@ void Matrix3Test::constructZero() {
 }
 
 void Matrix3Test::constructNoInit() {
+    #ifdef CORRADE_GCC45_COMPATIBILITY
+    CORRADE_EXPECT_FAIL("Not possible on GCC 4.5");
+    #endif
+
     Matrix3 a{{3.0f,  5.0f, 8.0f},
               {4.5f,  4.0f, 7.0f},
               {7.9f, -1.0f, 8.0f}};

@@ -162,6 +162,10 @@ void MatrixTest::constructZero() {
 }
 
 void MatrixTest::constructNoInit() {
+    #ifdef CORRADE_GCC45_COMPATIBILITY
+    CORRADE_EXPECT_FAIL("Not possible on GCC 4.5");
+    #endif
+
     Matrix4x4 a{Vector4(3.0f,  5.0f, 8.0f, -3.0f),
                 Vector4(4.5f,  4.0f, 7.0f,  2.0f),
                 Vector4(1.0f,  2.0f, 3.0f, -1.0f),
