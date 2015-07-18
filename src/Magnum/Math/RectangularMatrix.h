@@ -429,7 +429,7 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
             _data({Vector<rows, T>(matrix[sequence])...}) {}
             #endif
         #else
-        template<class U, std::size_t ...sequence> explicit RectangularMatrix(Implementation::Sequence<sequence...>, const RectangularMatrix<cols, rows, U>& matrix): _data() {
+        template<class U, std::size_t ...sequence> explicit RectangularMatrix(Implementation::Sequence<sequence...>, const RectangularMatrix<cols, rows, U>& matrix) {
             constructInternal({Vector<rows, T>(matrix[sequence])...});
         }
         #endif
