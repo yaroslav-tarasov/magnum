@@ -31,8 +31,8 @@
 #include "Magnum/CubeMapTexture.h"
 
 #ifdef CORRADE_GCC45_COMPATIBILITY
-#ifndef MAGNUM_TARGET_GLES
-#include "Magnum/BufferTexture.h"
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
+#include "Magnum/BufferTextureFormat.h"
 #endif
 #include "Magnum/ColorFormat.h"
 #include "Magnum/TextureFormat.h"
@@ -41,7 +41,7 @@
 /* Otherwise we get a pretty nice memory corruption only with a warning about
    architecture-dependent alignment of `setBufferImplementation` variable */
 #ifdef CORRADE_MSVC2013_COMPATIBILITY
-#ifndef MAGNUM_TARGET_GLES
+#if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 #include "Magnum/BufferTexture.h"
 #else
 #include "Magnum/AbstractTexture.h"
