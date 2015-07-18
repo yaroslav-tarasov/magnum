@@ -149,9 +149,21 @@ typedef Camera<3, Float> Camera3D;
 
 #ifdef MAGNUM_BUILD_DEPRECATED
 #ifndef CORRADE_GCC46_COMPATIBILITY
-template<UnsignedInt dimensions, class T> using AbstractCamera CORRADE_DEPRECATED("use BasicCamera2D instead") = Camera<dimensions, T>;
-template<class T> using AbstractBasicCamera2D CORRADE_DEPRECATED("use BasicCamera2D instead") = BasicCamera2D<T>;
-template<class T> using AbstractBasicCamera3D CORRADE_DEPRECATED("use BasicCamera3D instead") = BasicCamera3D<T>;
+template<UnsignedInt dimensions, class T> using AbstractCamera
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
+    CORRADE_DEPRECATED("use BasicCamera2D instead")
+    #endif
+    = Camera<dimensions, T>;
+template<class T> using AbstractBasicCamera2D
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
+    CORRADE_DEPRECATED("use BasicCamera2D instead")
+    #endif
+    = BasicCamera2D<T>;
+template<class T> using AbstractBasicCamera3D
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
+    CORRADE_DEPRECATED("use BasicCamera3D instead")
+    #endif
+    = BasicCamera3D<T>;
 #endif
 /* Not possible to stay backwards-compatible on GCC 4.6, sorry */
 CORRADE_DEPRECATED("use Camera2D instead") typedef Camera2D AbstractCamera2D;
