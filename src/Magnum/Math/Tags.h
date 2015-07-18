@@ -73,7 +73,7 @@ using Corrade::Containers::NoInit;
 
 Use for construction with all elements set to zero.
 */
-#ifndef CORRADE_GCC45_COMPATIBILITY
+#if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
 constexpr
 #else
 const
@@ -85,7 +85,7 @@ ZeroInitT ZeroInit{};
 
 Use for construction with transformation set to identity.
 */
-#ifndef CORRADE_GCC45_COMPATIBILITY
+#if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
 constexpr
 #else
 const

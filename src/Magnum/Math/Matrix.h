@@ -63,7 +63,7 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
         #else
         CORRADE_DEPRECATED("use Math::ZeroInitT instead") typedef ZeroInitT ZeroType;
         CORRADE_DEPRECATED("use Math::ZeroInit instead")
-            #ifndef CORRADE_GCC46_COMPATIBILITY
+            #if !defined(CORRADE_GCC46_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
             constexpr static ZeroInitT Zero{};
             #else
             static const ZeroInitT Zero;
@@ -79,7 +79,7 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
         #else
         CORRADE_DEPRECATED("use Math::IdentityInitT instead") typedef IdentityInitT IdentityType;
         CORRADE_DEPRECATED("use Math::IdentityInit instead")
-            #ifndef CORRADE_GCC46_COMPATIBILITY
+            #if !defined(CORRADE_GCC46_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
             constexpr static IdentityInitT Identity{};
             #else
             static const IdentityInitT Identity;

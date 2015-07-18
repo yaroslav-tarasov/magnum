@@ -46,7 +46,7 @@ struct NoCreateT {};
 
 Use for construction without creating the underlying OpenGL object.
 */
-#ifndef CORRADE_GCC45_COMPATIBILITY
+#if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
 constexpr
 #else
 const
