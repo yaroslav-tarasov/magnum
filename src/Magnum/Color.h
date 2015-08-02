@@ -55,6 +55,7 @@ template<class T> using BasicColor3 CORRADE_DEPRECATED_ALIAS("use Math::Color3 i
 #ifndef CORRADE_MSVC2013_COMPATIBILITY /* Cannot have multiple alias definitions */
 template<class T> using BasicColor4 CORRADE_DEPRECATED_ALIAS("use Math::Color4 instead") = Math::Color4<T>;
 #endif
+#endif
 
 }
 #else
