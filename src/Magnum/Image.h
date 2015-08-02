@@ -218,13 +218,13 @@ template<UnsignedInt dimensions> class CompressedImage: public AbstractCompresse
 
         /** @brief Conversion to view */
         /*implicit*/ operator CompressedImageView<dimensions>()
-        #ifndef CORRADE_GCC47_COMPATIBILITY
+        #if !defined(CORRADE_GCC47_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         const &;
         #else
         const;
         #endif
 
-        #ifndef CORRADE_GCC47_COMPATIBILITY
+        #if !defined(CORRADE_GCC47_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         /** @overload */
         /*implicit*/ operator CompressedImageView<dimensions>() const && = delete;
         #endif
@@ -331,7 +331,7 @@ const
 }
 
 template<UnsignedInt dimensions> inline CompressedImage<dimensions>::operator CompressedImageView<dimensions>()
-#ifndef CORRADE_GCC47_COMPATIBILITY
+#if !defined(CORRADE_GCC47_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
 const &
 #else
 const
