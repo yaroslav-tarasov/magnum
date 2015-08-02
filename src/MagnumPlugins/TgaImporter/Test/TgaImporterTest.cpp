@@ -26,6 +26,7 @@
 #include <sstream>
 #include <Corrade/Containers/ArrayView.h>
 #include <Corrade/TestSuite/Tester.h>
+#include <Corrade/TestSuite/Compare/Container.h>
 #include <Corrade/Utility/Directory.h>
 
 #include "Magnum/ColorFormat.h"
@@ -144,9 +145,8 @@ void TgaImporterTest::colorBits24() {
     CORRADE_COMPARE(image->format(), ColorFormat::RGB);
     CORRADE_COMPARE(image->size(), Vector2i(2, 3));
     CORRADE_COMPARE(image->type(), ColorType::UnsignedByte);
-    /* GCC 4.5 can't handle {} here */
-    CORRADE_COMPARE(std::string(image->data(), 2*3*3),
-                    std::string(pixels, 2*3*3));
+    CORRADE_COMPARE_AS(image->data(), Containers::ArrayView<const char>{pixels},
+        TestSuite::Compare::Container);
 }
 
 void TgaImporterTest::colorBits32() {
@@ -169,9 +169,8 @@ void TgaImporterTest::colorBits32() {
     CORRADE_COMPARE(image->format(), ColorFormat::RGBA);
     CORRADE_COMPARE(image->size(), Vector2i(2, 3));
     CORRADE_COMPARE(image->type(), ColorType::UnsignedByte);
-    /* GCC 4.5 can't handle {} here */
-    CORRADE_COMPARE(std::string(image->data(), 2*3*3),
-                    std::string(pixels, 2*3*3));
+    CORRADE_COMPARE_AS(image->data(), Containers::ArrayView<const char>{pixels},
+        TestSuite::Compare::Container);
 }
 
 void TgaImporterTest::grayscaleBits8() {
@@ -193,9 +192,8 @@ void TgaImporterTest::grayscaleBits8() {
     #endif
     CORRADE_COMPARE(image->size(), Vector2i(2, 3));
     CORRADE_COMPARE(image->type(), ColorType::UnsignedByte);
-    /* GCC 4.5 can't handle {} here */
-    CORRADE_COMPARE(std::string(image->data(), 2*3),
-                    std::string(data + 18, 2*3));
+    CORRADE_COMPARE_AS(image->data(), Containers::ArrayView<const char>{data}.suffix(18),
+        TestSuite::Compare::Container);
 }
 
 void TgaImporterTest::grayscaleBits16() {
@@ -228,9 +226,8 @@ void TgaImporterTest::file() {
     #endif
     CORRADE_COMPARE(image->size(), Vector2i(2, 3));
     CORRADE_COMPARE(image->type(), ColorType::UnsignedByte);
-    /* GCC 4.5 can't handle {} here */
-    CORRADE_COMPARE(std::string(image->data(), 2*3),
-                    std::string(data + 18, 2*3));
+    CORRADE_COMPARE_AS(image->data(), Containers::ArrayView<const char>{data}.suffix(18),
+        TestSuite::Compare::Container);
 }
 
 }}}
