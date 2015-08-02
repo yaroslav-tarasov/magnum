@@ -35,7 +35,7 @@ template<UnsignedInt dimensions> void Image<dimensions>::setData(ColorFormat for
     _data = reinterpret_cast<char*>(data);
 }
 
-template<UnsignedInt dimensions> void CompressedImage<dimensions>::setData(CompressedColorFormat format, const VectorTypeFor<dimensions, Int>& size, Containers::Array<char>&& data) {
+template<UnsignedInt dimensions> void CompressedImage<dimensions>::setData(CompressedColorFormat format, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::Array<char>&& data) {
     _format = format;
     _size = size;
     _data = std::move(data);

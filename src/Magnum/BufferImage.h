@@ -172,7 +172,7 @@ template<UnsignedInt dimensions> class CompressedBufferImage: public AbstractCom
          * @todo Make it more flexible (usable with
          *      @extension{ARB,buffer_storage}, avoiding relocations...)
          */
-        explicit CompressedBufferImage(CompressedColorFormat format, const VectorTypeFor<dimensions, Int>& size, Containers::ArrayView<const void> data, BufferUsage usage);
+        explicit CompressedBufferImage(CompressedColorFormat format, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::ArrayView<const void> data, BufferUsage usage);
 
         /**
          * @brief Constructor
@@ -198,7 +198,7 @@ template<UnsignedInt dimensions> class CompressedBufferImage: public AbstractCom
         CompressedColorFormat format() const { return _format; }
 
         /** @brief Image size */
-        VectorTypeFor<Dimensions, Int> size() const { return _size; }
+        typename DimensionTraits<Dimensions, Int>::VectorType size() const { return _size; }
 
         /** @brief Image buffer */
         Buffer& buffer() { return _buffer; }
@@ -219,7 +219,7 @@ template<UnsignedInt dimensions> class CompressedBufferImage: public AbstractCom
          * @todo Make it more flexible (usable with
          *      @extension{ARB,buffer_storage}, avoiding relocations...)
          */
-        void setData(CompressedColorFormat format, const VectorTypeFor<dimensions, Int>& size, Containers::ArrayView<const void> data, BufferUsage usage);
+        void setData(CompressedColorFormat format, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::ArrayView<const void> data, BufferUsage usage);
 
     private:
         CompressedColorFormat _format;

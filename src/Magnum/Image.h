@@ -194,7 +194,7 @@ template<UnsignedInt dimensions> class CompressedImage: public AbstractCompresse
          * @param size              Image size
          * @param data              Image data
          */
-        explicit CompressedImage(CompressedColorFormat format, const VectorTypeFor<dimensions, Int>& size, Containers::Array<char>&& data): _format{format}, _size{size}, _data{std::move(data)} {}
+        explicit CompressedImage(CompressedColorFormat format, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _format{format}, _size{size}, _data{std::move(data)} {}
 
         /**
          * @brief Constructor
@@ -233,7 +233,7 @@ template<UnsignedInt dimensions> class CompressedImage: public AbstractCompresse
         CompressedColorFormat format() const { return _format; }
 
         /** @brief Image size */
-        VectorTypeFor<dimensions, Int> size() const { return _size; }
+        typename DimensionTraits<Dimensions, Int>::VectorType size() const { return _size; }
 
         /** @brief Raw data */
         Containers::ArrayView<char> data() { return _data; }
@@ -265,7 +265,7 @@ template<UnsignedInt dimensions> class CompressedImage: public AbstractCompresse
          * data are not copied, but they are deleted on destruction.
          * @see @ref release()
          */
-        void setData(CompressedColorFormat format, const VectorTypeFor<dimensions, Int>& size, Containers::Array<char>&& data);
+        void setData(CompressedColorFormat format, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
 
         /**
          * @brief Release data storage

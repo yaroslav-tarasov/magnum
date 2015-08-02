@@ -654,19 +654,19 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          *      eventually @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
          *      @fn_gl{CompressedTexSubImage2D}/@fn_gl{CompressedTexSubImage3D}
          */
-        TextureArray<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions+1, Int>& offset, const CompressedImageView<dimensions+1>& image) {
+        TextureArray<dimensions>& setCompressedSubImage(Int level, const typename DimensionTraits<dimensions+1, Int>::VectorType& offset, const CompressedImageView<dimensions+1>& image) {
             DataHelper<dimensions+1>::setCompressedSubImage(*this, level, offset, image);
             return *this;
         }
 
         /** @overload */
-        TextureArray<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions+1, Int>& offset, CompressedBufferImage<dimensions+1>& image) {
+        TextureArray<dimensions>& setCompressedSubImage(Int level, typename DimensionTraits<dimensions+1, Int>::VectorType& offset, CompressedBufferImage<dimensions+1>& image) {
             DataHelper<dimensions+1>::setCompressedSubImage(*this, level, offset, image);
             return *this;
         }
 
         /** @overload */
-        TextureArray<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions+1, Int>& offset, CompressedBufferImage<dimensions+1>&& image) {
+        TextureArray<dimensions>& setCompressedSubImage(Int level, typename DimensionTraits<dimensions+1, Int>::VectorType& offset, CompressedBufferImage<dimensions+1>&& image) {
             return setCompressedSubImage(level, offset, image);
         }
 

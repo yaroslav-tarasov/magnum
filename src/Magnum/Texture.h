@@ -1007,7 +1007,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *      @fn_gl{CompressedTexSubImage1D} / @fn_gl{CompressedTexSubImage2D} /
          *      @fn_gl{CompressedTexSubImage3D}
          */
-        Texture<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions, Int>& offset, const CompressedImageView<dimensions>& image) {
+        Texture<dimensions>& setCompressedSubImage(Int level, const typename DimensionTraits<dimensions, Int>::VectorType& offset, const CompressedImageView<dimensions>& image) {
             DataHelper<Dimensions>::setCompressedSubImage(*this, level, offset, image);
             return *this;
         }
@@ -1019,7 +1019,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @requires_webgl20 Pixel buffer objects are not available in WebGL
          *      1.0.
          */
-        Texture<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions, Int>& offset, CompressedBufferImage<dimensions>& image) {
+        Texture<dimensions>& setCompressedSubImage(Int level, const typename DimensionTraits<dimensions, Int>::VectorType& offset, CompressedBufferImage<dimensions>& image) {
             DataHelper<Dimensions>::setCompressedSubImage(*this, level, offset, image);
             return *this;
         }
@@ -1030,7 +1030,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @requires_webgl20 Pixel buffer objects are not available in WebGL
          *      1.0.
          */
-        Texture<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions, Int>& offset, CompressedBufferImage<dimensions>&& image) {
+        Texture<dimensions>& setCompressedSubImage(Int level, const typename DimensionTraits<dimensions, Int>::VectorType& offset, CompressedBufferImage<dimensions>&& image) {
             return setCompressedSubImage(level, offset, image);
         }
         #endif
