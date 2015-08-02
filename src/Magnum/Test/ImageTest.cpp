@@ -236,7 +236,8 @@ void ImageTest::toReferenceCommpressed() {
 
     CORRADE_COMPARE(b.format(), CompressedColorFormat::RGBAS3tcDxt1);
     CORRADE_COMPARE(b.size(), Vector2i(4, 4));
-    CORRADE_COMPARE(b.data(), data);
+    /* GCC 4.6 can't compare this */
+    CORRADE_VERIFY(b.data() == data);
     CORRADE_COMPARE(b.data().size(), 8);
 
     CORRADE_VERIFY((std::is_convertible<const CompressedImage2D&, CompressedImageView2D>::value));
