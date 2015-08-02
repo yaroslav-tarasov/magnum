@@ -39,7 +39,7 @@ struct FormatTest: TestSuite::Tester {
 };
 
 FormatTest::FormatTest() {
-    addTests({&FormatTest::debugColorFormat,
+    addTests<FormatTest>({&FormatTest::debugColorFormat,
               &FormatTest::debugColorType,
               &FormatTest::debugCompressedColorFormat});
 }
