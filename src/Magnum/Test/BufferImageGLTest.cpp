@@ -122,8 +122,25 @@ void BufferImageGLTest::constructCopy() {
 }
 
 void BufferImageGLTest::constructCopyCompressed() {
-    CORRADE_VERIFY(!(std::is_constructible<CompressedBufferImage2D, const CompressedBufferImage2D&>{}));
-    CORRADE_VERIFY(!(std::is_assignable<CompressedBufferImage2D, const CompressedBufferImage2D&>{}));
+    #ifndef CORRADE_GCC44_COMPATIBILITY
+    {
+        #ifdef CORRADE_MSVC2013_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("std::is_constructible is buggy on MSVC 2013.");
+        #endif
+        CORRADE_VERIFY(!(std::is_constructible<CompressedBufferImage2D, const CompressedBufferImage2D&>::value));
+    }
+    /* GCC 4.6 doesn't have std::is_assignable */
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    {
+        #ifdef CORRADE_MSVC2013_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("std::is_assignable is buggy on MSVC 2013.");
+        #endif
+        CORRADE_VERIFY(!(std::is_assignable<CompressedBufferImage2D, const CompressedBufferImage2D&>{}));
+    }
+    #endif
+    #else
+    CORRADE_SKIP("Type traits needed to test this are not available on GCC 4.4.");
+    #endif
 }
 
 void BufferImageGLTest::constructMove() {
