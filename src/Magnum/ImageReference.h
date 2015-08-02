@@ -42,7 +42,9 @@ namespace Magnum {
 /** @copybrief ImageView
  * @deprecated Use @ref ImageView instead.
  */
+#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Cannot have multiple alias definitions */
 template<UnsignedInt dimensions> using CORRADE_DEPRECATED_ALIAS("use ImageView instead") ImageReference = ImageView<dimensions>;
+#endif
 #endif
 
 /** @copybrief ImageView1D
