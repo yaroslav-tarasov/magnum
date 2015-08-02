@@ -39,6 +39,8 @@ CORRADE_DEPRECATED_FILE("use Magnum/Math/Color.h instead")
 
 namespace Magnum {
 
+#ifndef CORRADE_GCC46_COMPATIBILITY
+/* Sorry, no backward compatibility on this compiler */
 /** @copybrief Math::Color3
  * @deprecated Use @ref Math::Color3 instead.
  */
@@ -48,6 +50,7 @@ template<class T> using BasicColor3 CORRADE_DEPRECATED_ALIAS("use Math::Color3 i
  * @deprecated Use @ref Math::Color4 instead.
  */
 template<class T> using BasicColor4 CORRADE_DEPRECATED_ALIAS("use Math::Color4 instead") = Math::Color4<T>;
+#endif
 
 }
 #else

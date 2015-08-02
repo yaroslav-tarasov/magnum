@@ -560,8 +560,11 @@ enum class BufferTextureFormat: GLenum;
 #endif
 
 #ifdef MAGNUM_BUILD_DEPRECATED
+#ifndef CORRADE_GCC46_COMPATIBILITY
+/* Sorry, no backward compatibility on this compiler */
 template<class T> using BasicColor3 CORRADE_DEPRECATED_ALIAS("use Math::Color3 instead") = Math::Color3<T>;
 template<class T> using BasicColor4 CORRADE_DEPRECATED_ALIAS("use Math::Color4 instead") = Math::Color4<T>;
+#endif
 #endif
 
 #ifndef CORRADE_GCC45_COMPATIBILITY
@@ -600,7 +603,10 @@ typedef ImageView<2> ImageView2D;
 typedef ImageView<3> ImageView3D;
 
 #ifdef MAGNUM_BUILD_DEPRECATED
+#ifndef CORRADE_GCC46_COMPATIBILITY
+/* Sorry, no backward compatibility on this compiler */
 template<UnsignedInt dimensions> using ImageReference CORRADE_DEPRECATED_ALIAS("use ImageView instead") = ImageView<dimensions>;
+#endif
 typedef CORRADE_DEPRECATED("use ImageView1D instead") ImageView1D ImageReference1D;
 typedef CORRADE_DEPRECATED("use ImageView2D instead") ImageView2D ImageReference2D;
 typedef CORRADE_DEPRECATED("use ImageView3D instead") ImageView3D ImageReference3D;
