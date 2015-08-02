@@ -190,6 +190,8 @@ void Matrix4Test::constructZero() {
 void Matrix4Test::constructNoInit() {
     #ifdef CORRADE_GCC45_COMPATIBILITY
     CORRADE_EXPECT_FAIL("Not possible on GCC 4.5");
+    #elif defined(CORRADE_MSVC2013_COMPATIBILITY)
+    CORRADE_EXPECT_FAIL("Broken on MSVC 2013, probably because std::array");
     #endif
 
     Matrix4 a = {{3.0f,  5.0f, 8.0f, -3.0f},

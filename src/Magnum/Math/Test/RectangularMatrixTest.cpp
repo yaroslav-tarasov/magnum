@@ -164,6 +164,8 @@ void RectangularMatrixTest::constructDefault() {
 void RectangularMatrixTest::constructNoInit() {
     #ifdef CORRADE_GCC46_COMPATIBILITY
     CORRADE_EXPECT_FAIL("Not possible on GCC 4.6");
+    #elif defined(CORRADE_MSVC2013_COMPATIBILITY)
+    CORRADE_EXPECT_FAIL("Broken on MSVC 2013, probably because std::array");
     #endif
 
     Matrix3x4 a{Vector4(1.0f,  2.0f,  3.0f,  4.0f),
