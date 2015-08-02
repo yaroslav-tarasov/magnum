@@ -34,7 +34,7 @@ build_script:
 - cmake . -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/Deploy -DBUILD_TESTS=OFF
 - cmake --build . --target install
 - cd ../Deploy
-- 7z a ../magnum.zip *
+- 7z a ../magnum-compatibility.zip *
 test_script:
 - cd %APPVEYOR_BUILD_FOLDER%/build
 - SET fail=0
