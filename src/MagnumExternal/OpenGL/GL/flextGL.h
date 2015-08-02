@@ -1629,6 +1629,13 @@ typedef void (APIENTRY *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
+/* GL_EXT_texture_compression_s3tc */
+
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT 0x83F0
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+
 /* GL_EXT_texture_mirror_clamp */
 
 #define GL_MIRROR_CLAMP_EXT 0x8742
@@ -1744,12 +1751,6 @@ typedef void (APIENTRY *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum 
 
 /* Function prototypes */
 
-/* GL_AMD_shader_trinary_minmax */
-
-
-/* GL_AMD_vertex_shader_layer */
-
-
 /* GL_ARB_bindless_texture */
 
 GLAPI FLEXTGL_EXPORT GLuint64(APIENTRY *flextglGetImageHandleARB)(GLuint, GLint, GLboolean, GLint, GLenum);
@@ -1797,9 +1798,6 @@ GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglMultiDrawArraysIndirectCountARB)(GLen
 GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglMultiDrawElementsIndirectCountARB)(GLenum, GLenum, GLintptr, GLintptr, GLsizei, GLsizei);
 #define glMultiDrawElementsIndirectCountARB flextglMultiDrawElementsIndirectCountARB
 
-/* GL_ARB_pipeline_statistics_query */
-
-
 /* GL_ARB_robustness */
 
 GLAPI FLEXTGL_EXPORT GLenum(APIENTRY *flextglGetGraphicsResetStatusARB)(void);
@@ -1819,18 +1817,6 @@ GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglGetnUniformuivARB)(GLuint, GLint, GLs
 GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglReadnPixelsARB)(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLsizei, void *);
 #define glReadnPixelsARB flextglReadnPixelsARB
 
-/* GL_ARB_robustness_isolation */
-
-
-/* GL_ARB_seamless_cubemap_per_texture */
-
-
-/* GL_ARB_shader_draw_parameters */
-
-
-/* GL_ARB_shader_group_vote */
-
-
 /* GL_ARB_sparse_buffer */
 
 GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglBufferPageCommitmentARB)(GLenum, GLintptr, GLsizeiptr, GLboolean);
@@ -1844,12 +1830,6 @@ GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglNamedBufferPageCommitmentEXT)(GLuint,
 
 GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglTexPageCommitmentARB)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLboolean);
 #define glTexPageCommitmentARB flextglTexPageCommitmentARB
-
-/* GL_ARB_transform_feedback_overflow_query */
-
-
-/* GL_ATI_texture_mirror_once */
-
 
 /* GL_EXT_debug_label */
 
@@ -2380,18 +2360,6 @@ GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglVertexArrayVertexBindingDivisorEXT)(G
 GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglVertexArrayVertexOffsetEXT)(GLuint, GLuint, GLint, GLenum, GLsizei, GLintptr);
 #define glVertexArrayVertexOffsetEXT flextglVertexArrayVertexOffsetEXT
 
-/* GL_EXT_shader_integer_mix */
-
-
-/* GL_EXT_texture_filter_anisotropic */
-
-
-/* GL_EXT_texture_mirror_clamp */
-
-
-/* GL_EXT_texture_sRGB_decode */
-
-
 /* GL_GREMEDY_string_marker */
 
 GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglStringMarkerGREMEDY)(GLsizei, const void *);
@@ -2401,15 +2369,6 @@ GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglStringMarkerGREMEDY)(GLsizei, const v
 
 GLAPI FLEXTGL_EXPORT void(APIENTRY *flextglBlendBarrierKHR)(void);
 #define glBlendBarrierKHR flextglBlendBarrierKHR
-
-/* GL_KHR_blend_equation_advanced_coherent */
-
-
-/* GL_KHR_texture_compression_astc_hdr */
-
-
-/* GL_KHR_texture_compression_astc_ldr */
-
 
 /* GL_VERSION_1_0 */
 

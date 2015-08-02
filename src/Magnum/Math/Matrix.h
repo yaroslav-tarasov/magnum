@@ -96,7 +96,7 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
         constexpr /*implicit*/ Matrix(IdentityInitT = IdentityInit, T value = T(1))
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            /* MSVC 2013 can't handle {} here */
+            /* MSVC 2015 can't handle {} here */
             : RectangularMatrix<size, size, T>(typename Implementation::GenerateSequence<size>::Type(),
                 /* The original one is not constexpr under GCC 4.6 */
                 #ifndef CORRADE_GCC46_COMPATIBILITY
@@ -112,7 +112,7 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
         constexpr explicit Matrix(ZeroInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            /* MSVC 2013 can't handle {} here */
+            /* MSVC 2015 can't handle {} here */
             : RectangularMatrix<size, size, T>(ZeroInit)
             #endif
             {}
@@ -122,7 +122,7 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
             #ifndef CORRADE_GCC46_COMPATIBILITY
-            /* MSVC 2013 can't handle {} here */
+            /* MSVC 2015 can't handle {} here */
             : RectangularMatrix<size, size, T>(NoInit)
             #else
             : RectangularMatrix<size, size, T>{typename Implementation::GenerateSequence<size>::Type{}, NoInit}

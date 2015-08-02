@@ -40,7 +40,6 @@ The core subset of OpenGL 2.1 should be fully implemented, except for the
 following:
 
 -   Pixel store state (@fn_gl{PixelStore} function)
--   Compressed texture upload
 -   Proxy textures
 -   Copying framebuffer to texture (@fn_gl{CopyTexImage2D} etc.)
 -   Some forgotten limit queries
@@ -173,7 +172,7 @@ Extension                                   | Status
 ------------------------------------------- | ------
 GLSL 4.30                                   | done
 @extension{ARB,arrays_of_arrays}            | done (shading language only)
-@extension{ARB,ES3_compatibility}           | only conservative sample query
+@extension{ARB,ES3_compatibility}           | only conservative sample query and compression formats
 @extension{ARB,clear_buffer_object}         | |
 @extension{ARB,compute_shader}              | |
 @extension{ARB,copy_image}                  | |
@@ -235,8 +234,8 @@ GLSL 4.50                                   | done
 Extension                                   | Status
 ------------------------------------------- | ------
 @extension{ARB,robustness}                  | done
-@extension3{KHR,texture_compression_astc_ldr,texture_compression_astc_hdr} | |
-@extension{KHR,texture_compression_astc_hdr} | |
+@extension3{KHR,texture_compression_astc_ldr,texture_compression_astc_hdr} | done
+@extension{KHR,texture_compression_astc_hdr} | done
 @extension{ARB,robustness_isolation}        | done
 @extension{ARB,bindless_texture}            | |
 @extension{ARB,compute_variable_group_size} | |
@@ -263,6 +262,7 @@ Extension                                   | Status
 @extension{AMD,shader_trinary_minmax}       | done (shading language only)
 @extension{ATI,texture_mirror_once}         | done (GL 4.4 subset)
 @extension{EXT,texture_filter_anisotropic}  | done
+@extension{EXT,texture_compression_s3tc}    | done
 @extension{EXT,texture_mirror_clamp}        | only GL 4.4 subset
 @extension{EXT,direct_state_access}         | done for implemented functionality
 @extension{EXT,texture_sRGB_decode}         | done
@@ -359,6 +359,7 @@ Extension                                   | Status
 @es_extension{EXT,disjoint_timer_query}     | only time elapsed query
 @es_extension{EXT,texture_sRGB_decode}      | done
 @es_extension{EXT,sRGB_write_control}       | done
+@es_extension2{EXT,texture_compression_s3tc,texture_compression_s3tc} | done
 @es_extension{EXT,shader_integer_mix}       | done (shading language only)
 @es_extension{EXT,copy_image}               | |
 @es_extension{EXT,draw_buffers_indexed}     | |
@@ -370,8 +371,8 @@ Extension                                   | Status
 @es_extension{EXT,texture_buffer}           | done
 @es_extension{EXT,texture_cube_map_array}   | done
 @es_extension{EXT,primitive_bounding_box}   | |
-@es_extension2{KHR,texture_compression_astc_ldr,texture_compression_astc_hdr} | |
-@es_extension2{KHR,texture_compression_astc_hdr,texture_compression_astc_hdr} | |
+@es_extension2{KHR,texture_compression_astc_ldr,texture_compression_astc_hdr} | done
+@es_extension2{KHR,texture_compression_astc_hdr,texture_compression_astc_hdr} | done
 @es_extension{KHR,debug}                    | see above
 @es_extension2{KHR,blend_equation_advanced,blend_equation_advanced}  | |
 @es_extension2{KHR,blend_equation_advanced_coherent,blend_equation_advanced} | |
@@ -430,6 +431,7 @@ Extension                                   | Status
 @webgl_extension{EXT,texture_filter_anisotropic} | done
 @webgl_extension{EXT,sRGB}                  | done
 @webgl_extension{EXT,disjoint_timer_query}  | only time elapsed query
+@webgl_extension{WEBGL,compressed_texture_s3tc} | done
 
 @section opengl-unsupported Unsupported OpenGL features
 

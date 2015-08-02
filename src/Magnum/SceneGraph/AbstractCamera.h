@@ -43,13 +43,13 @@ namespace Magnum { namespace SceneGraph {
  * @deprecated Use @ref Camera instead.
  */
 /* Not possible to stay backwards-compatible on GCC 4.6, sorry */
-template<UnsignedInt dimensions, class T> using AbstractCamera CORRADE_DEPRECATED("use Camera instead") = Camera<dimensions, T>;
+template<UnsignedInt dimensions, class T> using AbstractCamera CORRADE_DEPRECATED_ALIAS("use Camera instead") = Camera<dimensions, T>;
 
 /**
  * @copybrief BasicCamera2D
  * @deprecated Use @ref BasicCamera2D instead.
  */
-template<class T> using AbstractBasicCamera2D CORRADE_DEPRECATED("use BasicCamera2D instead") = BasicCamera2D<T>;
+template<class T> using AbstractBasicCamera2D CORRADE_DEPRECATED_ALIAS("use BasicCamera2D instead") = BasicCamera2D<T>;
 #endif
 
 /**
@@ -63,7 +63,7 @@ CORRADE_DEPRECATED("use Camera2D instead") typedef Camera2D AbstractCamera2D;
  * @copybrief BasicCamera3D
  * @deprecated Use @ref BasicCamera3D instead.
  */
-template<class T> using AbstractBasicCamera3D CORRADE_DEPRECATED("use BasicCamera3D instead") = BasicCamera3D<T>;
+template<class T> using AbstractBasicCamera3D CORRADE_DEPRECATED_ALIAS("use BasicCamera3D instead") = BasicCamera3D<T>;
 #endif
 
 /**

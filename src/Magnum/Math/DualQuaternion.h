@@ -120,7 +120,7 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
         constexpr explicit DualQuaternion(ZeroInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            /* MSVC 2013 can't handle {} here */
+            /* MSVC 2015 can't handle {} here */
             : Dual<Quaternion<T>>(Quaternion<T>{ZeroInit}, Quaternion<T>{ZeroInit})
             #endif
             {}
@@ -129,7 +129,7 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
         explicit DualQuaternion(NoInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            /* MSVC 2013 can't handle {} here */
+            /* MSVC 2015 can't handle {} here */
             : Dual<Quaternion<T>>(NoInit)
             #endif
             {}

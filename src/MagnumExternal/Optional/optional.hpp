@@ -99,6 +99,8 @@ using is_trivially_destructible = typename std::has_trivial_destructor<T>;
     // leave it; remaining metafunctions are already defined.
 #  elif defined __clang__
     // leave it; remaining metafunctions are already defined.
+# elif (defined _MSC_VER) && _MSC_VER >= 1900
+    // leave it; our metafunctions are already defined.
 #  else
 
 

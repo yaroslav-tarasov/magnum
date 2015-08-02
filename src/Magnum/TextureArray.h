@@ -450,9 +450,53 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
         BufferImage<dimensions+1> image(Int level, BufferImage<dimensions+1>&& image, BufferUsage usage);
 
         /**
-         * @copybrief Texture::subImage(Int, const typename DimensionTraits<dimensions, Int>::RangeType&, Image&)
+         * @copybrief Texture::compressedImage(Int, CompressedImage&)
+         * @return Reference to self (for method chaining)
          *
-         * See @ref Texture::subImage(Int, const typename DimensionTraits<dimensions, Int>::RangeType&, Image&)
+         * See @ref Texture::compressedImage(Int, CompressedImage&) for more
+         * information.
+         * @requires_gl Texture image queries are not available in OpenGL ES or
+         *      WebGL. See @ref Framebuffer::read() for possible workaround.
+         */
+        void compressedImage(Int level, CompressedImage<dimensions+1>& image) {
+            AbstractTexture::compressedImage<dimensions+1>(level, image);
+        }
+
+        /** @overload
+         *
+         * Convenience alternative to the above, example usage:
+         * @code
+         * CompressedImage3D image = texture.compressedImage(0, {});
+         * @endcode
+         */
+        CompressedImage<dimensions+1> compressedImage(Int level, CompressedImage<dimensions+1>&& image);
+
+        /**
+         * @copybrief Texture::compressedImage(Int, CompressedBufferImage&, BufferUsage)
+         * @return Reference to self (for method chaining)
+         *
+         * See @ref Texture::compressedImage(Int, CompressedBufferImage&, BufferUsage)
+         * for more information.
+         * @requires_gl Texture image queries are not available in OpenGL ES or
+         *      WebGL. See @ref Framebuffer::read() for possible workaround.
+         */
+        void compressedImage(Int level, CompressedBufferImage<dimensions+1>& image, BufferUsage usage) {
+            AbstractTexture::compressedImage<dimensions+1>(level, image, usage);
+        }
+
+        /** @overload
+         *
+         * Convenience alternative to the above, example usage:
+         * @code
+         * CompressedBufferImage3D image = texture.compressedImage(0, {}, BufferUsage::StaticRead);
+         * @endcode
+         */
+        CompressedBufferImage<dimensions+1> compressedImage(Int level, CompressedBufferImage<dimensions+1>&& image, BufferUsage usage);
+
+        /**
+         * @copybrief Texture::subImage(Int, const RangeTypeFor<dimensions, Int>&, Image&)
+         *
+         * See @ref Texture::subImage(Int, const RangeTypeFor<dimensions, Int>&, Image&)
          * for more information.
          * @requires_gl45 Extension @extension{ARB,get_texture_sub_image}
          * @requires_gl Texture image queries are not available in OpenGL ES or
@@ -503,7 +547,7 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          * @deprecated_gl Prefer to use @ref setStorage() and @ref setSubImage()
          *      instead.
          */
-        TextureArray<dimensions>& setImage(Int level, TextureFormat internalFormat, const ImageReference<dimensions+1>& image) {
+        TextureArray<dimensions>& setImage(Int level, TextureFormat internalFormat, const ImageView<dimensions+1>& image) {
             DataHelper<dimensions+1>::setImage(*this, level, internalFormat, image);
             return *this;
         }
@@ -526,10 +570,41 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
         }
 
         /**
+         * @copybrief Texture::setCompressedImage()
+         * @return Reference to self (for method chaining)
+         *
+         * See @ref Texture::setCompressedImage() for more information.
+         * @see @ref maxSize()
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        TextureArray<dimensions>& setCompressedImage(Int level, const CompressedImageView<dimensions+1>& image) {
+            DataHelper<dimensions+1>::setCompressedImage(*this, level, image);
+            return *this;
+        }
+
+        /** @overload
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        TextureArray<dimensions>& setCompressedImage(Int level, CompressedBufferImage<dimensions+1>& image) {
+            DataHelper<dimensions+1>::setCompressedImage(*this, level, image);
+            return *this;
+        }
+
+        /** @overload
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        TextureArray<dimensions>& setCompressedImage(Int level, CompressedBufferImage<dimensions+1>&& image) {
+            return setCompressedImage(level, image);
+        }
+
+        /**
          * @brief Set image subdata
          * @param level             Mip level
          * @param offset            Offset where to put data in the texture
-         * @param image             @ref Image, @ref ImageReference or
+         * @param image             @ref Image, @ref ImageView or
          *      @ref Trade::ImageData of the same dimension count
          * @return Reference to self (for method chaining)
          *
@@ -544,7 +619,7 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          *      eventually @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
          *      @fn_gl{TexSubImage2D}/@fn_gl{TexSubImage3D}
          */
-        TextureArray<dimensions>& setSubImage(Int level, const typename DimensionTraits<dimensions+1, Int>::VectorType& offset, const ImageReference<dimensions+1>& image) {
+        TextureArray<dimensions>& setSubImage(Int level, const typename DimensionTraits<dimensions+1, Int>::VectorType& offset, const ImageView<dimensions+1>& image) {
             DataHelper<dimensions+1>::setSubImage(*this, level, offset, image);
             return *this;
         }
@@ -558,6 +633,41 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
         /** @overload */
         TextureArray<dimensions>& setSubImage(Int level, const typename DimensionTraits<dimensions+1, Int>::VectorType& offset, BufferImage<dimensions+1>&& image) {
             return setSubImage(level, offset, image);
+        }
+
+        /**
+         * @brief Set compressed image subdata
+         * @param level             Mip level
+         * @param offset            Offset where to put data in the texture
+         * @param image             @ref CompressedImage, @ref CompressedImageView
+         *      or compressed @ref Trade::ImageData of the same dimension count
+         * @return Reference to self (for method chaining)
+         *
+         * If neither @extension{ARB,direct_state_access} (part of OpenGL 4.5)
+         * nor @extension{EXT,direct_state_access} desktop extension is
+         * available, the texture is bound before the operation (if not
+         * already).
+         * @see @ref setStorage(), @fn_gl2{CompressedTextureSubImage2D,CompressedTexSubImage2D}/
+         *      @fn_gl2{CompressedTextureSubImage3D,CompressedTexSubImage3D},
+         *      @fn_gl_extension{CompressedTextureSubImage2D,EXT,direct_state_access}/
+         *      @fn_gl_extension{CompressedTextureSubImage3D,EXT,direct_state_access},
+         *      eventually @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
+         *      @fn_gl{CompressedTexSubImage2D}/@fn_gl{CompressedTexSubImage3D}
+         */
+        TextureArray<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions+1, Int>& offset, const CompressedImageView<dimensions+1>& image) {
+            DataHelper<dimensions+1>::setCompressedSubImage(*this, level, offset, image);
+            return *this;
+        }
+
+        /** @overload */
+        TextureArray<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions+1, Int>& offset, CompressedBufferImage<dimensions+1>& image) {
+            DataHelper<dimensions+1>::setCompressedSubImage(*this, level, offset, image);
+            return *this;
+        }
+
+        /** @overload */
+        TextureArray<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions+1, Int>& offset, CompressedBufferImage<dimensions+1>&& image) {
+            return setCompressedSubImage(level, offset, image);
         }
 
         /**

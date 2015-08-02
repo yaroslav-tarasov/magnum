@@ -426,6 +426,48 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
         BufferImage3D image(Int level, BufferImage3D&& image, BufferUsage usage);
 
         /**
+         * @copybrief Texture::compressedImage(Int, CompressedImage&)
+         *
+         * See @ref Texture::compressedImage(Int, CompressedImage&) for more
+         *      information.
+         * @requires_gl Texture image queries are not available in OpenGL ES.
+         *      See @ref Framebuffer::read() for possible workaround.
+         */
+        void compressedImage(Int level, CompressedImage3D& image) {
+            AbstractTexture::compressedImage<3>(level, image);
+        }
+
+        /** @overload
+         *
+         * Convenience alternative to the above, example usage:
+         * @code
+         * CompressedImage3D image = texture.compressedImage(0, {});
+         * @endcode
+         */
+        CompressedImage3D compressedImage(Int level, CompressedImage3D&& image);
+
+        /**
+         * @copybrief Texture::compressedImage(Int, CompressedBufferImage&, BufferUsage)
+         *
+         * See @ref Texture::compressedImage(Int, CompressedBufferImage&, BufferUsage)
+         * for more information.
+         * @requires_gl Texture image queries are not available in OpenGL ES.
+         *      See @ref Framebuffer::read() for possible workaround.
+         */
+        void compressedImage(Int level, CompressedBufferImage3D& image, BufferUsage usage) {
+            AbstractTexture::compressedImage<3>(level, image, usage);
+        }
+
+        /** @overload
+         *
+         * Convenience alternative to the above, example usage:
+         * @code
+         * CompressedBufferImage3D image = texture.compressedImage(0, {}, BufferUsage::StaticRead);
+         * @endcode
+         */
+        CompressedBufferImage3D compressedImage(Int level, CompressedBufferImage3D&& image, BufferUsage usage);
+
+        /**
          * @copybrief Texture::subImage(Int, const RangeTypeFor<dimensions, Int>&, Image&)
          *
          * See @ref Texture::subImage(Int, const RangeTypeFor<dimensions, Int>&, Image&)
@@ -484,7 +526,7 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          * @deprecated_gl Prefer to use @ref setStorage() and @ref setSubImage()
          *      instead.
          */
-        CubeMapTextureArray& setImage(Int level, TextureFormat internalFormat, const ImageReference3D& image) {
+        CubeMapTextureArray& setImage(Int level, TextureFormat internalFormat, const ImageView3D& image) {
             DataHelper<3>::setImage(*this, level, internalFormat, image);
             return *this;
         }
@@ -507,6 +549,42 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
         }
 
         /**
+         * @copybrief Texture::setCompressedImage()
+         * @return Reference to self (for method chaining)
+         *
+         * Sets texture image data from three-dimensional image for all cube
+         * faces for all layers. Each group of 6 2D images is one cube map
+         * layer, thus Z coordinate of @p image size must be multiple of 6. The
+         * images are in order of (+X, -X, +Y, -Y, +Z, -Z).
+         *
+         * See @ref Texture::setCompressedImage() for more information.
+         * @see @ref maxSize()
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        CubeMapTextureArray& setCompressedImage(Int level, const CompressedImageView3D& image) {
+            DataHelper<3>::setCompressedImage(*this, level, image);
+            return *this;
+        }
+
+        /** @overload
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        CubeMapTextureArray& setCompressedImage(Int level, CompressedBufferImage3D& image) {
+            DataHelper<3>::setCompressedImage(*this, level, image);
+            return *this;
+        }
+
+        /** @overload
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        CubeMapTextureArray& setCompressedImage(Int level, CompressedBufferImage3D&& image) {
+            return setCompressedImage(level, image);
+        }
+
+        /**
          * @copybrief Texture::setSubImage()
          * @return Reference to self (for method chaining)
          *
@@ -515,7 +593,7 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
          *
          * See @ref Texture::setSubImage() for more information.
          */
-        CubeMapTextureArray& setSubImage(Int level, const Vector3i& offset, const ImageReference3D& image) {
+        CubeMapTextureArray& setSubImage(Int level, const Vector3i& offset, const ImageView3D& image) {
             DataHelper<3>::setSubImage(*this, level, offset, image);
             return *this;
         }
@@ -529,6 +607,31 @@ class MAGNUM_EXPORT CubeMapTextureArray: public AbstractTexture {
         /** @overload */
         CubeMapTextureArray& setSubImage(Int level, const Vector3i& offset, BufferImage3D&& image) {
             return setSubImage(level, offset, image);
+        }
+
+        /**
+         * @copybrief Texture::setCompressedSubImage()
+         * @return Reference to self (for method chaining)
+         *
+         * Z coordinate is equivalent to layer * 6 + number of texture face,
+         * i.e. +X is `0` and so on, in order of (+X, -X, +Y, -Y, +Z, -Z).
+         *
+         * See @ref Texture::setCompressedSubImage() for more information.
+         */
+        CubeMapTextureArray& setCompressedSubImage(Int level, const Vector3i& offset, const CompressedImageView3D& image) {
+            DataHelper<3>::setCompressedSubImage(*this, level, offset, image);
+            return *this;
+        }
+
+        /** @overload */
+        CubeMapTextureArray& setCompressedSubImage(Int level, const Vector3i& offset, CompressedBufferImage3D& image) {
+            DataHelper<3>::setCompressedSubImage(*this, level, offset, image);
+            return *this;
+        }
+
+        /** @overload */
+        CubeMapTextureArray& setCompressedSubImage(Int level, const Vector3i& offset, CompressedBufferImage3D&& image) {
+            return setCompressedSubImage(level, offset, image);
         }
 
         /**

@@ -28,11 +28,11 @@
 
 #include "Magnum/configure.h"
 #include "Magnum/BufferImage.h"
-#include "Magnum/Color.h"
 #include "Magnum/ColorFormat.h"
 #include "Magnum/Image.h"
 #include "Magnum/RectangleTexture.h"
 #include "Magnum/TextureFormat.h"
+#include "Magnum/Math/Color.h"
 #include "Magnum/Math/Range.h"
 #include "Magnum/Test/AbstractOpenGLTester.h"
 
@@ -56,9 +56,13 @@ struct RectangleTextureGLTest: AbstractOpenGLTester {
     void storage();
 
     void image();
+    void compressedImage();
     void imageBuffer();
+    void compressedImageBuffer();
     void subImage();
+    void compressedSubImage();
     void subImageBuffer();
+    void compressedSubImageBuffer();
     void subImageQuery();
     void subImageQueryBuffer();
 
@@ -82,10 +86,14 @@ RectangleTextureGLTest::RectangleTextureGLTest() {
               &RectangleTextureGLTest::storage,
 
               &RectangleTextureGLTest::image,
+              &RectangleTextureGLTest::compressedImage,
               &RectangleTextureGLTest::imageBuffer,
+              &RectangleTextureGLTest::compressedImageBuffer,
 
               &RectangleTextureGLTest::subImage,
+              &RectangleTextureGLTest::compressedSubImage,
               &RectangleTextureGLTest::subImageBuffer,
+              &RectangleTextureGLTest::compressedSubImageBuffer,
               &RectangleTextureGLTest::subImageQuery,
               &RectangleTextureGLTest::subImageQueryBuffer,
 
@@ -253,7 +261,7 @@ void RectangleTextureGLTest::image() {
 
     RectangleTexture texture;
     texture.setImage(TextureFormat::RGBA8,
-        ImageReference2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data));
+        ImageView2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data));
 
     MAGNUM_VERIFY_NO_ERROR();
 
@@ -265,6 +273,10 @@ void RectangleTextureGLTest::image() {
     CORRADE_COMPARE_AS(
         Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
         Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
+}
+
+void RectangleTextureGLTest::compressedImage() {
+    CORRADE_SKIP("No rectangle texture compression format exists.");
 }
 
 void RectangleTextureGLTest::imageBuffer() {
@@ -286,6 +298,10 @@ void RectangleTextureGLTest::imageBuffer() {
     CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
 }
 
+void RectangleTextureGLTest::compressedImageBuffer() {
+    CORRADE_SKIP("No rectangle texture compression format exists.");
+}
+
 namespace {
     constexpr UnsignedByte Zero[4*4*4] = {};
 
@@ -303,9 +319,9 @@ void RectangleTextureGLTest::subImage() {
 
     RectangleTexture texture;
     texture.setImage(TextureFormat::RGBA8,
-        ImageReference2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(4), Zero));
+        ImageView2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(4), Zero));
     texture.setSubImage(Vector2i(1),
-        ImageReference2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data));
+        ImageView2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data));
 
     MAGNUM_VERIFY_NO_ERROR();
 
@@ -319,13 +335,17 @@ void RectangleTextureGLTest::subImage() {
         Containers::ArrayView<const UnsignedByte>{SubDataComplete}, TestSuite::Compare::Container);
 }
 
+void RectangleTextureGLTest::compressedSubImage() {
+    CORRADE_SKIP("No rectangle texture compression format exists.");
+}
+
 void RectangleTextureGLTest::subImageBuffer() {
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::texture_rectangle>())
         CORRADE_SKIP(Extensions::GL::ARB::texture_rectangle::string() + std::string(" is not supported."));
 
     RectangleTexture texture;
     texture.setImage(TextureFormat::RGBA8,
-        ImageReference2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(4), Zero));
+        ImageView2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(4), Zero));
     texture.setSubImage(Vector2i(1),
         BufferImage2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data, BufferUsage::StaticDraw));
 
@@ -340,6 +360,10 @@ void RectangleTextureGLTest::subImageBuffer() {
     CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{SubDataComplete}, TestSuite::Compare::Container);
 }
 
+void RectangleTextureGLTest::compressedSubImageBuffer() {
+    CORRADE_SKIP("No rectangle texture compression format exists.");
+}
+
 void RectangleTextureGLTest::subImageQuery() {
     if(!Context::current()->isExtensionSupported<Extensions::GL::ARB::texture_rectangle>())
         CORRADE_SKIP(Extensions::GL::ARB::texture_rectangle::string() + std::string(" is not supported."));
@@ -348,7 +372,7 @@ void RectangleTextureGLTest::subImageQuery() {
 
     RectangleTexture texture;
     texture.setStorage(TextureFormat::RGBA8, Vector2i{4})
-           .setSubImage({}, ImageReference2D{ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i{4}, SubDataComplete});
+           .setSubImage({}, ImageView2D{ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i{4}, SubDataComplete});
 
     MAGNUM_VERIFY_NO_ERROR();
 
@@ -370,7 +394,7 @@ void RectangleTextureGLTest::subImageQueryBuffer() {
 
     RectangleTexture texture;
     texture.setStorage(TextureFormat::RGBA8, Vector2i{4})
-           .setSubImage({}, ImageReference2D{ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i{4}, SubDataComplete});
+           .setSubImage({}, ImageView2D{ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i{4}, SubDataComplete});
 
     MAGNUM_VERIFY_NO_ERROR();
 

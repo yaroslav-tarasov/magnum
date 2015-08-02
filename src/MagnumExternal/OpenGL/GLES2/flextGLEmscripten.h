@@ -448,10 +448,14 @@ typedef khronos_ssize_t GLsizeiptr;
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
+/* GL_EXT_texture_compression_s3tc */
+
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT 0x83F0
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83F1
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+
 /* Function prototypes */
-
-/* GL_ANGLE_depth_texture */
-
 
 /* GL_ANGLE_instanced_arrays */
 
@@ -604,39 +608,9 @@ GLAPI void glVertexAttrib4fv(GLuint, const GLfloat *);
 GLAPI void glVertexAttribPointer(GLuint, GLint, GLenum, GLboolean, GLsizei, const void *);
 GLAPI void glViewport(GLint, GLint, GLsizei, GLsizei);
 
-/* GL_EXT_blend_minmax */
-
-
 /* GL_EXT_draw_buffers */
 
 GLAPI void glDrawBuffersEXT(GLsizei, const GLenum *);
-
-/* GL_EXT_sRGB */
-
-
-/* GL_EXT_shader_texture_lod */
-
-
-/* GL_EXT_texture_filter_anisotropic */
-
-
-/* GL_OES_element_index_uint */
-
-
-/* GL_OES_standard_derivatives */
-
-
-/* GL_OES_texture_float */
-
-
-/* GL_OES_texture_float_linear */
-
-
-/* GL_OES_texture_half_float */
-
-
-/* GL_OES_texture_half_float_linear */
-
 
 /* GL_OES_vertex_array_object */
 

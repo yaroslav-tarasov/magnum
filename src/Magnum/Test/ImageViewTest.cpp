@@ -26,25 +26,31 @@
 #include <Corrade/TestSuite/Tester.h>
 
 #include "Magnum/ColorFormat.h"
-#include "Magnum/ImageReference.h"
+#include "Magnum/ImageView.h"
 
 namespace Magnum { namespace Test {
 
-struct ImageReferenceTest: TestSuite::Tester {
-    explicit ImageReferenceTest();
+struct ImageViewTest: TestSuite::Tester {
+    explicit ImageViewTest();
 
     void construct();
+    void constructCompressed();
+
     void setData();
+    void setDataCompressed();
 };
 
-ImageReferenceTest::ImageReferenceTest() {
-    addTests<ImageReferenceTest>({&ImageReferenceTest::construct,
-              &ImageReferenceTest::setData});
+ImageViewTest::ImageViewTest() {
+    addTests<ImageViewTest>({&ImageViewTest::construct,
+              &ImageViewTest::constructCompressed,
+
+              &ImageViewTest::setData,
+              &ImageViewTest::setDataCompressed});
 }
 
-void ImageReferenceTest::construct() {
-    const char data[3] = {};
-    ImageReference2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
+void ImageViewTest::construct() {
+    const char data[3]{};
+    ImageView2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
 
     CORRADE_COMPARE(a.format(), ColorFormat::Red);
     CORRADE_COMPARE(a.type(), ColorType::UnsignedByte);
@@ -52,10 +58,19 @@ void ImageReferenceTest::construct() {
     CORRADE_COMPARE(a.data(), data);
 }
 
-void ImageReferenceTest::setData() {
-    const char data[3] = {};
-    ImageReference2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
-    const char data2[8] = {};
+void ImageViewTest::constructCompressed() {
+    const char data[8]{};
+    CompressedImageView2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, data};
+
+    CORRADE_COMPARE(a.format(), CompressedColorFormat::RGBAS3tcDxt1);
+    CORRADE_COMPARE(a.size(), Vector2i(4, 4));
+    CORRADE_COMPARE(a.data(), data);
+}
+
+void ImageViewTest::setData() {
+    const char data[3]{};
+    ImageView2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
+    const char data2[8]{};
     a.setData(data2);
 
     CORRADE_COMPARE(a.format(), ColorFormat::Red);
@@ -64,6 +79,17 @@ void ImageReferenceTest::setData() {
     CORRADE_COMPARE(a.data(), data2);
 }
 
+void ImageViewTest::setDataCompressed() {
+    const char data[8]{};
+    CompressedImageView2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, data};
+    const char data2[16]{};
+    a.setData(data2);
+
+    CORRADE_COMPARE(a.format(), CompressedColorFormat::RGBAS3tcDxt1);
+    CORRADE_COMPARE(a.size(), Vector2i(4, 4));
+    CORRADE_COMPARE(a.data(), data2);
+}
+
 }}
 
-CORRADE_TEST_MAIN(Magnum::Test::ImageReferenceTest)
+CORRADE_TEST_MAIN(Magnum::Test::ImageViewTest)

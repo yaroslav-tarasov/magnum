@@ -711,6 +711,74 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
         BufferImage<dimensions> image(Int level, BufferImage<dimensions>&& image, BufferUsage usage);
 
         /**
+         * @brief Read given mip level of compressed texture to image
+         * @param level             Mip level
+         * @param image             Image where to put the compressed data
+         *
+         * Compression format and data size are taken from the texture, image
+         * size is taken using @ref imageSize().
+         *
+         * If neither @extension{ARB,direct_state_access} (part of OpenGL 4.5)
+         * nor @extension{EXT,direct_state_access} is available, the texture is
+         * bound before the operation (if not already). If either
+         * @extension{ARB,direct_state_access} or @extension{ARB,robustness}
+         * is available, the operation is protected from buffer overflow.
+         * However, if @extension{ARB,direct_state_access} is not available and
+         * both @extension{EXT,direct_state_access} and @extension{ARB,robustness}
+         * are available, the robust operation is preferred over DSA.
+         * @see @fn_gl2{GetTextureLevelParameter,GetTexLevelParameter},
+         *      @fn_gl_extension{GetTextureLevelParameter,EXT,direct_state_access},
+         *      eventually @fn_gl{GetTexLevelParameter} with
+         *      @def_gl{TEXTURE_COMPRESSED_IMAGE_SIZE},
+         *      @def_gl{TEXTURE_INTERNAL_FORMAT}, @def_gl{TEXTURE_WIDTH},
+         *      @def_gl{TEXTURE_HEIGHT}, @def_gl{TEXTURE_DEPTH}, then
+         *      @fn_gl2{GetCompressedTextureImage,GetCompressedTexImage},
+         *      @fn_gl_extension{GetnCompressedTexImage,ARB,robustness},
+         *      @fn_gl_extension{GetCompressedTextureImage,EXT,direct_state_access},
+         *      eventually @fn_gl{GetCompressedTexImage}
+         * @requires_gl Texture image queries are not available in OpenGL ES or
+         *      WebGL. See @ref Framebuffer::read() for possible workaround.
+         */
+        void compressedImage(Int level, CompressedImage<dimensions>& image) {
+            AbstractTexture::compressedImage<dimensions>(level, image);
+        }
+
+        /** @overload
+         *
+         * Convenience alternative to the above, example usage:
+         * @code
+         * CompressedImage2D image = texture.compressedImage(0, {});
+         * @endcode
+         */
+        CompressedImage<dimensions> compressedImage(Int level, CompressedImage<dimensions>&& image);
+
+        /**
+         * @brief Read given mip level of compressed texture to buffer image
+         * @param level             Mip level
+         * @param image             Buffer image where to put the compressed data
+         * @param usage             Buffer usage
+         *
+         * See @ref compressedImage(Int, CompressedImage&) for more
+         * information.
+         * @requires_gl Texture image queries are not available in OpenGL ES or
+         *      WebGL. See @ref Framebuffer::read() for possible workaround.
+         * @todo Make it more flexible (usable with
+         *      @extension{ARB,buffer_storage}, avoiding relocations...)
+         */
+        void compressedImage(Int level, CompressedBufferImage<dimensions>& image, BufferUsage usage) {
+            AbstractTexture::compressedImage<dimensions>(level, image, usage);
+        }
+
+        /** @overload
+         *
+         * Convenience alternative to the above, example usage:
+         * @code
+         * CompressedBufferImage2D image = texture.compressedImage(0, {}, BufferUsage::StaticRead);
+         * @endcode
+         */
+        CompressedBufferImage<dimensions> compressedImage(Int level, CompressedBufferImage<dimensions>&& image, BufferUsage usage);
+
+        /**
          * @brief Read range of given texture mip level to image
          * @param level             Mip level
          * @param range             Range to read
@@ -767,7 +835,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @brief Set image data
          * @param level             Mip level
          * @param internalFormat    Internal format
-         * @param image             @ref Image, @ref ImageReference or
+         * @param image             @ref Image, @ref ImageView or
          *      @ref Trade::ImageData of the same dimension count
          * @return Reference to self (for method chaining)
          *
@@ -781,7 +849,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @deprecated_gl Prefer to use @ref setStorage() and @ref setSubImage()
          *      instead.
          */
-        Texture<dimensions>& setImage(Int level, TextureFormat internalFormat, const ImageReference<dimensions>& image) {
+        Texture<dimensions>& setImage(Int level, TextureFormat internalFormat, const ImageView<dimensions>& image) {
             DataHelper<dimensions>::setImage(*this, level, internalFormat, image);
             return *this;
         }
@@ -814,10 +882,61 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
         #endif
 
         /**
+         * @brief Set compressed image data
+         * @param level             Mip level
+         * @param image             @ref CompressedImage, @ref CompressedImageView
+         *      or compressed @ref Trade::ImageData of the same dimension count
+         * @return Reference to self (for method chaining)
+         *
+         * On platforms that support it prefer to use @ref setStorage() and
+         * @ref setCompressedSubImage() instead, as it avoids unnecessary
+         * reallocations and has better performance characteristics. This call
+         * also has no equivalent in @extension{ARB,direct_state_access}, thus
+         * the texture needs to be bound to some texture unit before the
+         * operation.
+         * @see @ref maxSize(), @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
+         *      @fn_gl{CompressedTexImage1D} / @fn_gl{CompressedTexImage2D} /
+         *      @fn_gl{CompressedTexImage3D}
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        Texture<dimensions>& setCompressedImage(Int level, const CompressedImageView<dimensions>& image) {
+            DataHelper<dimensions>::setCompressedImage(*this, level, image);
+            return *this;
+        }
+
+        #ifndef MAGNUM_TARGET_GLES2
+        /** @overload
+         * @requires_gles30 Pixel buffer objects are not available in OpenGL ES
+         *      2.0.
+         * @requires_webgl20 Pixel buffer objects are not available in WebGL
+         *      1.0.
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        Texture<dimensions>& setCompressedImage(Int level, CompressedBufferImage<dimensions>& image) {
+            DataHelper<dimensions>::setCompressedImage(*this, level, image);
+            return *this;
+        }
+
+        /** @overload
+         * @requires_gles30 Pixel buffer objects are not available in OpenGL ES
+         *      2.0.
+         * @requires_webgl20 Pixel buffer objects are not available in WebGL
+         *      1.0.
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        Texture<dimensions>& setCompressedImage(Int level, CompressedBufferImage<dimensions>&& image) {
+            return setCompressedImage(level, image);
+        }
+        #endif
+
+        /**
          * @brief Set image subdata
          * @param level             Mip level
          * @param offset            Offset where to put data in the texture
-         * @param image             @ref Image, @ref ImageReference or
+         * @param image             @ref Image, @ref ImageView or
          *      @ref Trade::ImageData of the same dimension count
          * @return Reference to self (for method chaining)
          *
@@ -838,7 +957,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *      able to use @ref setStorage() as it uses implicit @ref ColorType
          *      value.
          */
-        Texture<dimensions>& setSubImage(Int level, const typename DimensionTraits<dimensions, Int>::VectorType& offset, const ImageReference<dimensions>& image) {
+        Texture<dimensions>& setSubImage(Int level, const typename DimensionTraits<dimensions, Int>::VectorType& offset, const ImageView<dimensions>& image) {
             DataHelper<Dimensions>::setSubImage(*this, level, offset, image);
             return *this;
         }
@@ -863,6 +982,56 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          */
         Texture<dimensions>& setSubImage(Int level, const typename DimensionTraits<dimensions, Int>::VectorType& offset, BufferImage<dimensions>&& image) {
             return setSubImage(level, offset, image);
+        }
+        #endif
+
+        /**
+         * @brief Set compressed image subdata
+         * @param level             Mip level
+         * @param offset            Offset where to put data in the texture
+         * @param image             @ref CompressedImage, @ref CompressedImageView
+         *      or compressed @ref Trade::ImageData of the same dimension count
+         * @return Reference to self (for method chaining)
+         *
+         * If neither @extension{ARB,direct_state_access} (part of OpenGL 4.5)
+         * nor @extension{EXT,direct_state_access} desktop extension is
+         * available, the texture is bound before the operation (if not
+         * already).
+         * @see @ref setStorage(), @fn_gl2{CompressedTextureSubImage1D,CompressedTexSubImage1D} /
+         *      @fn_gl2{CompressedTextureSubImage2D,CompressedTexSubImage2D} /
+         *      @fn_gl2{CompressedTextureSubImage3D,CompressedTexSubImage3D},
+         *      @fn_gl_extension{CompressedTextureSubImage1D,EXT,direct_state_access} /
+         *      @fn_gl_extension{CompressedTextureSubImage2D,EXT,direct_state_access} /
+         *      @fn_gl_extension{CompressedTextureSubImage3D,EXT,direct_state_access},
+         *      eventually @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
+         *      @fn_gl{CompressedTexSubImage1D} / @fn_gl{CompressedTexSubImage2D} /
+         *      @fn_gl{CompressedTexSubImage3D}
+         */
+        Texture<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions, Int>& offset, const CompressedImageView<dimensions>& image) {
+            DataHelper<Dimensions>::setCompressedSubImage(*this, level, offset, image);
+            return *this;
+        }
+
+        #ifndef MAGNUM_TARGET_GLES2
+        /** @overload
+         * @requires_gles30 Pixel buffer objects are not available in OpenGL ES
+         *      2.0.
+         * @requires_webgl20 Pixel buffer objects are not available in WebGL
+         *      1.0.
+         */
+        Texture<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions, Int>& offset, CompressedBufferImage<dimensions>& image) {
+            DataHelper<Dimensions>::setCompressedSubImage(*this, level, offset, image);
+            return *this;
+        }
+
+        /** @overload
+         * @requires_gles30 Pixel buffer objects are not available in OpenGL ES
+         *      2.0.
+         * @requires_webgl20 Pixel buffer objects are not available in WebGL
+         *      1.0.
+         */
+        Texture<dimensions>& setCompressedSubImage(Int level, const VectorTypeFor<dimensions, Int>& offset, CompressedBufferImage<dimensions>&& image) {
+            return setCompressedSubImage(level, offset, image);
         }
         #endif
 

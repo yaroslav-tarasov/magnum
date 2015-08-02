@@ -34,22 +34,34 @@ struct ImageTest: TestSuite::Tester {
     explicit ImageTest();
 
     void construct();
+    void constructCompressed();
     void constructCopy();
+    void constructCopyCompressed();
     void constructMove();
+    void constructMoveCompressed();
 
     void setData();
+    void setDataCompressed();
     void toReference();
+    void toReferenceCommpressed();
     void release();
+    void releaseCompressed();
 };
 
 ImageTest::ImageTest() {
     addTests<ImageTest>({&ImageTest::construct,
+              &ImageTest::constructCompressed,
               &ImageTest::constructCopy,
+              &ImageTest::constructCopyCompressed,
               &ImageTest::constructMove,
+              &ImageTest::constructMoveCompressed,
 
               &ImageTest::setData,
+              &ImageTest::setDataCompressed,
               &ImageTest::toReference,
-              &ImageTest::release});
+              &ImageTest::toReferenceCommpressed,
+              &ImageTest::release,
+              &ImageTest::releaseCompressed});
 }
 
 void ImageTest::construct() {
@@ -60,6 +72,16 @@ void ImageTest::construct() {
     CORRADE_COMPARE(a.type(), ColorType::UnsignedByte);
     CORRADE_COMPARE(a.size(), Vector2i(1, 3));
     CORRADE_COMPARE(a.data(), data);
+}
+
+void ImageTest::constructCompressed() {
+    auto data = new char[8];
+    CompressedImage2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, Containers::Array<char>{data, 8}};
+
+    CORRADE_COMPARE(a.format(), CompressedColorFormat::RGBAS3tcDxt1);
+    CORRADE_COMPARE(a.size(), Vector2i(4, 4));
+    CORRADE_COMPARE(a.data(), data);
+    CORRADE_COMPARE(a.data().size(), 8);
 }
 
 void ImageTest::constructCopy() {
@@ -82,6 +104,11 @@ void ImageTest::constructCopy() {
     #else
     CORRADE_SKIP("Type traits needed to test this are not available on GCC 4.4.");
     #endif
+}
+
+void ImageTest::constructCopyCompressed() {
+    CORRADE_VERIFY(!(std::is_constructible<CompressedImage2D, const CompressedImage2D&>{}));
+    CORRADE_VERIFY(!(std::is_assignable<CompressedImage2D, const CompressedImage2D&>{}));
 }
 
 void ImageTest::constructMove() {
@@ -114,6 +141,33 @@ void ImageTest::constructMove() {
     CORRADE_COMPARE(c.data(), data);
 }
 
+void ImageTest::constructMoveCompressed() {
+    auto data = new char[8];
+    CompressedImage2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, Containers::Array<char>{data, 8}};
+    CompressedImage2D b{std::move(a)};
+
+    CORRADE_COMPARE(a.data(), nullptr);
+    CORRADE_COMPARE(a.size(), Vector2i());
+
+    CORRADE_COMPARE(b.format(), CompressedColorFormat::RGBAS3tcDxt1);
+    CORRADE_COMPARE(b.size(), Vector2i(4, 4));
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.data().size(), 8);
+
+    auto data2 = new char[16];
+    CompressedImage2D c{CompressedColorFormat::RGBAS3tcDxt3, {8, 4}, Containers::Array<char>{data2, 16}};
+    c = std::move(b);
+
+    CORRADE_COMPARE_AS(b.data(), data2, char*);
+    CORRADE_COMPARE(b.data().size(), 16);
+    CORRADE_COMPARE(b.size(), Vector2i(8, 4));
+
+    CORRADE_COMPARE(c.format(), CompressedColorFormat::RGBAS3tcDxt1);
+    CORRADE_COMPARE(c.size(), Vector2i(4, 4));
+    CORRADE_COMPARE(c.data(), data);
+    CORRADE_COMPARE(c.data().size(), 8);
+}
+
 void ImageTest::setData() {
     auto data = new char[3];
     Image2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
@@ -126,23 +180,55 @@ void ImageTest::setData() {
     CORRADE_COMPARE(a.data(), data2);
 }
 
+void ImageTest::setDataCompressed() {
+    auto data = new char[8];
+    CompressedImage2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, Containers::Array<char>{data, 8}};
+    auto data2 = new char[16];
+    a.setData(CompressedColorFormat::RGBAS3tcDxt3, {8, 4}, Containers::Array<char>{data2, 16});
+
+    CORRADE_COMPARE(a.format(), CompressedColorFormat::RGBAS3tcDxt3);
+    CORRADE_COMPARE(a.size(), Vector2i(8, 4));
+    CORRADE_COMPARE(a.data(), data2);
+    CORRADE_COMPARE(a.data().size(), 16);
+}
+
 void ImageTest::toReference() {
     auto data = new char[3];
     const Image2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
-    ImageReference2D b = a;
+    ImageView2D b = a;
 
     CORRADE_COMPARE(b.format(), ColorFormat::Red);
     CORRADE_COMPARE(b.type(), ColorType::UnsignedByte);
     CORRADE_COMPARE(b.size(), Vector2i(1, 3));
     CORRADE_COMPARE(b.data(), data);
 
-    CORRADE_VERIFY((std::is_convertible<const Image2D&, ImageReference2D>::value));
+    CORRADE_VERIFY((std::is_convertible<const Image2D&, ImageView2D>::value));
     {
         #if defined(CORRADE_GCC47_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
         CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1 and MSVC 2013.");
         #endif
-        CORRADE_VERIFY(!(std::is_convertible<const Image2D, ImageReference2D>::value));
-        CORRADE_VERIFY(!(std::is_convertible<const Image2D&&, ImageReference2D>::value));
+        CORRADE_VERIFY(!(std::is_convertible<const Image2D, ImageView2D>::value));
+        CORRADE_VERIFY(!(std::is_convertible<const Image2D&&, ImageView2D>::value));
+    }
+}
+
+void ImageTest::toReferenceCommpressed() {
+    auto data = new char[8];
+    const CompressedImage2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, Containers::Array<char>{data, 8}};
+    CompressedImageView2D b = a;
+
+    CORRADE_COMPARE(b.format(), CompressedColorFormat::RGBAS3tcDxt1);
+    CORRADE_COMPARE(b.size(), Vector2i(4, 4));
+    CORRADE_COMPARE(b.data(), data);
+    CORRADE_COMPARE(b.data().size(), 8);
+
+    CORRADE_VERIFY((std::is_convertible<const CompressedImage2D&, CompressedImageView2D>::value));
+    {
+        #ifdef CORRADE_GCC47_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1.");
+        #endif
+        CORRADE_VERIFY(!(std::is_convertible<const CompressedImage2D, CompressedImageView2D>::value));
+        CORRADE_VERIFY(!(std::is_convertible<const CompressedImage2D&&, CompressedImageView2D>::value));
     }
 }
 
@@ -157,6 +243,16 @@ void ImageTest::release() {
     #else
     CORRADE_VERIFY(a.data() == nullptr);
     #endif
+    CORRADE_COMPARE(a.size(), Vector2i());
+}
+
+void ImageTest::releaseCompressed() {
+    char data[8];
+    CompressedImage2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, Containers::Array<char>{data, 8}};
+    const char* const pointer = a.release().release();
+
+    CORRADE_COMPARE(pointer, data);
+    CORRADE_COMPARE(a.data(), nullptr);
     CORRADE_COMPARE(a.size(), Vector2i());
 }
 

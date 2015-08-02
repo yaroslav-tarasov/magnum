@@ -34,6 +34,10 @@
 #include "Magnum/Types.h"
 #include "Magnum/Math/Math.h"
 
+#ifdef MAGNUM_BUILD_DEPRECATED
+#include <Corrade/Utility/Macros.h>
+#endif
+
 #ifndef DOXYGEN_GENERATING_OUTPUT
 typedef unsigned int GLenum; /* Needed for *Format and *Type enums */
 #endif
@@ -210,6 +214,18 @@ typedef Math::Vector3<Int> Vector3i;
 
 /** @brief Four-component signed integer vector */
 typedef Math::Vector4<Int> Vector4i;
+
+/** @brief Three-component (RGB) float color */
+typedef Math::Color3<Float> Color3;
+
+/** @brief Four-component (RGBA) float color */
+typedef Math::Color4<Float> Color4;
+
+/** @brief Three-component (RGB) unsigned byte color */
+typedef Math::Color3<UnsignedByte> Color3ub;
+
+/** @brief Four-component (RGBA) unsigned byte color */
+typedef Math::Color4<UnsignedByte> Color4ub;
 
 /**
 @brief 3x3 float transformation matrix
@@ -529,6 +545,11 @@ template<UnsignedInt> class BufferImage;
 typedef BufferImage<1> BufferImage1D;
 typedef BufferImage<2> BufferImage2D;
 typedef BufferImage<3> BufferImage3D;
+
+template<UnsignedInt> class CompressedBufferImage;
+typedef CompressedBufferImage<1> CompressedBufferImage1D;
+typedef CompressedBufferImage<2> CompressedBufferImage2D;
+typedef CompressedBufferImage<3> CompressedBufferImage3D;
 #endif
 
 #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
@@ -538,16 +559,15 @@ enum class BufferTextureFormat: GLenum;
 #endif
 #endif
 
-template<class> class BasicColor3;
-template<class> class BasicColor4;
-typedef BasicColor3<Float> Color3;
-typedef BasicColor3<UnsignedByte> Color3ub;
-typedef BasicColor4<Float> Color4;
-typedef BasicColor4<UnsignedByte> Color4ub;
+#ifdef MAGNUM_BUILD_DEPRECATED
+template<class T> using BasicColor3 CORRADE_DEPRECATED_ALIAS("use Math::Color3 instead") = Math::Color3<T>;
+template<class T> using BasicColor4 CORRADE_DEPRECATED_ALIAS("use Math::Color4 instead") = Math::Color4<T>;
+#endif
 
 #ifndef CORRADE_GCC45_COMPATIBILITY
 enum class ColorFormat: GLenum;
 enum class ColorType: GLenum;
+enum class CompressedColorFormat: GLenum;
 #endif
 
 class Context;
@@ -569,10 +589,27 @@ typedef Image<1> Image1D;
 typedef Image<2> Image2D;
 typedef Image<3> Image3D;
 
-template<UnsignedInt> class ImageReference;
-typedef ImageReference<1> ImageReference1D;
-typedef ImageReference<2> ImageReference2D;
-typedef ImageReference<3> ImageReference3D;
+template<UnsignedInt> class CompressedImage;
+typedef CompressedImage<1> CompressedImage1D;
+typedef CompressedImage<2> CompressedImage2D;
+typedef CompressedImage<3> CompressedImage3D;
+
+template<UnsignedInt> class ImageView;
+typedef ImageView<1> ImageView1D;
+typedef ImageView<2> ImageView2D;
+typedef ImageView<3> ImageView3D;
+
+#ifdef MAGNUM_BUILD_DEPRECATED
+template<UnsignedInt dimensions> using ImageReference CORRADE_DEPRECATED_ALIAS("use ImageView instead") = ImageView<dimensions>;
+typedef CORRADE_DEPRECATED("use ImageView1D instead") ImageView1D ImageReference1D;
+typedef CORRADE_DEPRECATED("use ImageView2D instead") ImageView2D ImageReference2D;
+typedef CORRADE_DEPRECATED("use ImageView3D instead") ImageView3D ImageReference3D;
+#endif
+
+template<UnsignedInt> class CompressedImageView;
+typedef CompressedImageView<1> CompressedImageView1D;
+typedef CompressedImageView<2> CompressedImageView2D;
+typedef CompressedImageView<3> CompressedImageView3D;
 
 #ifndef CORRADE_GCC45_COMPATIBILITY
 enum class MeshPrimitive: GLenum;

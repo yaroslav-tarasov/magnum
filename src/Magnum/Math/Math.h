@@ -77,6 +77,9 @@ template<class> class Vector2;
 template<class> class Vector3;
 template<class> class Vector4;
 
+template<class> class Color3;
+template<class> class Color4;
+
 template<UnsignedInt, class> class Range;
 #ifndef CORRADE_GCC46_COMPATIBILITY
 template<class T> using Range1D = Range<1, T>;

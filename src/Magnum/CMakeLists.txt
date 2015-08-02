@@ -66,6 +66,7 @@ set(Magnum_SRCS
     Trade/AbstractImageConverter.cpp
     Trade/AbstractImporter.cpp
     Trade/AbstractMaterialData.cpp
+    Trade/ImageData.cpp
     Trade/MeshData2D.cpp
     Trade/MeshData3D.cpp
     Trade/MeshObjectData2D.cpp
@@ -86,7 +87,6 @@ set(Magnum_HEADERS
     Array.h
     Attribute.h
     Buffer.h
-    Color.h
     ColorFormat.h
     Context.h
     CubeMapTexture.h
@@ -95,7 +95,7 @@ set(Magnum_HEADERS
     Extensions.h
     Framebuffer.h
     Image.h
-    ImageReference.h
+    ImageView.h
     Magnum.h
     Mesh.h
     MeshView.h
@@ -128,6 +128,13 @@ set(Magnum_PRIVATE_HEADERS
     Implementation/ShaderState.h
     Implementation/State.h
     Implementation/TextureState.h)
+
+# Deprecated stuff
+if(BUILD_DEPRECATED)
+    list(APPEND Magnum_HEADERS
+        Color.h
+        ImageReference.h)
+endif()
 
 # Desktop-only stuff
 if(NOT TARGET_GLES)

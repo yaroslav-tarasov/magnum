@@ -29,8 +29,8 @@
  * @brief Class @ref Magnum::Shaders::VertexColor
  */
 
-#include "Magnum/Color.h"
 #include "Magnum/DimensionTraits.h"
+#include "Magnum/Math/Color.h"
 #include "Magnum/Math/Matrix3.h"
 #include "Magnum/Math/Matrix4.h"
 #include "Magnum/Shaders/Generic.h"
@@ -93,9 +93,9 @@ template<UnsignedInt dimensions> class MAGNUM_SHADERS_EXPORT VertexColor: public
         /**
          * @brief Vertex color
          *
-         * @ref shaders-generic "Generic attribute", @ref Vector3.
+         * @ref shaders-generic "Generic attribute", @ref Color3.
          */
-        typedef Attribute<3, Color3> Color;
+        typedef typename Generic<dimensions>::Color Color;
 
         explicit VertexColor();
 

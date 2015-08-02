@@ -26,7 +26,7 @@
 */
 
 /** @file
- * @brief Class @ref Magnum::AbstractImage
+ * @brief Class @ref Magnum::AbstractImage, @ref Magnum::AbstractCompressedImage
  */
 
 #include <cstddef>
@@ -40,49 +40,25 @@
 
 namespace Magnum {
 
-/**
-@brief Non-templated base for one-, two- or three-dimensional images
+namespace Implementation {
+    std::size_t MAGNUM_EXPORT imagePixelSize(ColorFormat format, ColorType type);
 
-See @ref Image, @ref ImageReference, @ref BufferImage, @ref Trade::ImageData
+    template<UnsignedInt dimensions> std::size_t imageDataSize(const AbstractImage& image, ColorFormat format, ColorType type, Math::Vector<dimensions, Int> size);
+}
+
+/**
+@brief Non-templated base for one-, two- or three-dimensional uncompressed images
+
+See @ref Image, @ref ImageView, @ref BufferImage and @ref Trade::ImageData
 documentation for more information.
+@see @ref AbstractCompressedImage
 @todo Where to put glClampColor() and glPixelStore() encapsulation? It is
     needed in AbstractFramebuffer::read(), Texture::setImage() etc (i.e. all
     functions operating with images). It also possibly needs to be "stackable"
     to easily revert the state back.
 */
-class MAGNUM_EXPORT AbstractImage {
-    public:
-        /**
-         * @brief Pixel size (in bytes)
-         * @param format            Format of the pixel
-         * @param type              Data type of the pixel
-         *
-         * @see @ref pixelSize()
-         */
-        static std::size_t pixelSize(ColorFormat format, ColorType type);
-
-        /** @brief Format of pixel data */
-        constexpr ColorFormat format() const { return _format; }
-
-        /** @brief Data type of pixel data */
-        constexpr ColorType type() const { return _type; }
-
-        /**
-         * @brief Pixel size (in bytes)
-         *
-         * Convenience member alternative for
-         * @ref pixelSize(ColorFormat, ColorType).
-         */
-        std::size_t pixelSize() const { return pixelSize(_format, _type); }
-
+class AbstractImage {
     protected:
-        /**
-         * @brief Constructor
-         * @param format            Format of pixel data
-         * @param type              Data type of pixel data
-         */
-        constexpr explicit AbstractImage(ColorFormat format, ColorType type): _format(format), _type(type) {}
-
         /* GCC > 4.5 needs to have `= default` in class body, otherwise can't
            use constexpr */
         #ifndef CORRADE_GCC45_COMPATIBILITY
@@ -91,15 +67,26 @@ class MAGNUM_EXPORT AbstractImage {
         ~AbstractImage();
         #endif
 
-        template<UnsignedInt dimensions> std::size_t dataSize(Math::Vector<dimensions, Int> size) const;
-
-    #ifdef DOXYGEN_GENERATING_OUTPUT
-    private:
-    #else
+    #ifndef DOXYGEN_GENERATING_OUTPUT
     protected:
+    #else
+    private:
     #endif
-        ColorFormat _format;
-        ColorType _type;
+        /** @todo remove this when the class has actual contents */
+        /* Otherwise both (heh) GCC and Clang complain when move-constructing using {} */
+        Int _dummy;
+};
+
+/**
+@brief Non-templated base for one-, two- or three-dimensional compressed images
+
+See @ref CompressedImage, @ref CompressedImageView, @ref CompressedBufferImage
+and @ref Trade::ImageData documentation for more information.
+@see @ref AbstractImage
+*/
+class AbstractCompressedImage: public AbstractImage {
+    protected:
+        ~AbstractCompressedImage() = default;
 };
 
 #ifdef CORRADE_GCC45_COMPATIBILITY

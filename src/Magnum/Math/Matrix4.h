@@ -258,7 +258,7 @@ template<class T> class Matrix4: public Matrix<4, T> {
         constexpr /*implicit*/ Matrix4(IdentityInitT = IdentityInit, T value = T{1})
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            /* MSVC 2013 can't handle {} here */
+            /* MSVC 2015 can't handle {} here */
             : Matrix<4, T>(IdentityInit, value)
             #endif
             {}
@@ -267,7 +267,7 @@ template<class T> class Matrix4: public Matrix<4, T> {
         constexpr explicit Matrix4(ZeroInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            /* MSVC 2013 can't handle {} here */
+            /* MSVC 2015 can't handle {} here */
             : Matrix<4, T>(ZeroInit)
             #endif
             {}
@@ -276,7 +276,7 @@ template<class T> class Matrix4: public Matrix<4, T> {
         constexpr explicit Matrix4(NoInitT)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
-            /* MSVC 2013 can't handle {} here */
+            /* MSVC 2015 can't handle {} here */
             : Matrix<4, T>(NoInit)
             #endif
             {}

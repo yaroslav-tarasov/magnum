@@ -327,6 +327,44 @@ class MAGNUM_EXPORT RectangleTexture: public AbstractTexture {
         BufferImage2D image(BufferImage2D&& image, BufferUsage usage);
 
         /**
+         * @brief Read compressed texture to image
+         *
+         * See @ref Texture::compressedImage(Int, CompressedImage&) for more
+         * information.
+         */
+        void compressedImage(CompressedImage2D& image) {
+            AbstractTexture::compressedImage<2>(0, image);
+        }
+
+        /** @overload
+         *
+         * Convenience alternative to the above, example usage:
+         * @code
+         * CompressedImage2D image = texture.compressedimage({});
+         * @endcode
+         */
+        CompressedImage2D compressedImage(CompressedImage2D&& image);
+
+        /**
+         * @brief Read compressed texture to buffer image
+         *
+         * See @ref Texture::compressedImage(Int, CompressedBufferImage&, BufferUsage)
+         * for more information.
+         */
+        void compressedImage(CompressedBufferImage2D& image, BufferUsage usage) {
+            AbstractTexture::compressedImage<2>(0, image, usage);
+        }
+
+        /** @overload
+         *
+         * Convenience alternative to the above, example usage:
+         * @code
+         * CompressedBufferImage2D image = texture.compressedImage({}, BufferUsage::StaticRead);
+         * @endcode
+         */
+        CompressedBufferImage2D compressedImage(CompressedBufferImage2D&& image, BufferUsage usage);
+
+        /**
          * @copybrief Texture::subImage(Int, const RangeTypeFor<dimensions, Int>&, Image&)
          *
          * See @ref Texture::subImage(Int, const RangeTypeFor<dimensions, Int>&, Image&)
@@ -375,7 +413,7 @@ class MAGNUM_EXPORT RectangleTexture: public AbstractTexture {
          * @deprecated_gl Prefer to use @ref setStorage() and @ref setSubImage()
          *      instead.
          */
-        RectangleTexture& setImage(TextureFormat internalFormat, const ImageReference2D& image) {
+        RectangleTexture& setImage(TextureFormat internalFormat, const ImageView2D& image) {
             DataHelper<2>::setImage(*this, 0, internalFormat, image);
             return *this;
         }
@@ -398,12 +436,43 @@ class MAGNUM_EXPORT RectangleTexture: public AbstractTexture {
         }
 
         /**
+         * @copybrief Texture::setCompressedImage()
+         * @return Reference to self (for method chaining)
+         *
+         * See @ref Texture::setCompressedImage() for more information.
+         * @see @ref maxSize()
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        RectangleTexture& setCompressedImage(const CompressedImageView2D& image) {
+            DataHelper<2>::setCompressedImage(*this, 0, image);
+            return *this;
+        }
+
+        /** @overload
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        RectangleTexture& setCompressedImage(CompressedBufferImage2D& image) {
+            DataHelper<2>::setCompressedImage(*this, 0, image);
+            return *this;
+        }
+
+        /** @overload
+         * @deprecated_gl Prefer to use @ref setStorage() and
+         *      @ref setCompressedSubImage() instead.
+         */
+        RectangleTexture& setCompressedImage(CompressedBufferImage2D&& image) {
+            return setCompressedImage(image);
+        }
+
+        /**
          * @copybrief Texture::setSubImage()
          * @return Reference to self (for method chaining)
          *
          * See @ref Texture::setSubImage() for more information.
          */
-        RectangleTexture& setSubImage(const Vector2i& offset, const ImageReference2D& image) {
+        RectangleTexture& setSubImage(const Vector2i& offset, const ImageView2D& image) {
             DataHelper<2>::setSubImage(*this, 0, offset, image);
             return *this;
         }
@@ -417,6 +486,28 @@ class MAGNUM_EXPORT RectangleTexture: public AbstractTexture {
         /** @overload */
         RectangleTexture& setSubImage(const Vector2i& offset, BufferImage2D&& image) {
             return setSubImage(offset, image);
+        }
+
+        /**
+         * @copybrief Texture::setCompressedSubImage()
+         * @return Reference to self (for method chaining)
+         *
+         * See @ref Texture::setCompressedSubImage() for more information.
+         */
+        RectangleTexture& setCompressedSubImage(const Vector2i& offset, const CompressedImageView2D& image) {
+            DataHelper<2>::setCompressedSubImage(*this, 0, offset, image);
+            return *this;
+        }
+
+        /** @overload */
+        RectangleTexture& setCompressedSubImage(const Vector2i& offset, CompressedBufferImage2D& image) {
+            DataHelper<2>::setCompressedSubImage(*this, 0, offset, image);
+            return *this;
+        }
+
+        /** @overload */
+        RectangleTexture& setCompressedSubImage(const Vector2i& offset, CompressedBufferImage2D&& image) {
+            return setCompressedSubImage(offset, image);
         }
 
         /**

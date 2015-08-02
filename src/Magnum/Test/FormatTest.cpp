@@ -1,5 +1,3 @@
-#ifndef Magnum_Color_h
-#define Magnum_Color_h
 /*
     This file is part of Magnum.
 
@@ -25,33 +23,52 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-/** @file
- * @deprecated Use @ref Magnum/Math/Color.h instead.
- */
+#include <sstream>
+#include <Corrade/TestSuite/Tester.h>
 
-#include "Magnum/configure.h"
+#include "Magnum/ColorFormat.h"
 
-#ifdef MAGNUM_BUILD_DEPRECATED
-#include <Corrade/Utility/Macros.h>
+namespace Magnum { namespace Test {
 
-#include "Magnum/Math/Color.h"
-CORRADE_DEPRECATED_FILE("use Magnum/Math/Color.h instead")
+struct FormatTest: TestSuite::Tester {
+    explicit FormatTest();
 
-namespace Magnum {
+    void debugColorFormat();
+    void debugColorType();
+    void debugCompressedColorFormat();
+};
 
-/** @copybrief Math::Color3
- * @deprecated Use @ref Math::Color3 instead.
- */
-template<class T> using BasicColor3 CORRADE_DEPRECATED_ALIAS("use Math::Color3 instead") = Math::Color3<T>;
-
-/** @copybrief Math::Color4
- * @deprecated Use @ref Math::Color4 instead.
- */
-template<class T> using BasicColor4 CORRADE_DEPRECATED_ALIAS("use Math::Color4 instead") = Math::Color4<T>;
-
+FormatTest::FormatTest() {
+    addTests({&FormatTest::debugColorFormat,
+              &FormatTest::debugColorType,
+              &FormatTest::debugCompressedColorFormat});
 }
-#else
-#error use Magnum/Math/Color.h instead
-#endif
 
-#endif
+void FormatTest::debugColorFormat() {
+    std::ostringstream out;
+
+    Debug(&out) << ColorFormat::RGBA;
+    CORRADE_COMPARE(out.str(), "ColorFormat::RGBA\n");
+}
+
+void FormatTest::debugColorType() {
+    std::ostringstream out;
+
+    Debug(&out) << ColorType::UnsignedByte;
+    CORRADE_COMPARE(out.str(), "ColorType::UnsignedByte\n");
+}
+
+void FormatTest::debugCompressedColorFormat() {
+    #ifdef MAGNUM_TARGET_GLES
+    CORRADE_SKIP("No enum value available");
+    #else
+    std::ostringstream out;
+
+    Debug(&out) << CompressedColorFormat::RGBBptcUnsignedFloat;
+    CORRADE_COMPARE(out.str(), "CompressedColorFormat::RGBBptcUnsignedFloat\n");
+    #endif
+}
+
+}}
+
+CORRADE_TEST_MAIN(Magnum::Test::FormatTest)

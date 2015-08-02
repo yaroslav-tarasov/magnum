@@ -136,6 +136,75 @@ Debug operator<<(Debug debug, const ColorType value) {
 
     return debug << "ColorType::(invalid)";
 }
+
+Debug operator<<(Debug debug, const CompressedColorFormat value) {
+    switch(value) {
+        #define _c(value) case CompressedColorFormat::value: return debug << "CompressedColorFormat::" #value;
+        #ifndef MAGNUM_TARGET_GLES
+        _c(Red)
+        _c(RG)
+        _c(RGB)
+        _c(RGBA)
+        _c(RedRgtc1)
+        _c(RGRgtc2)
+        _c(SignedRedRgtc1)
+        _c(SignedRGRgtc2)
+        _c(RGBBptcUnsignedFloat)
+        _c(RGBBptcSignedFloat)
+        _c(RGBABptcUnorm)
+        _c(SRGBAlphaBptcUnorm)
+        #endif
+        #ifndef MAGNUM_TARGET_GLES2
+        _c(RGB8Etc2)
+        _c(SRGB8Etc2)
+        _c(RGB8PunchthroughAlpha1Etc2)
+        _c(SRGB8PunchthroughAlpha1Etc2)
+        _c(RGBA8Etc2Eac)
+        _c(SRGB8Alpha8Etc2Eac)
+        _c(R11Eac)
+        _c(SignedR11Eac)
+        _c(RG11Eac)
+        _c(SignedRG11Eac)
+        #endif
+        _c(RGBS3tcDxt1)
+        _c(RGBAS3tcDxt1)
+        _c(RGBAS3tcDxt3)
+        _c(RGBAS3tcDxt5)
+        #ifndef MAGNUM_TARGET_WEBGL
+        _c(RGBAAstc4x4)
+        _c(SRGB8Alpha8Astc4x4)
+        _c(RGBAAstc5x4)
+        _c(SRGB8Alpha8Astc5x4)
+        _c(RGBAAstc5x5)
+        _c(SRGB8Alpha8Astc5x5)
+        _c(RGBAAstc6x5)
+        _c(SRGB8Alpha8Astc6x5)
+        _c(RGBAAstc6x6)
+        _c(SRGB8Alpha8Astc6x6)
+        _c(RGBAAstc8x5)
+        _c(SRGB8Alpha8Astc8x5)
+        _c(RGBAAstc8x6)
+        _c(SRGB8Alpha8Astc8x6)
+        _c(RGBAAstc8x8)
+        _c(SRGB8Alpha8Astc8x8)
+        _c(RGBAAstc10x5)
+        _c(SRGB8Alpha8Astc10x5)
+        _c(RGBAAstc10x6)
+        _c(SRGB8Alpha8Astc10x6)
+        _c(RGBAAstc10x8)
+        _c(SRGB8Alpha8Astc10x8)
+        _c(RGBAAstc10x10)
+        _c(SRGB8Alpha8Astc10x10)
+        _c(RGBAAstc12x10)
+        _c(SRGB8Alpha8Astc12x10)
+        _c(RGBAAstc12x12)
+        _c(SRGB8Alpha8Astc12x12)
+        #endif
+        #undef _c
+    }
+
+    return debug << "CompressedColorFormat::(invalid)";
+}
 #endif
 
 }

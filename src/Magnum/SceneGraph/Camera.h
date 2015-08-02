@@ -103,11 +103,13 @@ template<UnsignedInt dimensions, class T> class Camera: public AbstractFeature<d
          */
         explicit Camera(AbstractObject<dimensions, T>& object);
 
+        #ifndef DOXYGEN_GENERATING_OUTPUT
         /* This is here to avoid ambiguity with deleted copy constructor when
            passing `*this` from class subclassing both Camera and AbstractObject */
         template<class U, class = typename std::enable_if<std::is_base_of<AbstractObject<dimensions, T>, U>::value>::type> Camera(U& object): AbstractFeature<dimensions, T>(object), _aspectRatioPolicy(AspectRatioPolicy::NotPreserved) {
             AbstractFeature<dimensions, T>::setCachedTransformations(CachedTransformation::InvertedAbsolute);
         }
+        #endif
 
         ~Camera();
 
@@ -228,12 +230,10 @@ template<UnsignedInt dimensions, class T> class Camera: public AbstractFeature<d
             _cameraMatrix = invertedAbsoluteTransformationMatrix;
         }
 
-        #ifndef DOXYGEN_GENERATING_OUTPUT
         void fixAspectRatio();
 
         typename DimensionTraits<dimensions, T>::MatrixType _rawProjectionMatrix;
         AspectRatioPolicy _aspectRatioPolicy;
-        #endif
 
         typename DimensionTraits<dimensions, T>::MatrixType _projectionMatrix;
         typename DimensionTraits<dimensions, T>::MatrixType _cameraMatrix;
