@@ -107,8 +107,25 @@ void ImageTest::constructCopy() {
 }
 
 void ImageTest::constructCopyCompressed() {
-    CORRADE_VERIFY(!(std::is_constructible<CompressedImage2D, const CompressedImage2D&>{}));
-    CORRADE_VERIFY(!(std::is_assignable<CompressedImage2D, const CompressedImage2D&>{}));
+    #ifndef CORRADE_GCC44_COMPATIBILITY
+    {
+        #ifdef CORRADE_MSVC2013_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("std::is_constructible is buggy on MSVC 2013.");
+        #endif
+        CORRADE_VERIFY(!(std::is_constructible<CompressedImage2D, const CompressedImage2D&>{}));
+    }
+    /* GCC 4.6 doesn't have std::is_assignable */
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    {
+        #ifdef CORRADE_MSVC2013_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("std::is_assignable is buggy on MSVC 2013.");
+        #endif
+        CORRADE_VERIFY(!(std::is_assignable<CompressedImage2D, const CompressedImage2D&>{}));
+    }
+    #endif
+    #else
+    CORRADE_SKIP("Type traits needed to test this are not available on GCC 4.4.");
+    #endif
 }
 
 void ImageTest::constructMove() {
@@ -224,8 +241,8 @@ void ImageTest::toReferenceCommpressed() {
 
     CORRADE_VERIFY((std::is_convertible<const CompressedImage2D&, CompressedImageView2D>::value));
     {
-        #ifdef CORRADE_GCC47_COMPATIBILITY
-        CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1.");
+        #if defined(CORRADE_GCC47_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
+        CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1 and MSVC 2013.");
         #endif
         CORRADE_VERIFY(!(std::is_convertible<const CompressedImage2D, CompressedImageView2D>::value));
         CORRADE_VERIFY(!(std::is_convertible<const CompressedImage2D&&, CompressedImageView2D>::value));
