@@ -54,9 +54,9 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
         };
 
         #ifdef MAGNUM_BUILD_DEPRECATED
-        /* Sorry, MSVC complains that in-class initialization is not yet
+        /* Sorry, MSVC 2015 complains that in-class initialization is not yet
            implemented and it is not worth fixing */
-        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        #if !defined(CORRADE_MSVC2015_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
         /**
          * @brief Pass to constructor to create zero-filled matrix
          * @deprecated Use @ref ZeroInitT and @ref ZeroInit instead.
