@@ -30,6 +30,9 @@
  */
 
 #include <cmath>
+#ifdef _MSC_VER
+#include <algorithm> /* std::max() */
+#endif
 #include <Corrade/Utility/Assert.h>
 #include <Corrade/Utility/ConfigurationValue.h>
 #include <Corrade/Utility/Debug.h>
@@ -185,7 +188,12 @@ template<std::size_t size, class T> class Vector {
         constexpr explicit Vector(T value);
         #else
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class U, class V = typename std::enable_if<std::is_same<T, U>::value && size != 1, T>::type> constexpr explicit Vector(U value): Vector(typename Implementation::GenerateSequence<size>::Type(), value) {}
+        template<class U, class V = typename std::enable_if<std::is_same<T, U>::value && size != 1, T>::type>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        explicit Vector(U value): Vector(typename Implementation::GenerateSequence<size>::Type(), value) {}
         #else
         template<class U, class V = typename std::enable_if<std::is_same<T, U>::value && size != 1, T>::type> explicit Vector(U value) {
             *this = Vector(typename Implementation::GenerateSequence<size>::Type(), value);
@@ -205,7 +213,12 @@ template<std::size_t size, class T> class Vector {
          * @endcode
          */
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class U> constexpr explicit Vector(const Vector<size, U>& other): Vector(typename Implementation::GenerateSequence<size>::Type(), other) {}
+        template<class U>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        explicit Vector(const Vector<size, U>& other): Vector(typename Implementation::GenerateSequence<size>::Type(), other) {}
         #else
         template<class U> explicit Vector(const Vector<size, U>& other) {
             *this = Vector(typename Implementation::GenerateSequence<size>::Type(), other);

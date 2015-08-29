@@ -86,7 +86,12 @@ template<UnsignedInt dimensions, class T> class Array {
         constexpr /*implicit*/ Array(T value);
         #else
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class U, class V = typename std::enable_if<std::is_same<T, U>::value && dimensions != 1, T>::type> constexpr /*implicit*/ Array(U value): Array(typename Math::Implementation::GenerateSequence<dimensions>::Type(), value) {}
+        template<class U, class V = typename std::enable_if<std::is_same<T, U>::value && dimensions != 1, T>::type>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        /*implicit*/ Array(U value): Array(typename Math::Implementation::GenerateSequence<dimensions>::Type(), value) {}
         #else
         template<class U, class V = typename std::enable_if<std::is_same<T, U>::value && dimensions != 1, T>::type> /*implicit*/ Array(U value) {
             *this = Array(typename Math::Implementation::GenerateSequence<dimensions>::Type(), value);

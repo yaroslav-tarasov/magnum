@@ -1,3 +1,5 @@
+#ifndef Magnum_PixelStorage_h
+#define Magnum_PixelStorage_h
 /*
     This file is part of Magnum.
 
@@ -23,32 +25,23 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include <Magnum/Context.h>
-#include <Magnum/DefaultFramebuffer.h>
-#include <Magnum/Renderer.h>
-#include <Magnum/Version.h>
-#include <Magnum/Math/Color.h>
-#include <Magnum/Platform/Sdl2Application.h>
+/** @file
+ * @brief
+ */
 
-using namespace Magnum;
+#include <cstddef>
 
-class Hello: public Platform::Application {
-public:
-    explicit Hello(const Arguments& arguments);
+#include "Magnum/Magnum.h"
+#include "Magnum/visibility.h"
 
-private:
-    void drawEvent() override;
-};
+namespace Magnum {
 
-Hello::Hello(const Arguments& arguments): Platform::Application(arguments) {
-    Renderer::setClearColor(Color3::fromHSV(216.0_degf, 0.85f, 1.0f));
-    Debug() << "Hello! This application is running on" << Context::current()->version()
-            << "using" << Context::current()->rendererString();
+namespace Implementation {
+    std::size_t MAGNUM_EXPORT imagePixelSize(ColorFormat format, ColorType type);
+
+    template<UnsignedInt dimensions> std::size_t imageDataSize(ColorFormat format, ColorType type, Math::Vector<dimensions, Int> size);
 }
 
-void Hello::drawEvent() {
-    defaultFramebuffer.clear(FramebufferClear::Color);
-    swapBuffers();
 }
 
-MAGNUM_APPLICATION_MAIN(Hello)
+#endif

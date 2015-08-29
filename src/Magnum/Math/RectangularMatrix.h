@@ -114,7 +114,12 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
 
         /** @brief Construct zero-filled matrix */
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        constexpr /*implicit*/ RectangularMatrix(ZeroInitT = ZeroInit)
+        /** @todo Remove MSVC workaround when fixed */
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        /*implicit*/ RectangularMatrix(ZeroInitT = ZeroInit)
             /** @todoc remove workaround when doxygen is sane */
             #ifndef DOXYGEN_GENERATING_OUTPUT
             /* MSVC 2015 can't handle {} here */
@@ -450,7 +455,7 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
             #ifndef CORRADE_MSVC2013_COMPATIBILITY
             _data{Vector<rows, T>{(static_cast<void>(sequence), U{})}...} {}
             #else
-            /* std::array, also MSVC 2013 can't handle {} here */
+            /* std::array, also MSVC 2015 can't handle {} here */
             _data({Vector<rows, T>((static_cast<void>(sequence), U{}))...}) {}
             #endif
         #else
