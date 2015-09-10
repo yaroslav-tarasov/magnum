@@ -265,7 +265,9 @@ template<UnsignedInt dimensions> class ImageData {
             public:
                 Storage(Containers::NoInitT) {}
                 Storage(const PixelStorage& storage): _storage{storage} {}
+                #ifndef MAGNUM_TARGET_GLES
                 Storage(const CompressedPixelStorage& storage): _compressedStorage{storage} {}
+                #endif
 
                 PixelStorage& storage() { return _storage; }
                 const PixelStorage& storage() const { return _storage; }

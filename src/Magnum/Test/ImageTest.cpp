@@ -261,8 +261,7 @@ void ImageTest::toReference() {
     {
         #if defined(CORRADE_GCC47_COMPATIBILITY) || defined(CORRADE_MSVC2013_COMPATIBILITY)
         CORRADE_EXPECT_FAIL("Rvalue references for *this are not supported in GCC < 4.8.1 and MSVC 2013.");
-        #endif
-        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        #elif defined(CORRADE_MSVC2015_COMPATIBILITY)
         CORRADE_EXPECT_FAIL("std::is_convertible is still buggy in MSVC 2015.");
         #endif
         CORRADE_VERIFY(!(std::is_convertible<const Image2D, ImageView2D>::value));
