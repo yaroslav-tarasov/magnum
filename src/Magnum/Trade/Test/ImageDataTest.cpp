@@ -194,7 +194,8 @@ void ImageDataTest::toReference() {
     CORRADE_COMPARE(b.format(), PixelFormat::Red);
     CORRADE_COMPARE(b.type(), PixelType::UnsignedByte);
     CORRADE_COMPARE(b.size(), Vector2i(4, 1));
-    CORRADE_COMPARE(b.data(), data);
+    /* GCC 4.6 needs explicit conversion here */
+    CORRADE_COMPARE(b.data().data(), data);
 
     CORRADE_VERIFY((std::is_convertible<const Trade::ImageData2D&, ImageView2D>::value));
     {
