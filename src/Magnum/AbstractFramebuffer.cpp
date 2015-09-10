@@ -314,7 +314,7 @@ void AbstractFramebuffer::read(const Range2Di& rectangle, BufferImage2D& image, 
     if(image.dataSize() < dataSize)
         image.setData(image.storage(), image.format(), image.type(), rectangle.size(), {nullptr, dataSize}, usage);
     else
-        image.setData(image.storage(), image.format(), image.type(), rectangle.size(), nullptr, usage);
+        image.setData(image.storage(), image.format(), image.type(), rectangle.size(), {nullptr, 0}, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();

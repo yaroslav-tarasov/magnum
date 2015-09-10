@@ -95,7 +95,9 @@ template<UnsignedInt dimensions> class ImageView {
         template<class T, std::size_t dataSize> explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, const T(&data)[dataSize]): _format{format}, _type{type}, _size{size}, _data{reinterpret_cast<const char*>(data), sizeof(T)*dataSize} {
             CORRADE_ASSERT(!_data || Implementation::imageDataSize(*this) <= _data.size(), "ImageView::ImageView(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
         }
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, std::nullptr_t): _format{format}, _type{type}, _size{size}, _data{nullptr} {}
+        #endif
         #endif
         #endif
 
@@ -118,7 +120,7 @@ template<UnsignedInt dimensions> class ImageView {
         /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
         constexpr
         #endif
-        explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size) noexcept: _format{format}, _type{type}, _size{size}, _data{nullptr} {}
+        explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size) noexcept: _format{format}, _type{type}, _size{size} {}
 
         /** @brief Storage of pixel data */
         PixelStorage storage() const { return _storage; }
@@ -184,9 +186,11 @@ template<UnsignedInt dimensions> class ImageView {
         template<class T, std::size_t size> void setData(const T(&data)[size]) {
             setData(Containers::ArrayView<const void>{data});
         }
+        #ifndef CORRADE_GCC45_COMPATIBILITY
         void setData(std::nullptr_t) {
             setData(Containers::ArrayView<const void>{nullptr});
         }
+        #endif
         #endif
         #endif
 

@@ -1520,7 +1520,7 @@ template<UnsignedInt dimensions> void AbstractTexture::image(GLint level, Buffer
     if(image.dataSize() < dataSize)
         image.setData(image.storage(), image.format(), image.type(), size, {nullptr, dataSize}, usage);
     else
-        image.setData(image.storage(), image.format(), image.type(), size, nullptr, usage);
+        image.setData(image.storage(), image.format(), image.type(), size, {nullptr, 0}, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
@@ -1566,7 +1566,7 @@ template<UnsignedInt dimensions> void AbstractTexture::compressedImage(const GLi
     if(image.dataSize() < dataSize)
         image.setData(image.storage(), CompressedPixelFormat(format), size, {nullptr, dataSize}, usage);
     else
-        image.setData(image.storage(), CompressedPixelFormat(format), size, nullptr, usage);
+        image.setData(image.storage(), CompressedPixelFormat(format), size, {nullptr, 0}, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
@@ -1612,7 +1612,7 @@ template<UnsignedInt dimensions> void AbstractTexture::subImage(const GLint leve
     if(image.dataSize() < dataSize)
         image.setData(image.storage(), image.format(), image.type(), size, {nullptr, dataSize}, usage);
     else
-        image.setData(image.storage(), image.format(), image.type(), size, nullptr, usage);
+        image.setData(image.storage(), image.format(), image.type(), size, {nullptr, 0}, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();

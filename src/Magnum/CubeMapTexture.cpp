@@ -88,7 +88,7 @@ void CubeMapTexture::image(const Int level, BufferImage3D& image, const BufferUs
     if(image.dataSize() < dataSize)
         image.setData(image.storage(), image.format(), image.type(), size, {nullptr, dataSize}, usage);
     else
-        image.setData(image.storage(), image.format(), image.type(), size, nullptr, usage);
+        image.setData(image.storage(), image.format(), image.type(), size, {nullptr, 0}, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
@@ -140,7 +140,7 @@ void CubeMapTexture::compressedImage(const Int level, CompressedBufferImage3D& i
     if(image.dataSize() < dataSize)
         image.setData(image.storage(), CompressedPixelFormat(format), size, {nullptr, dataSize}, usage);
     else
-        image.setData(image.storage(), CompressedPixelFormat(format), size, nullptr, usage);
+        image.setData(image.storage(), CompressedPixelFormat(format), size, {nullptr, 0}, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
@@ -180,7 +180,7 @@ void CubeMapTexture::image(const Coordinate coordinate, const Int level, BufferI
     if(image.dataSize() < dataSize)
         image.setData(image.storage(), image.format(), image.type(), size, {nullptr, dataSize}, usage);
     else
-        image.setData(image.storage(), image.format(), image.type(), size, nullptr, usage);
+        image.setData(image.storage(), image.format(), image.type(), size, {nullptr, 0}, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
@@ -228,7 +228,7 @@ void CubeMapTexture::compressedImage(const Coordinate coordinate, const Int leve
     if(image.dataSize() < dataSize)
         image.setData(image.storage(), CompressedPixelFormat(format), size, {nullptr, dataSize}, usage);
     else
-        image.setData(image.storage(), CompressedPixelFormat(format), size, nullptr, usage);
+        image.setData(image.storage(), CompressedPixelFormat(format), size, {nullptr, 0}, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
