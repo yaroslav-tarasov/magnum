@@ -26,6 +26,7 @@
 */
 
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "Magnum/Magnum.h"
