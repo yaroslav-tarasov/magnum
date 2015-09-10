@@ -86,14 +86,16 @@ template<UnsignedInt dimensions> CompressedBufferImage<dimensions>::CompressedBu
     #ifndef MAGNUM_TARGET_GLES
     _storage{storage},
     #endif
-    _format{}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{} {}
+    /* GCC 4.5 can't handle {} here */
+    _format(), _buffer{Buffer::TargetHint::PixelPack}, _dataSize{} {}
 
 #ifndef MAGNUM_TARGET_GLES
 template<UnsignedInt dimensions> inline CompressedBufferImage<dimensions>::CompressedBufferImage(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, const Containers::ArrayView<const void> data, const BufferUsage usage): _format{format}, _size{size}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{data.size()} {
     _buffer.setData(data, usage);
 }
 
-template<UnsignedInt dimensions> CompressedBufferImage<dimensions>::CompressedBufferImage(): _format{}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{} {}
+/* GCC 4.5 can't handle {} here */
+template<UnsignedInt dimensions> CompressedBufferImage<dimensions>::CompressedBufferImage(): _format(), _buffer{Buffer::TargetHint::PixelPack}, _dataSize{} {}
 #endif
 
 template<UnsignedInt dimensions> void CompressedBufferImage<dimensions>::setData(

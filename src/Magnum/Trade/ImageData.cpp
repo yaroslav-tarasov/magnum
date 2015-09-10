@@ -47,12 +47,14 @@ template<UnsignedInt dimensions> PixelStorage ImageData<dimensions>::storage() c
 }
 
 template<UnsignedInt dimensions> PixelFormat ImageData<dimensions>::format() const {
-    CORRADE_ASSERT(!_compressed, "Trade::ImageData::format(): the image is compressed", {});
+    /* GCC 4.5 can't handle {} here */
+    CORRADE_ASSERT(!_compressed, "Trade::ImageData::format(): the image is compressed", PixelFormat());
     return _format;
 }
 
 template<UnsignedInt dimensions> PixelType ImageData<dimensions>::type() const {
-    CORRADE_ASSERT(!_compressed, "Trade::ImageData::type(): the image is compressed", {});
+    /* GCC 4.5 can't handle {} here */
+    CORRADE_ASSERT(!_compressed, "Trade::ImageData::type(): the image is compressed", PixelType());
     return _type;
 }
 
@@ -64,7 +66,8 @@ template<UnsignedInt dimensions> CompressedPixelStorage ImageData<dimensions>::c
 #endif
 
 template<UnsignedInt dimensions> CompressedPixelFormat ImageData<dimensions>::compressedFormat() const {
-    CORRADE_ASSERT(_compressed, "Trade::ImageData::compressedFormat(): the image is not compressed", {});
+    /* GCC 4.5 can't handle {} here */
+    CORRADE_ASSERT(_compressed, "Trade::ImageData::compressedFormat(): the image is not compressed", CompressedPixelFormat());
     return _compressedFormat;
 }
 

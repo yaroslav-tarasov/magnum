@@ -1500,7 +1500,8 @@ template<UnsignedInt dimensions> void AbstractTexture::image(GLint level, Image<
     /* Reallocate only if needed */
     Containers::Array<char> data{image.release()};
     if(data.size() < dataSize)
-        data = Containers::Array<char>{dataSize};
+        /* GCC 4.5 can't handle {} here */
+        data = Containers::Array<char>(dataSize);
 
     Buffer::unbindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
@@ -1542,7 +1543,8 @@ template<UnsignedInt dimensions> void AbstractTexture::compressedImage(const GLi
     /* Reallocate only if needed */
     Containers::Array<char> data{image.release()};
     if(data.size() < dataSize)
-        data = Containers::Array<char>{dataSize};
+        /* GCC 4.5 can't handle {} here */
+        data = Containers::Array<char>(dataSize);
 
     Buffer::unbindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
@@ -1588,7 +1590,8 @@ template<UnsignedInt dimensions> void AbstractTexture::subImage(const GLint leve
     /* Reallocate only if needed */
     Containers::Array<char> data{image.release()};
     if(data.size() < dataSize)
-        data = Containers::Array<char>{dataSize};
+        /* GCC 4.5 can't handle {} here */
+        data = Containers::Array<char>(dataSize);
 
     Buffer::unbindInternal(Buffer::TargetHint::PixelPack);
     image.storage().applyPack();
