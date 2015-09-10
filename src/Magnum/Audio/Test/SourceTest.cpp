@@ -145,8 +145,8 @@ void SourceTest::minGain() {
 
 void SourceTest::coneAnglesAndGain() {
     Source source;
-    constexpr auto outerAngle = 12.0_degf;
-    constexpr auto innerAngle = 21.0_degf;
+    constexpr Deg outerAngle{12.0f};
+    constexpr Deg innerAngle{21.0f};
     constexpr Float outerGain = 0.05f;
 
     source.setInnerConeAngle(innerAngle);
