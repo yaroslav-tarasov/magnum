@@ -337,6 +337,8 @@ template<UnsignedInt dimensions> ImageData<dimensions>::ImageData(
     const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _compressed{true},
     #ifndef MAGNUM_TARGET_GLES
     _s{storage},
+    #else
+    _s{Containers::NoInit},
     #endif
     _compressedFormat{format}, _size{size}, _data{std::move(data)} {}
 
