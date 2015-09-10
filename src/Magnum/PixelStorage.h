@@ -61,9 +61,10 @@ currently used pixel pack/unpack parameters to avoid unnecessary calls to
 @see @ref CompressedPixelStorage
 */
 class MAGNUM_EXPORT PixelStorage {
-    friend AbstractFramebuffer;
-    friend AbstractTexture;
-    friend CubeMapTexture;
+    /* GCC 4.6 needs the class keyword */
+    friend class AbstractFramebuffer;
+    friend class AbstractTexture;
+    friend class CubeMapTexture;
 
     public:
         /**
@@ -260,8 +261,9 @@ Includes all parameters from @ref PixelStorage, except for @ref swapBytes() and
 @requires_gl Compressed pixel storage is hardcoded in OpenGL ES and WebGL.
 */
 class MAGNUM_EXPORT CompressedPixelStorage: public PixelStorage {
-    friend AbstractTexture;
-    friend CubeMapTexture;
+    /* GCC 4.6 needs the class keyword */
+    friend class AbstractTexture;
+    friend class CubeMapTexture;
 
     public:
         /**
