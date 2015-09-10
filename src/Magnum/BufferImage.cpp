@@ -33,7 +33,21 @@ template<UnsignedInt dimensions> BufferImage<dimensions>::BufferImage(const Pixe
     _buffer.setData(data, usage);
 }
 
+template<UnsignedInt dimensions> BufferImage<dimensions>::BufferImage(const PixelFormat format, const PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::ArrayView<const void> const data, const BufferUsage usage): _format{format}, _type{type}, _size{size}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{data.size()} {
+    CORRADE_ASSERT(Implementation::imageDataSize(*this) <= data.size(), "BufferImage::BufferImage(): bad image data size, got" << data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+    _buffer.setData(data, usage);
+}
+
+#ifdef MAGNUM_BUILD_DEPRECATED
+template<UnsignedInt dimensions> BufferImage<dimensions>::BufferImage(const PixelFormat format, const PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const void* const data, const BufferUsage usage): _format{format}, _type{type}, _size{size}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{Implementation::imageDataSizeFor(format, type, size)} {
+    /* No assertion since the size is implicit */
+    _buffer.setData({data, Implementation::imageDataSizeFor(format, type, size)}, usage);
+}
+#endif
+
 template<UnsignedInt dimensions> BufferImage<dimensions>::BufferImage(const PixelStorage storage, const PixelFormat format, const PixelType type): _storage{storage}, _format{format}, _type{type}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{0} {}
+
+template<UnsignedInt dimensions> BufferImage<dimensions>::BufferImage(const PixelFormat format, const PixelType type): _format{format}, _type{type}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{0} {}
 
 template<UnsignedInt dimensions> void BufferImage<dimensions>::setData(const PixelStorage storage, const PixelFormat format, const PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::ArrayView<const void> const data, const BufferUsage usage) {
     _storage = storage;
@@ -73,6 +87,14 @@ template<UnsignedInt dimensions> CompressedBufferImage<dimensions>::CompressedBu
     _storage{storage},
     #endif
     _format{}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{} {}
+
+#ifndef MAGNUM_TARGET_GLES
+template<UnsignedInt dimensions> inline CompressedBufferImage<dimensions>::CompressedBufferImage(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, const Containers::ArrayView<const void> data, const BufferUsage usage): _format{format}, _size{size}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{data.size()} {
+    _buffer.setData(data, usage);
+}
+
+template<UnsignedInt dimensions> CompressedBufferImage<dimensions>::CompressedBufferImage(): _format{}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{} {}
+#endif
 
 template<UnsignedInt dimensions> void CompressedBufferImage<dimensions>::setData(
     #ifndef MAGNUM_TARGET_GLES

@@ -72,21 +72,27 @@ template<UnsignedInt dimensions> class BufferImage {
         /** @overload
          * Similar to the above, but uses default @ref PixelStorage parameters.
          */
-        explicit BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::ArrayView<const void> data, BufferUsage usage): BufferImage{{}, format, type, size, data, usage} {}
+        explicit BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::ArrayView<const void> data, BufferUsage usage);
 
         #ifdef MAGNUM_BUILD_DEPRECATED
         /** @copybrief BufferImage(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::ArrayView<const void>, BufferUsage)
          * @deprecated Use @ref BufferImage(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::ArrayView<const void>, BufferUsage)
          *      instead.
          */
-        explicit CORRADE_DEPRECATED("use BufferImage(PixelFormat, PixelType, const VectorTypeFor&, Containers::ArrayView, BufferUsage) instead") BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const void* data, BufferUsage usage): BufferImage{{}, format, type, size, {data, Implementation::imageDataSizeFor(format, type, size)}, usage} {}
+        explicit CORRADE_DEPRECATED("use BufferImage(PixelFormat, PixelType, const VectorTypeFor&, Containers::ArrayView, BufferUsage) instead") BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const void* data, BufferUsage usage);
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         /* To avoid decay of sized arrays and nullptr to const void* and
            unwanted use of deprecated function */
-        template<class T, std::size_t dataSize> explicit BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const T(&data)[dataSize], BufferUsage usage): BufferImage{{}, format, type, size, Containers::ArrayView<const void>{data}, usage} {}
+        template<class T, std::size_t dataSize> explicit BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const T(&data)[dataSize], BufferUsage usage): _format{format}, _type{type}, _size{size}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{dataSize} {
+            CORRADE_ASSERT(Implementation::imageDataSize(*this) <= dataSize, "BufferImage::BufferImage(): bad image data size, got" << dataSize << "but expected at least" << Implementation::imageDataSize(*this), );
+            _buffer.setData(data, usage);
+        }
         /* To avoid ambiguous overload when passing Containers::Array */
-        template<class T> explicit BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const Containers::Array<T>& data, BufferUsage usage): BufferImage{{}, format, type, size, Containers::ArrayView<const void>{data}, usage} {}
+        template<class T> explicit BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const Containers::Array<T>& data, BufferUsage usage): _storage{storage}, _format{format}, _type{type}, _size{size}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{data.size()} {
+            CORRADE_ASSERT(Implementation::imageDataSize(*this) <= data.size(), "BufferImage::BufferImage(): bad image data size, got" << data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+            _buffer.setData(data, usage);
+        }
         #endif
         #endif
 
@@ -107,7 +113,7 @@ template<UnsignedInt dimensions> class BufferImage {
         /** @overload
          * Similar to the above, but uses default @ref PixelStorage parameters.
          */
-        /*implicit*/ BufferImage(PixelFormat format, PixelType type): BufferImage{{}, format, type} {}
+        /*implicit*/ BufferImage(PixelFormat format, PixelType type);
 
         /** @brief Copying is not allowed */
         BufferImage(const BufferImage<dimensions>&) = delete;
@@ -433,10 +439,6 @@ template<UnsignedInt dimensions> inline CompressedBufferImage<dimensions>& Compr
 }
 
 #ifndef MAGNUM_TARGET_GLES
-template<UnsignedInt dimensions> inline CompressedBufferImage<dimensions>::CompressedBufferImage(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, const Containers::ArrayView<const void> data, const BufferUsage usage): CompressedBufferImage{{}, format, size, data, usage} {}
-
-template<UnsignedInt dimensions> inline CompressedBufferImage<dimensions>::CompressedBufferImage(): CompressedBufferImage{CompressedPixelStorage{}} {}
-
 template<UnsignedInt dimensions> inline void CompressedBufferImage<dimensions>::setData(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, const Containers::ArrayView<const void> data, const BufferUsage usage) {
     setData({}, format, size, data, usage);
 }

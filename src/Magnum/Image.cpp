@@ -31,6 +31,16 @@ template<UnsignedInt dimensions> Image<dimensions>::Image(PixelStorage storage, 
     CORRADE_ASSERT(Implementation::imageDataSize(*this) <= _data.size(), "Image::Image(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
 }
 
+template<UnsignedInt dimensions> Image<dimensions>::Image(const PixelFormat format, const PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _format{format}, _type{type}, _size{size}, _data{std::move(data)} {
+    CORRADE_ASSERT(Implementation::imageDataSize(*this) <= _data.size(), "Image::Image(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+}
+
+#ifdef MAGNUM_BUILD_DEPRECATED
+template<UnsignedInt dimensions> Image<dimensions>::Image(const PixelFormat format, const PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, void* const data): _format{format}, _type{type}, _size{size}, _data{reinterpret_cast<char*>(data), Implementation::imageDataSizeFor(format, type, size)} {
+    /* No assertion since the size is implicit */
+}
+#endif
+
 template<UnsignedInt dimensions> void Image<dimensions>::setData(PixelStorage storage, PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data) {
     _storage = storage;
     _format = format;

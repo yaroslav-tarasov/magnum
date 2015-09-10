@@ -72,13 +72,13 @@ template<UnsignedInt dimensions> class ImageData {
         /** @overload
          * Similar to the above, but uses default @ref PixelStorage parameters.
          */
-        explicit ImageData(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): ImageData{{}, format, type, size, std::move(data)} {}
+        explicit ImageData(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
 
         #ifdef MAGNUM_BUILD_DEPRECATED
         /** @copybrief ImageData(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::Array<char>&&)
          * @deprecated Use @ref ImageData(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::Array<char>&&) instead.
          */
-        explicit CORRADE_DEPRECATED("use ImageData(PixelFormat, PixelType, const VectorTypeFor&, Containers::Array&&) instead") ImageData(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, void* data): ImageData{format, type, size, Containers::Array<char>{reinterpret_cast<char*>(data), Magnum::Implementation::imageDataSizeFor(format, type, size)}} {}
+        explicit CORRADE_DEPRECATED("use ImageData(PixelFormat, PixelType, const VectorTypeFor&, Containers::Array&&) instead") ImageData(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, void* data);
         #endif
 
         #ifndef MAGNUM_TARGET_GLES
@@ -295,7 +295,7 @@ template<UnsignedInt dimensions> ImageData<dimensions>::ImageData(
     _compressedFormat{format}, _size{size}, _data{std::move(data)} {}
 
 #ifndef MAGNUM_TARGET_GLES
-template<UnsignedInt dimensions> inline ImageData<dimensions>::ImageData(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): ImageData{{}, format, size, std::move(data)} {}
+template<UnsignedInt dimensions> inline ImageData<dimensions>::ImageData(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _compressed{true}, _compressedFormat{format}, _size{size}, _data{std::move(data)} {}
 #endif
 
 template<UnsignedInt dimensions> inline ImageData<dimensions>::ImageData(ImageData<dimensions>&& other) noexcept: _compressed{std::move(other._compressed)}, _size{std::move(other._size)}, _data{std::move(other._data)} {

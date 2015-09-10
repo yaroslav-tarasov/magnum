@@ -77,19 +77,25 @@ template<UnsignedInt dimensions> class ImageView {
         /** @overload
          * Similar to the above, but uses default @ref PixelStorage parameters.
          */
-        explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::ArrayView<const void> data) noexcept: ImageView{{}, format, type, size, data} {}
+        explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::ArrayView<const void> data) noexcept: _format{format}, _type{type}, _size{size}, _data{reinterpret_cast<const char*>(data.data()), data.size()} {
+            CORRADE_ASSERT(!_data || Implementation::imageDataSize(*this) <= _data.size(), "ImageView::ImageView(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+        }
 
         #ifdef MAGNUM_BUILD_DEPRECATED
         /** @copybrief ImageView(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::ArrayView<const void>)
          * @deprecated Use @ref ImageView(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::ArrayView<const void>) instead.
          */
-        explicit CORRADE_DEPRECATED("use ImageView(PixelFormat, PixelType, const VectorTypeFor&, Containers::ArrayView) instead") ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, const void* data) noexcept: ImageView{{}, format, type, size, {reinterpret_cast<const char*>(data), Implementation::imageDataSizeFor(format, type, size)}} {}
+        explicit CORRADE_DEPRECATED("use ImageView(PixelFormat, PixelType, const VectorTypeFor&, Containers::ArrayView) instead") ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, const void* data) noexcept: _format{format}, _type{type}, _size{size}, _data{reinterpret_cast<const char*>(data), Implementation::imageDataSizeFor(format, type, size)} {
+            /* Size is implicit, no assertion done */
+        }
 
         #ifndef DOXYGEN_GENERATING_OUTPUT
         /* To avoid decay of sized arrays and nullptr to const void* and
            unwanted use of deprecated function */
-        template<class T, std::size_t dataSize> explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, const T(&data)[dataSize]): ImageView{{}, format, type, size, Containers::ArrayView<const void>{data}} {}
-        explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, std::nullptr_t): ImageView{{}, format, type, size, Containers::ArrayView<const void>{nullptr}} {}
+        template<class T, std::size_t dataSize> explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, const T(&data)[dataSize]): _format{format}, _type{type}, _size{size}, _data{reinterpret_cast<const char*>(data), sizeof(T)*dataSize} {
+            CORRADE_ASSERT(!_data || Implementation::imageDataSize(*this) <= _data.size(), "ImageView::ImageView(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+        }
+        explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, std::nullptr_t): _format{format}, _type{type}, _size{size}, _data{nullptr} {}
         #endif
         #endif
 
@@ -112,7 +118,7 @@ template<UnsignedInt dimensions> class ImageView {
         /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
         constexpr
         #endif
-        explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size) noexcept: ImageView{{}, format, type, size} {}
+        explicit ImageView(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size) noexcept: _format{format}, _type{type}, _size{size}, _data{nullptr} {}
 
         /** @brief Storage of pixel data */
         PixelStorage storage() const { return _storage; }
@@ -369,9 +375,9 @@ template<UnsignedInt dimensions>
 /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
 constexpr
 #endif
-CompressedImageView<dimensions>::CompressedImageView(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, const Containers::ArrayView<const void> data) noexcept: CompressedImageView{{}, format, size, data} {}
+CompressedImageView<dimensions>::CompressedImageView(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, const Containers::ArrayView<const void> data) noexcept: _format{format}, _size{size}, _data{reinterpret_cast<const char*>(data.data()), data.size()} {}
 
-template<UnsignedInt dimensions> constexpr CompressedImageView<dimensions>::CompressedImageView(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size) noexcept: CompressedImageView{{}, format, size} {}
+template<UnsignedInt dimensions> constexpr CompressedImageView<dimensions>::CompressedImageView(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size) noexcept: _format{format}, _size{size} {}
 #endif
 
 }

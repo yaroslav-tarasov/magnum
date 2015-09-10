@@ -64,14 +64,14 @@ template<UnsignedInt dimensions> class Image {
         /** @overload
          * Similar to the above, but uses default @ref PixelStorage parameters.
          */
-        explicit Image(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): Image{{}, format, type, size, std::move(data)} {}
+        explicit Image(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
 
         #ifdef MAGNUM_BUILD_DEPRECATED
         /** @copybrief Image(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::Array<char>&&)
          * @deprecated Use @ref Image(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::Array<char>&&)
          *      instead.
          */
-        explicit CORRADE_DEPRECATED("use Image(PixelFormat, PixelType, const VectorTypeFor&, Containers::Array&&) instead") Image(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, void* data): Image{{}, format, type, size, Containers::Array<char>{reinterpret_cast<char*>(data), Implementation::imageDataSizeFor(format, type, size)}} {}
+        explicit CORRADE_DEPRECATED("use Image(PixelFormat, PixelType, const VectorTypeFor&, Containers::Array&&) instead") Image(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, void* data);
         #endif
 
         /**
@@ -92,7 +92,7 @@ template<UnsignedInt dimensions> class Image {
         /** @overload
          * Similar to the above, but uses default @ref PixelStorage parameters.
          */
-        /*implicit*/ Image(PixelFormat format, PixelType type): Image{{}, format, type} {}
+        /*implicit*/ Image(PixelFormat format, PixelType type): _format{format}, _type{type} {}
 
         /** @brief Copying is not allowed */
         Image(const Image<dimensions>&) = delete;
@@ -515,9 +515,9 @@ template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedI
     {}
 
 #ifndef MAGNUM_TARGET_GLES
-template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): CompressedImage{{}, format, size, std::move(data)} {}
+template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _format{format}, _size{size}, _data{std::move(data)} {}
 
-template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(): CompressedImage{CompressedPixelStorage{}} {}
+template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage() {}
 
 template<UnsignedInt dimensions> inline void CompressedImage<dimensions>::setData(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data) {
     setData({}, format, size, std::move(data));
