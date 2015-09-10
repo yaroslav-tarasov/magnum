@@ -263,6 +263,10 @@ template<UnsignedInt dimensions> class ImageData {
         #if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         union Storage {
             public:
+                Storage(Containers::NoInitT) {}
+                Storage(const PixelStorage& storage): _storage{storage} {}
+                Storage(const CompressedPixelStorage& storage): _compressedStorage{storage} {}
+
                 PixelStorage& storage() { return _storage; }
                 const PixelStorage& storage() const { return _storage; }
                 #ifndef MAGNUM_TARGET_GLES
