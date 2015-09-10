@@ -42,9 +42,25 @@
 namespace Magnum {
 
 struct Mesh::AttributeLayout {
-    explicit AttributeLayout(const Buffer& buffer, GLuint location, GLint size, GLenum type, AttributeKind kind, GLintptr offset, GLsizei stride, GLuint divisor) noexcept: buffer{Buffer::wrap(buffer.id())}, location{location}, size{size}, type{type}, kind{kind}, offset{offset}, stride{stride}, divisor{divisor} {}
+    /* GCC 4.5 needs explicit std::move() */
+    explicit AttributeLayout(const Buffer& buffer, GLuint location, GLint size, GLenum type, AttributeKind kind, GLintptr offset, GLsizei stride, GLuint divisor) noexcept: buffer{std::move(Buffer::wrap(buffer.id()))}, location{location}, size{size}, type{type}, kind{kind}, offset{offset}, stride{stride}, divisor{divisor} {}
 
-    explicit AttributeLayout(const AttributeLayout& other): buffer{Buffer::wrap(other.buffer.id())}, location{other.location}, size{other.size}, type{other.type}, kind{other.kind}, offset{other.offset}, stride{other.stride}, divisor{other.divisor} {}
+    /* GCC 4.5 needs explicit std::move() */
+    explicit AttributeLayout(const AttributeLayout& other): buffer{std::move(Buffer::wrap(other.buffer.id()))}, location{other.location}, size{other.size}, type{other.type}, kind{other.kind}, offset{other.offset}, stride{other.stride}, divisor{other.divisor} {}
+
+    #ifdef CORRADE_GCC45_COMPATIBILITY
+    AttributeLayout& operator=(const AttributeLayout& other) {
+        buffer = std::move(Buffer::wrap(other.buffer.id()));
+        location = other.location;
+        size = other.size;
+        type = other.type;
+        kind = other.kind;
+        offset = other.offset;
+        stride = other.stride;
+        divisor = other.divisor;
+        return *this;
+    }
+    #endif
 
     Buffer buffer;
     GLuint location;
