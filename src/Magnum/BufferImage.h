@@ -95,7 +95,7 @@ template<UnsignedInt dimensions> class BufferImage {
         #undef dataSize
         #endif
         /* To avoid ambiguous overload when passing Containers::Array */
-        template<class T> explicit BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const Containers::Array<T>& data, BufferUsage usage): _storage{storage}, _format{format}, _type{type}, _size{size}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{data.size()} {
+        template<class T> explicit BufferImage(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const Containers::Array<T>& data, BufferUsage usage): _format{format}, _type{type}, _size{size}, _buffer{Buffer::TargetHint::PixelPack}, _dataSize{data.size()} {
             CORRADE_ASSERT(Implementation::imageDataSize(*this) <= data.size(), "BufferImage::BufferImage(): bad image data size, got" << data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
             _buffer.setData(data, usage);
         }
