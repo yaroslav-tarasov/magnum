@@ -366,7 +366,8 @@ class MAGNUM_EXPORT CompressedPixelStorage: public PixelStorage {
 };
 #endif
 
-constexpr PixelStorage::PixelStorage() noexcept:
+/* GCC 4.5 doesn't have constexpr, thus needs inline */
+constexpr inline PixelStorage::PixelStorage() noexcept:
     #if !(defined(MAGNUM_TARGET_GLES2) && defined(MAGNUM_TARGET_WEBGL))
     _rowLength{0},
     #endif

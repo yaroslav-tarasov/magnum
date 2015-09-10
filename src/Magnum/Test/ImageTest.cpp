@@ -121,7 +121,7 @@ void ImageTest::constructCopyCompressed() {
         #ifdef CORRADE_MSVC2013_COMPATIBILITY
         CORRADE_EXPECT_FAIL("std::is_constructible is buggy on MSVC 2013.");
         #endif
-        CORRADE_VERIFY(!(std::is_constructible<CompressedImage2D, const CompressedImage2D&>{}));
+        CORRADE_VERIFY(!(std::is_constructible<CompressedImage2D, const CompressedImage2D&>::value));
     }
     /* GCC 4.6 doesn't have std::is_assignable */
     #ifndef CORRADE_GCC46_COMPATIBILITY
@@ -129,7 +129,7 @@ void ImageTest::constructCopyCompressed() {
         #ifdef CORRADE_MSVC2013_COMPATIBILITY
         CORRADE_EXPECT_FAIL("std::is_assignable is buggy on MSVC 2013.");
         #endif
-        CORRADE_VERIFY(!(std::is_assignable<CompressedImage2D, const CompressedImage2D&>{}));
+        CORRADE_VERIFY(!(std::is_assignable<CompressedImage2D, const CompressedImage2D&>::value));
     }
     #endif
     #else
