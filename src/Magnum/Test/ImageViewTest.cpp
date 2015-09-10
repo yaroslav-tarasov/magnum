@@ -65,7 +65,11 @@ void ImageViewTest::construct() {
 void ImageViewTest::constructNullptr() {
     /* Just verify that it won't assert when passing nullptr array -- useful
        e.g. for old-style texture allocation using setImage() */
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     ImageView2D a{PixelFormat::RGBA, PixelType::UnsignedByte, {256, 128}, nullptr};
+    #else
+    ImageView2D a{PixelFormat::RGBA, PixelType::UnsignedByte, {256, 128}, Containers::ArrayView<const void>{}};
+    #endif
     CORRADE_COMPARE(a.size(), (Vector2i{256, 128}));
 }
 

@@ -87,7 +87,11 @@ TgaImageConverterTest::TgaImageConverterTest() {
 }
 
 void TgaImageConverterTest::wrongFormat() {
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     ImageView2D image(PixelFormat::RG, PixelType::UnsignedByte, {}, nullptr);
+    #else
+    ImageView2D image(PixelFormat::RG, PixelType::UnsignedByte, {}, Containers::ArrayView<const void>{});
+    #endif
 
     std::ostringstream out;
     Error::setOutput(&out);
@@ -98,7 +102,11 @@ void TgaImageConverterTest::wrongFormat() {
 }
 
 void TgaImageConverterTest::wrongType() {
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     ImageView2D image(PixelFormat::Red, PixelType::Float, {}, nullptr);
+    #else
+    ImageView2D image(PixelFormat::Red, PixelType::Float, {}, Containers::ArrayView<const void>{});
+    #endif
 
     std::ostringstream out;
     Error::setOutput(&out);
