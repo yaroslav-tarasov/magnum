@@ -175,7 +175,11 @@ void ImageTest::constructMoveCompressed() {
     CompressedImage2D a{CompressedPixelFormat::RGBAS3tcDxt1, {4, 4}, Containers::Array<char>{data, 8}};
     CompressedImage2D b{std::move(a)};
 
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_COMPARE(a.data(), nullptr);
+    #else
+    CORRADE_VERIFY(a.data() == nullptr);
+    #endif
     CORRADE_COMPARE(a.size(), Vector2i());
 
     #ifndef MAGNUM_TARGET_GLES
@@ -317,7 +321,11 @@ void ImageTest::releaseCompressed() {
     const char* const pointer = a.release().release();
 
     CORRADE_COMPARE(pointer, data);
+    #ifndef CORRADE_GCC45_COMPATIBILITY
     CORRADE_COMPARE(a.data(), nullptr);
+    #else
+    CORRADE_VERIFY(a.data() == nullptr);
+    #endif
     CORRADE_COMPARE(a.size(), Vector2i());
 }
 

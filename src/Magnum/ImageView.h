@@ -111,7 +111,7 @@ template<UnsignedInt dimensions> class ImageView {
          * Data pointer is set to `nullptr`, call @ref setData() to fill the
          * image with data.
          */
-        constexpr explicit ImageView(PixelStorage storage, PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size) noexcept: _storage{storage}, _format{format}, _type{type}, _size{size}, _data{nullptr} {}
+        constexpr explicit ImageView(PixelStorage storage, PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size) noexcept: _storage{storage}, _format{format}, _type{type}, _size{size} {}
 
         /** @overload
          * Similar to the above, but uses default @ref PixelStorage parameters.

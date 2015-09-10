@@ -64,7 +64,7 @@ auto TgaImporter::doFeatures() const -> Features { return Feature::OpenData; }
 
 bool TgaImporter::doIsOpened() const { return _in; }
 
-void TgaImporter::doClose() { _in = nullptr; }
+void TgaImporter::doClose() { _in = {}; }
 
 void TgaImporter::doOpenData(const Containers::ArrayView<const char> data) {
     _in = Containers::Array<char>{data.size()};
