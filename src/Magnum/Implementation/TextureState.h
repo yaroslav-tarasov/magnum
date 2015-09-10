@@ -34,7 +34,7 @@
 #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 #include "Magnum/BufferTextureFormat.h"
 #endif
-#include "Magnum/ColorFormat.h"
+#include "Magnum/PixelFormat.h"
 #include "Magnum/TextureFormat.h"
 #endif
 

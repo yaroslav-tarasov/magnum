@@ -36,6 +36,10 @@
 #include "Magnum/visibility.h"
 #include "Magnum/Math/Vector3.h"
 
+#ifdef CORRADE_GCC45_COMPATIBILITY
+#include "Magnum/PixelFormat.h"
+#endif
+
 namespace Magnum {
 
 namespace Implementation { struct RendererState; }
