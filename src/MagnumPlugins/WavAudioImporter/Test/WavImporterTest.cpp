@@ -47,7 +47,7 @@ class WavImporterTest: public TestSuite::Tester {
 };
 
 WavImporterTest::WavImporterTest() {
-    addTests({&WavImporterTest::wrongSize,
+    addTests<WavImporterTest>({&WavImporterTest::wrongSize,
               &WavImporterTest::wrongSignature,
               &WavImporterTest::unsupportedFormat,
               &WavImporterTest::unsupportedChannelCount,

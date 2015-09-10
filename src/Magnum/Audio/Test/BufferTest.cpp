@@ -37,7 +37,7 @@ struct BufferTest: TestSuite::Tester {
 };
 
 BufferTest::BufferTest() {
-    addTests({&BufferTest::debugFormat});
+    addTests<BufferTest>({&BufferTest::debugFormat});
 }
 
 void BufferTest::debugFormat() {

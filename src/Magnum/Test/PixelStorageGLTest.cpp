@@ -58,7 +58,7 @@ struct PixelStorageGLTest: AbstractOpenGLTester {
 };
 
 PixelStorageGLTest::PixelStorageGLTest() {
-    addTests({&PixelStorageGLTest::unpack2D,
+    addTests<PixelStorageGLTest>({&PixelStorageGLTest::unpack2D,
               &PixelStorageGLTest::pack2D,
               #ifndef MAGNUM_TARGET_GLES2
               &PixelStorageGLTest::unpack3D,

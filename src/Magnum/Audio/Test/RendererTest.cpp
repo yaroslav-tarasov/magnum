@@ -37,7 +37,7 @@ struct RendererTest: TestSuite::Tester {
 };
 
 RendererTest::RendererTest() {
-    addTests({&RendererTest::debugError});
+    addTests<RendererTest>({&RendererTest::debugError});
 }
 
 void RendererTest::debugError() {

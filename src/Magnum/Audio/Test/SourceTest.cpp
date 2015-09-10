@@ -37,7 +37,7 @@ struct SourceTest: TestSuite::Tester {
 };
 
 SourceTest::SourceTest() {
-    addTests({&SourceTest::debugState});
+    addTests<SourceTest>({&SourceTest::debugState});
 }
 
 void SourceTest::debugState() {
