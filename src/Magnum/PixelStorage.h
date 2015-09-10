@@ -275,7 +275,13 @@ class MAGNUM_EXPORT CompressedPixelStorage: public PixelStorage {
         #ifndef CORRADE_MSVC2015_COMPATIBILITY /* What am I doing wrong? */
         constexpr
         #endif
-        /*implicit*/ CompressedPixelStorage() noexcept: _blockSize{0}, _blockDataSize{0} {}
+        /*implicit*/ CompressedPixelStorage() noexcept:
+            #ifndef CORRADE_GCC46_COMPATIBILITY
+            _blockSize{0},
+            #else
+            _blockSize{0, 0, 0}, /* Avoid the non-constexpr version */
+            #endif
+            _blockDataSize{0} {}
 
         /** @brief Compressed block size */
         constexpr Vector3i compressedBlockSize() const { return _blockSize; }
@@ -363,7 +369,11 @@ constexpr PixelStorage::PixelStorage() noexcept:
     #ifndef MAGNUM_TARGET_GLES2
     _imageHeight{0},
     #endif
+    #ifndef CORRADE_GCC46_COMPATIBILITY
     _skip{0},
+    #else
+    _skip{0, 0, 0}, /* Avoid the non-constexpr version */
+    #endif
     #ifndef MAGNUM_TARGET_GLES
     _swapBytes{false},
     #endif
