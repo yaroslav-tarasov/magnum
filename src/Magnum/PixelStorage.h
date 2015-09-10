@@ -455,7 +455,8 @@ namespace Implementation {
         std::size_t blockDataSize;
         std::tie(offset, blockCount, blockDataSize) = image.storage().dataProperties(Vector3i::pad(size, 1));
 
-        const auto realBlockCount = Math::Vector3<std::size_t>{(Vector3i::pad(size, 1) + image.storage().compressedBlockSize() - Vector3i{1})/image.storage().compressedBlockSize()};
+        /* GCC 4.5 can't handle {} here */
+        const auto realBlockCount = Math::Vector3<std::size_t>((Vector3i::pad(size, 1) + image.storage().compressedBlockSize() - Vector3i{1})/image.storage().compressedBlockSize());
 
         return offset + (blockCount.product() - (blockCount.x() - realBlockCount.x()) - (blockCount.y() - realBlockCount.y())*blockCount.x())*blockDataSize;
     }
