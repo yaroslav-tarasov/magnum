@@ -89,16 +89,17 @@ void PixelStorageTest::dataProperties() {
     PixelStorage storage;
     storage.setAlignment(1);
 
+    /* GCC 4.6 needs explicit typing */
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::RGBA, PixelType::UnsignedByte, Vector3i{0}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{0, {0, 0, 0}, 4}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{0, Vector3st{0, 0, 0}, 4}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::RGBA, PixelType::UnsignedByte, Vector3i{1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{0, {4, 1, 1}, 4}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{0, Vector3st{4, 1, 1}, 4}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {8, 2, 1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{0, {8, 2, 1}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{0, Vector3st{8, 2, 1}, 1}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {2, 4, 1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{0, {2, 4, 1}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{0, Vector3st{2, 4, 1}, 1}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {2, 4, 6}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{0, {2, 4, 6}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{0, Vector3st{2, 4, 6}, 1}));
 }
 
 void PixelStorageTest::dataPropertiesAlignment() {
@@ -106,16 +107,17 @@ void PixelStorageTest::dataPropertiesAlignment() {
     storage.setAlignment(8)
         .setSkip({3, 2, 1});
 
+    /* GCC 4.6 needs explicit typing */
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::RGBA, PixelType::UnsignedByte, Vector3i{0}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4, {0, 0, 0}, 4}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4, Vector3st{0, 0, 0}, 4}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::RGBA, PixelType::UnsignedByte, Vector3i{1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{8 + 16 + 3*4, {8, 1, 1}, 4}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{8 + 16 + 3*4, Vector3st{8, 1, 1}, 4}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {8, 2, 1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{16 + 16 + 3, {8, 2, 1}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{16 + 16 + 3, Vector3st{8, 2, 1}, 1}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {2, 4, 1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{32 + 16 + 3, {8, 4, 1}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{32 + 16 + 3, Vector3st{8, 4, 1}, 1}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {2, 4, 6}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{32 + 16 + 3, {8, 4, 6}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{32 + 16 + 3, Vector3st{8, 4, 6}, 1}));
 }
 
 void PixelStorageTest::dataPropertiesRowLength() {
@@ -124,16 +126,17 @@ void PixelStorageTest::dataPropertiesRowLength() {
         .setRowLength(15)
         .setSkip({3, 7, 0});
 
+    /* GCC 4.6 needs explicit typing */
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::RGBA, PixelType::UnsignedByte, Vector3i{0}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4 + 7*15*4, {0, 0, 0}, 4}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4 + 7*15*4, Vector3st{0, 0, 0}, 4}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::RGBA, PixelType::UnsignedByte, Vector3i{1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4 + 7*15*4, {60, 1, 1}, 4}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4 + 7*15*4, Vector3st{60, 1, 1}, 4}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {4, 2, 1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*16, {16, 2, 1}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*16, Vector3st{16, 2, 1}, 1}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {2, 4, 1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*16, {16, 4, 1}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*16, Vector3st{16, 4, 1}, 1}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {2, 4, 6}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*16, {16, 4, 6}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*16, Vector3st{16, 4, 6}, 1}));
 }
 
 #ifndef MAGNUM_TARGET_GLES2
@@ -143,16 +146,17 @@ void PixelStorageTest::dataPropertiesImageHeight() {
         .setImageHeight(128)
         .setSkip({3, 7, 2});
 
+    /* GCC 4.6 needs explicit typing */
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::RGBA, PixelType::UnsignedByte, Vector3i{0}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4, {0, 0, 0}, 4}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4, Vector3st{0, 0, 0}, 4}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::RGBA, PixelType::UnsignedByte, Vector3i{1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4 + 7*1*4 + 2*128*1*4, {4, 128, 1}, 4}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3*4 + 7*1*4 + 2*128*1*4, Vector3st{4, 128, 1}, 4}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {4, 2, 1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*1*4 + 2*128*4, {4, 128, 1}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*1*4 + 2*128*4, Vector3st{4, 128, 1}, 1}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {2, 4, 1}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*1*2 + 2*128*2, {2, 128, 1}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*1*2 + 2*128*2, Vector3st{2, 128, 1}, 1}));
     CORRADE_COMPARE(storage.dataProperties(PixelFormat::Red, PixelType::UnsignedByte, {2, 4, 6}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*1*2 + 2*128*2, {2, 128, 6}, 1}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{3 + 7*1*2 + 2*128*2, Vector3st{2, 128, 6}, 1}));
 }
 #endif
 
@@ -181,8 +185,9 @@ void PixelStorageTest::dataPropertiesCompressed() {
     storage.setCompressedBlockSize({3, 4, 5})
         .setCompressedBlockDataSize(16);
 
+    /* GCC 4.6 needs explicit typing */
     CORRADE_COMPARE(storage.dataProperties({2, 8, 11}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{0, {1, 2, 3}, 16}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{0, Vector3st{1, 2, 3}, 16}));
 }
 
 void PixelStorageTest::dataPropertiesCompressedRowLength() {
@@ -192,8 +197,9 @@ void PixelStorageTest::dataPropertiesCompressedRowLength() {
         .setRowLength(12)
         .setSkip({5, 8, 0});
 
+    /* GCC 4.6 needs explicit typing */
     CORRADE_COMPARE(storage.dataProperties({2, 8, 11}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{(2 + 8)*9, {4, 2, 3}, 9}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{(2 + 8)*9, Vector3st{4, 2, 3}, 9}));
 }
 
 void PixelStorageTest::dataPropertiesCompressedImageHeight() {
@@ -203,8 +209,9 @@ void PixelStorageTest::dataPropertiesCompressedImageHeight() {
         .setImageHeight(12)
         .setSkip({5, 8, 11});
 
+    /* GCC 4.6 needs explicit typing */
     CORRADE_COMPARE(storage.dataProperties({2, 8, 11}),
-        (std::tuple<std::size_t, Vector3st, std::size_t>{(2 + 2 + 9)*16, {1, 3, 3}, 16}));
+        (std::tuple<std::size_t, Vector3st, std::size_t>{(2 + 2 + 9)*16, Vector3st{1, 3, 3}, 16}));
 }
 
 void PixelStorageTest::dataSizeCompressed() {
