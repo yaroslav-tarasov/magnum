@@ -260,12 +260,52 @@ template<UnsignedInt dimensions> class ImageData {
 
     private:
         bool _compressed;
-        union {
-            PixelStorage _storage;
-            #ifndef MAGNUM_TARGET_GLES
-            CompressedPixelStorage _compressedStorage;
-            #endif
-        };
+        #ifndef CORRADE_GCC45_COMPATIBILITY
+        union Storage {
+            public:
+                PixelStorage& storage() { return _storage; }
+                const PixelStorage& storage() const { return _storage; }
+                #ifndef MAGNUM_TARGET_GLES
+                CompressedPixelStorage& compressedStorage() { return _compressedStorage; }
+                const CompressedPixelStorage& compressedStorage() const { return _compressedStorage; }
+                #endif
+
+            private:
+                PixelStorage _storage;
+                #ifndef MAGNUM_TARGET_GLES
+                CompressedPixelStorage _compressedStorage;
+                #endif
+        } _s;
+        #else
+        struct Storage {
+            public:
+                Storage(Containers::NoInitT) {}
+
+                Storage(const PixelStorage& storage) {
+                    new(_data) PixelStorage(storage);
+                }
+
+                #ifndef MAGNUM_TARGET_GLES
+                Storage(const CompressedPixelStorage& storage) {
+                    new(_data) CompressedPixelStorage(storage);
+                }
+                #endif
+
+                PixelStorage& storage() { return *reinterpret_cast<PixelStorage*>(_data); }
+                const PixelStorage& storage() const { return *reinterpret_cast<const PixelStorage*>(_data); }
+                #ifndef MAGNUM_TARGET_GLES
+                CompressedPixelStorage& compressedStorage() { return *reinterpret_cast<CompressedPixelStorage*>(_data); }
+                const CompressedPixelStorage& compressedStorage() const { return *reinterpret_cast<const CompressedPixelStorage*>(_data); }
+                #endif
+
+            private:
+                #ifndef MAGNUM_TARGET_GLES
+                char _data[sizeof(CompressedPixelStorage)];
+                #else
+                char _data[sizeof(PixelStorage)];
+                #endif
+        } _s;
+        #endif
         union {
             PixelFormat _format;
             CompressedPixelFormat _compressedFormat;
@@ -290,23 +330,24 @@ template<UnsignedInt dimensions> ImageData<dimensions>::ImageData(
     #endif
     const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _compressed{true},
     #ifndef MAGNUM_TARGET_GLES
-    _compressedStorage{storage},
+    _s{storage},
     #endif
     _compressedFormat{format}, _size{size}, _data{std::move(data)} {}
 
 #ifndef MAGNUM_TARGET_GLES
-template<UnsignedInt dimensions> inline ImageData<dimensions>::ImageData(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _compressed{true}, _compressedFormat{format}, _size{size}, _data{std::move(data)} {}
+/* GCC 4.5 can't handle {} here */
+template<UnsignedInt dimensions> inline ImageData<dimensions>::ImageData(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _compressed{true}, _s(CompressedPixelStorage()), _compressedFormat{format}, _size{size}, _data{std::move(data)} {}
 #endif
 
-template<UnsignedInt dimensions> inline ImageData<dimensions>::ImageData(ImageData<dimensions>&& other) noexcept: _compressed{std::move(other._compressed)}, _size{std::move(other._size)}, _data{std::move(other._data)} {
+template<UnsignedInt dimensions> inline ImageData<dimensions>::ImageData(ImageData<dimensions>&& other) noexcept: _compressed{std::move(other._compressed)}, _s{Containers::NoInit}, _size{std::move(other._size)}, _data{std::move(other._data)} {
     if(_compressed) {
         #ifndef MAGNUM_TARGET_GLES
-        new(&_compressedStorage) CompressedPixelStorage{std::move(other._compressedStorage)};
+        new(&_s.compressedStorage()) CompressedPixelStorage{std::move(other._s.compressedStorage())};
         #endif
         _compressedFormat = std::move(other._compressedFormat);
     }
     else {
-        new(&_storage) PixelStorage{std::move(other._storage)};
+        new(&_s.storage()) PixelStorage{std::move(other._s.storage())};
         _format = std::move(other._format);
         _type = std::move(other._type);
     }
@@ -319,12 +360,12 @@ template<UnsignedInt dimensions> inline ImageData<dimensions>& ImageData<dimensi
     swap(_compressed, other._compressed);
     if(_compressed) {
         #ifndef MAGNUM_TARGET_GLES
-        swap(_compressedStorage, other._compressedStorage);
+        swap(_s.compressedStorage(), other._s.compressedStorage());
         #endif
         swap(_compressedFormat, other._compressedFormat);
     }
     else {
-        swap(_storage, other._storage);
+        swap(_s.storage(), other._s.storage());
         swap(_format, other._format);
     }
     swap(_type, other._type);
