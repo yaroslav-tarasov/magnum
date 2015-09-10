@@ -260,7 +260,7 @@ template<UnsignedInt dimensions> class ImageData {
 
     private:
         bool _compressed;
-        #ifndef CORRADE_GCC45_COMPATIBILITY
+        #if !defined(CORRADE_GCC45_COMPATIBILITY) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
         union Storage {
             public:
                 PixelStorage& storage() { return _storage; }
