@@ -27,29 +27,45 @@
 
 namespace Magnum { namespace Trade {
 
-template<UnsignedInt dimensions> ColorFormat ImageData<dimensions>::format() const {
+template<UnsignedInt dimensions> ImageData<dimensions>::ImageData(const PixelStorage storage, const PixelFormat format, const PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _compressed{false}, _storage{storage}, _format{format}, _type{type}, _size{size}, _data{std::move(data)} {
+    CORRADE_ASSERT(Implementation::imageDataSize(*this) <= _data.size(), "Trade::ImageDat::ImageData(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+}
+
+template<UnsignedInt dimensions> PixelStorage ImageData<dimensions>::storage() const {
+    CORRADE_ASSERT(!_compressed, "Trade::ImageData::storage(): the image is compressed", {});
+    return _storage;
+}
+
+template<UnsignedInt dimensions> PixelFormat ImageData<dimensions>::format() const {
     CORRADE_ASSERT(!_compressed, "Trade::ImageData::format(): the image is compressed", {});
     return _format;
 }
 
-template<UnsignedInt dimensions> ColorType ImageData<dimensions>::type() const {
+template<UnsignedInt dimensions> PixelType ImageData<dimensions>::type() const {
     CORRADE_ASSERT(!_compressed, "Trade::ImageData::type(): the image is compressed", {});
     return _type;
 }
 
-template<UnsignedInt dimensions> CompressedColorFormat ImageData<dimensions>::compressedFormat() const {
-    CORRADE_ASSERT(_compressed, "Trade::ImageData::format(): the image is not compressed", {});
+#ifndef MAGNUM_TARGET_GLES
+template<UnsignedInt dimensions> CompressedPixelStorage ImageData<dimensions>::compressedStorage() const {
+    CORRADE_ASSERT(_compressed, "Trade::ImageData::compressedStorage(): the image is not compressed", {});
+    return _compressedStorage;
+}
+#endif
+
+template<UnsignedInt dimensions> CompressedPixelFormat ImageData<dimensions>::compressedFormat() const {
+    CORRADE_ASSERT(_compressed, "Trade::ImageData::compressedFormat(): the image is not compressed", {});
     return _compressedFormat;
 }
 
 template<UnsignedInt dimensions> std::size_t ImageData<dimensions>::pixelSize() const {
     CORRADE_ASSERT(!_compressed, "Trade::ImageData::pixelSize(): the image is compressed", {});
-    return Implementation::imagePixelSize(_format, _type);
+    return PixelStorage::pixelSize(_format, _type);
 }
 
-template<UnsignedInt dimensions> std::size_t ImageData<dimensions>::dataSize(const typename DimensionTraits<Dimensions, Int>::VectorType& size) const {
-    CORRADE_ASSERT(!_compressed, "Trade::ImageData::dataSize(): the image is compressed", {});
-    return Implementation::imageDataSize<dimensions>(_format, _type, size);
+template<UnsignedInt dimensions> std::tuple<std::size_t, typename DimensionTraits<dimensions, std::size_t>::VectorType, std::size_t> ImageData<dimensions>::dataProperties() const {
+    CORRADE_ASSERT(!_compressed, "Trade::ImageData::dataProperties(): the image is compressed", {});
+    return Implementation::imageDataProperties<dimensions>(*this);
 }
 
 template<UnsignedInt dimensions> ImageData<dimensions>::operator ImageView<dimensions>()
@@ -59,8 +75,8 @@ const &
 const
 #endif
 {
-    CORRADE_ASSERT(!_compressed, "Trade::ImageData::type(): the image is compressed", (ImageView<dimensions>{_format, _type, _size}));
-    return ImageView<dimensions>{_format, _type, _size, _data};
+    CORRADE_ASSERT(!_compressed, "Trade::ImageData::type(): the image is compressed", (ImageView<dimensions>{_storage, _format, _type, _size}));
+    return ImageView<dimensions>{_storage, _format, _type, _size, _data};
 }
 
 template<UnsignedInt dimensions> ImageData<dimensions>::operator CompressedImageView<dimensions>()
@@ -70,8 +86,16 @@ const &
 const
 #endif
 {
+    #ifndef MAGNUM_TARGET_GLES
+    CORRADE_ASSERT(_compressed, "Trade::ImageData::type(): the image is not compressed", (CompressedImageView<dimensions>{_compressedStorage, _compressedFormat, _size}));
+    #else
     CORRADE_ASSERT(_compressed, "Trade::ImageData::type(): the image is not compressed", (CompressedImageView<dimensions>{_compressedFormat, _size}));
-    return CompressedImageView<dimensions>{_compressedFormat, _size, _data};
+    #endif
+    return CompressedImageView<dimensions>{
+        #ifndef MAGNUM_TARGET_GLES
+        _compressedStorage,
+        #endif
+        _compressedFormat, _size, _data};
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT

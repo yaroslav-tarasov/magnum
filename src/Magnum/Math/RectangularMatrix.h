@@ -57,9 +57,9 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
 
     template<std::size_t, std::size_t, class> friend class RectangularMatrix;
 
-    #ifdef CORRADE_GCC46_COMPATIBILITY
-    /* So it can call internal constexpr NoInit constructor */
-    template<std::size_t, class> friend class Matrix;
+    #if defined(CORRADE_MSVC2015_COMPATIBILITY) || defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Delegating constructor workarounds */
+    friend class Matrix<cols, T>;
     #endif
 
     public:
@@ -177,7 +177,12 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
          * @endcode
          */
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class U> constexpr explicit RectangularMatrix(const RectangularMatrix<cols, rows, U>& other): RectangularMatrix(typename Implementation::GenerateSequence<cols>::Type(), other) {}
+        template<class U>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        explicit RectangularMatrix(const RectangularMatrix<cols, rows, U>& other): RectangularMatrix(typename Implementation::GenerateSequence<cols>::Type(), other) {}
         #else
         template<class U> explicit RectangularMatrix(const RectangularMatrix<cols, rows, U>& other) {
             *this = RectangularMatrix(typename Implementation::GenerateSequence<cols>::Type(), other);
@@ -186,7 +191,12 @@ template<std::size_t cols, std::size_t rows, class T> class RectangularMatrix {
 
         /** @brief Construct matrix from external representation */
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class U, class V = decltype(Implementation::RectangularMatrixConverter<cols, rows, T, U>::from(std::declval<U>()))> constexpr explicit RectangularMatrix(const U& other): RectangularMatrix(Implementation::RectangularMatrixConverter<cols, rows, T, U>::from(other)) {}
+        template<class U, class V = decltype(Implementation::RectangularMatrixConverter<cols, rows, T, U>::from(std::declval<U>()))>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        explicit RectangularMatrix(const U& other): RectangularMatrix(Implementation::RectangularMatrixConverter<cols, rows, T, U>::from(other)) {}
         #else
         #ifndef CORRADE_GCC44_COMPATIBILITY
         template<class U, class V = decltype(Implementation::RectangularMatrixConverter<cols, rows, T, U>::from(std::declval<U>()))> explicit RectangularMatrix(const U& other)
@@ -483,7 +493,7 @@ Convenience alternative to `RectangularMatrix<2, 3, T>`. See
     instead.
 @see @ref Magnum::Matrix2x3, @ref Magnum::Matrix2x3d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix2x3 = RectangularMatrix<2, 3, T>;
 #endif
 
@@ -496,7 +506,7 @@ Convenience alternative to `RectangularMatrix<3, 2, T>`. See
     instead.
 @see @ref Magnum::Matrix3x2, @ref Magnum::Matrix3x2d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix3x2 = RectangularMatrix<3, 2, T>;
 #endif
 
@@ -509,7 +519,7 @@ Convenience alternative to `RectangularMatrix<2, 4, T>`. See
     instead.
 @see @ref Magnum::Matrix2x4, @ref Magnum::Matrix2x4d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix2x4 = RectangularMatrix<2, 4, T>;
 #endif
 
@@ -522,7 +532,7 @@ Convenience alternative to `RectangularMatrix<4, 2, T>`. See
     instead.
 @see @ref Magnum::Matrix4x2, @ref Magnum::Matrix4x2d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix4x2 = RectangularMatrix<4, 2, T>;
 #endif
 
@@ -535,7 +545,7 @@ Convenience alternative to `RectangularMatrix<3, 4, T>`. See
     instead.
 @see @ref Magnum::Matrix3x4, @ref Magnum::Matrix3x4d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix3x4 = RectangularMatrix<3, 4, T>;
 #endif
 
@@ -548,7 +558,7 @@ Convenience alternative to `RectangularMatrix<4, 3, T>`. See
     instead.
 @see @ref Magnum::Matrix4x3, @ref Magnum::Matrix4x3d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix4x3 = RectangularMatrix<4, 3, T>;
 #endif
 #endif
@@ -827,7 +837,7 @@ template<std::size_t cols, std::size_t rows, class T> struct ConfigurationValue<
     }
 };
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
+#if !defined(DOXYGEN_GENERATING_OUTPUT) && !defined(__MINGW32__)
 /* Square matrices */
 extern template struct MAGNUM_EXPORT ConfigurationValue<Magnum::Math::RectangularMatrix<2, 2, Magnum::Float>>;
 extern template struct MAGNUM_EXPORT ConfigurationValue<Magnum::Math::RectangularMatrix<3, 3, Magnum::Float>>;

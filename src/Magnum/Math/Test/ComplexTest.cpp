@@ -192,15 +192,20 @@ void ComplexTest::convert() {
 
     /* GCC 5.1 fills the result with zeros instead of properly calling
        delegated copy constructor if using constexpr. Reported here:
-       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
-    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
-    constexpr /* Not constexpr under GCC < 4.7 */
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450
+       Not constexpr under GCC < 4.7
+       MSVC 2015: Can't use delegating constructors with constexpr:
+       https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    constexpr
     #endif
     Complex c(a);
     CORRADE_COMPARE(c, b);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Why can't be conversion constexpr under MSVC? */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Cmpl d(b);
     CORRADE_COMPARE(d.re, a.re);

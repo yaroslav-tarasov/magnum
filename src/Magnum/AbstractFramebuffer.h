@@ -320,7 +320,8 @@ class MAGNUM_EXPORT AbstractFramebuffer {
          * @param image             Image where to put the data
          *
          * Image parameters like format and type of pixel data are taken from
-         * given image.
+         * given image. The storage is not reallocated if it is large enough to
+         * contain the new data.
          *
          * If @extension{ARB,robustness} is available, the operation is
          * protected from buffer overflow.
@@ -333,7 +334,7 @@ class MAGNUM_EXPORT AbstractFramebuffer {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * Image2D image = framebuffer.read(framebuffer.viewport(), {ColorFormat::RGBA, ColorType::UnsignedByte});
+         * Image2D image = framebuffer.read(framebuffer.viewport(), {PixelFormat::RGBA, PixelType::UnsignedByte});
          * @endcode
          */
         Image2D read(const Range2Di& rectangle, Image2D&& image);
@@ -356,7 +357,8 @@ class MAGNUM_EXPORT AbstractFramebuffer {
          * @param usage             Buffer usage
          *
          * See @ref read(const Vector2i&, const Vector2i&, Image2D&) for more
-         * information.
+         * information. The storage is not reallocated if it is large enough to
+         * contain the new data, which means that @p usage might get ignored.
          * @requires_gles30 Pixel buffer objects are not available in OpenGL ES
          *      2.0.
          * @requires_webgl20 Pixel buffer objects are not available in WebGL
@@ -370,7 +372,7 @@ class MAGNUM_EXPORT AbstractFramebuffer {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * BufferImage2D image = framebuffer.read(framebuffer.viewport(), {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+         * BufferImage2D image = framebuffer.read(framebuffer.viewport(), {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
          * @endcode
          */
         BufferImage2D read(const Range2Di& rectangle, BufferImage2D&& image, BufferUsage usage);
@@ -461,9 +463,9 @@ class MAGNUM_EXPORT AbstractFramebuffer {
         void MAGNUM_LOCAL readBufferImplementationDSAEXT(GLenum buffer);
         #endif
 
-        static void MAGNUM_LOCAL readImplementationDefault(const Range2Di& rectangle, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
+        static void MAGNUM_LOCAL readImplementationDefault(const Range2Di& rectangle, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
         #ifndef MAGNUM_TARGET_WEBGL
-        static void MAGNUM_LOCAL readImplementationRobustness(const Range2Di& rectangle, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
+        static void MAGNUM_LOCAL readImplementationRobustness(const Range2Di& rectangle, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
         #endif
 
         void MAGNUM_LOCAL invalidateImplementationNoOp(GLsizei, const GLenum*);

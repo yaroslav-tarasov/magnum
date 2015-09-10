@@ -153,7 +153,14 @@ template<std::size_t size, class T> class Matrix: public RectangularMatrix<size,
          * // integral == {{1, 2}, {-15, 7}}
          * @endcode
          */
-        template<class U> constexpr explicit Matrix(const RectangularMatrix<size, size, U>& other): RectangularMatrix<size, size, T>(other) {}
+        template<class U> constexpr explicit Matrix(const RectangularMatrix<size, size, U>& other):
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY
+            RectangularMatrix<size, size, T>(other)
+            #else
+            /* Avoid using non-constexpr version */
+            RectangularMatrix<size, size, T>(typename Implementation::GenerateSequence<size>::Type(), other)
+            #endif
+        {}
 
         /** @brief Construct matrix from external representation */
         #ifndef CORRADE_GCC44_COMPATIBILITY
@@ -255,7 +262,7 @@ information.
 @note Not available on GCC < 4.7. Use <tt>%Matrix<2, T></tt> instead.
 @see @ref Magnum::Matrix2x2, @ref Magnum::Matrix2x2d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix2x2 = Matrix<2, T>;
 #endif
 
@@ -268,7 +275,7 @@ additional functions for transformations in 2D.
 @note Not available on GCC < 4.7. Use <tt>%Matrix<3, T></tt> instead.
 @see @ref Magnum::Matrix3x3, @ref Magnum::Matrix3x3d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix3x3 = Matrix<3, T>;
 #endif
 
@@ -281,7 +288,7 @@ additional functions for transformations in 3D.
 @note Not available on GCC < 4.7. Use <tt>%Matrix<3, T></tt> instead.
 @see @ref Magnum::Matrix4x4, @ref Magnum::Matrix4x4d
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Matrix4x4 = Matrix<4, T>;
 #endif
 #endif

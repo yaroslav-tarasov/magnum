@@ -133,12 +133,7 @@ in order to preserve the data. If running on OpenGL ES or extension
 functions do nothing.
 
 @todo all texture [level] parameters, global texture parameters
-@todo Add glPixelStore encapsulation
 @todo Texture copying
-@todo Move constructor/assignment - how to avoid creation of empty texture and
-    then deleting it immediately?
-@todo ES2 - proper support for pixel unpack buffer when extension is in headers
-@todo `GL_NUM_COMPRESSED_TEXTURE_FORMATS` when compressed textures are implemented
 @todo `GL_MAX_SAMPLE_MASK_WORDS` when @extension{ARB,texture_multisample} is done
 @todo Query for immutable levels (@extension{ARB,ES3_compatibility})
 */
@@ -533,10 +528,10 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
         #endif
 
         #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL getImageImplementationDefault(GLint level, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
-        void MAGNUM_LOCAL getImageImplementationDSA(GLint level, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
-        void MAGNUM_LOCAL getImageImplementationDSAEXT(GLint level, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
-        void MAGNUM_LOCAL getImageImplementationRobustness(GLint level, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
+        void MAGNUM_LOCAL getImageImplementationDefault(GLint level, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
+        void MAGNUM_LOCAL getImageImplementationDSA(GLint level, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
+        void MAGNUM_LOCAL getImageImplementationDSAEXT(GLint level, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
+        void MAGNUM_LOCAL getImageImplementationRobustness(GLint level, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
 
         void MAGNUM_LOCAL getCompressedImageImplementationDefault(GLint level, std::size_t dataSize, GLvoid* data);
         void MAGNUM_LOCAL getCompressedImageImplementationDSA(GLint level, std::size_t dataSize, GLvoid* data);
@@ -545,33 +540,33 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
         #endif
 
         #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL subImageImplementationDefault(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL subImageImplementationDSA(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL subImageImplementationDSAEXT(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, ColorFormat format, ColorType type, const GLvoid* data);
+        void MAGNUM_LOCAL subImageImplementationDefault(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL subImageImplementationDSA(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL subImageImplementationDSAEXT(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, PixelFormat format, PixelType type, const GLvoid* data);
 
-        void MAGNUM_LOCAL compressedSubImageImplementationDefault(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDSA(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDSAEXT(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
+        void MAGNUM_LOCAL compressedSubImageImplementationDefault(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
+        void MAGNUM_LOCAL compressedSubImageImplementationDSA(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
+        void MAGNUM_LOCAL compressedSubImageImplementationDSAEXT(GLint level, const Math::Vector<1, GLint>& offset, const Math::Vector<1, GLsizei>& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
         #endif
 
-        void MAGNUM_LOCAL subImageImplementationDefault(GLint level, const Vector2i& offset, const Vector2i& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDefault(GLint level, const Vector2i& offset, const Vector2i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
+        void MAGNUM_LOCAL subImageImplementationDefault(GLint level, const Vector2i& offset, const Vector2i& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL compressedSubImageImplementationDefault(GLint level, const Vector2i& offset, const Vector2i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
         #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL subImageImplementationDSA(GLint level, const Vector2i& offset, const Vector2i& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL subImageImplementationDSAEXT(GLint level, const Vector2i& offset, const Vector2i& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDSA(GLint level, const Vector2i& offset, const Vector2i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDSAEXT(GLint level, const Vector2i& offset, const Vector2i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
+        void MAGNUM_LOCAL subImageImplementationDSA(GLint level, const Vector2i& offset, const Vector2i& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL subImageImplementationDSAEXT(GLint level, const Vector2i& offset, const Vector2i& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL compressedSubImageImplementationDSA(GLint level, const Vector2i& offset, const Vector2i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
+        void MAGNUM_LOCAL compressedSubImageImplementationDSAEXT(GLint level, const Vector2i& offset, const Vector2i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
         #endif
 
         #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
-        void MAGNUM_LOCAL subImageImplementationDefault(GLint level, const Vector3i& offset, const Vector3i& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDefault(GLint level, const Vector3i& offset, const Vector3i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
+        void MAGNUM_LOCAL subImageImplementationDefault(GLint level, const Vector3i& offset, const Vector3i& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL compressedSubImageImplementationDefault(GLint level, const Vector3i& offset, const Vector3i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
         #endif
         #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL subImageImplementationDSA(GLint level, const Vector3i& offset, const Vector3i& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL subImageImplementationDSAEXT(GLint level, const Vector3i& offset, const Vector3i& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDSA(GLint level, const Vector3i& offset, const Vector3i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDSAEXT(GLint level, const Vector3i& offset, const Vector3i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
+        void MAGNUM_LOCAL subImageImplementationDSA(GLint level, const Vector3i& offset, const Vector3i& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL subImageImplementationDSAEXT(GLint level, const Vector3i& offset, const Vector3i& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL compressedSubImageImplementationDSA(GLint level, const Vector3i& offset, const Vector3i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
+        void MAGNUM_LOCAL compressedSubImageImplementationDSAEXT(GLint level, const Vector3i& offset, const Vector3i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
         #endif
 
         void MAGNUM_LOCAL invalidateImageImplementationNoOp(GLint level);
@@ -585,8 +580,8 @@ class MAGNUM_EXPORT AbstractTexture: public AbstractObject {
         #endif
 
         #if !defined(MAGNUM_TARGET_GLES) || defined(MAGNUM_TARGET_GLES2)
-        ColorFormat MAGNUM_LOCAL imageFormatForInternalFormat(TextureFormat internalFormat);
-        ColorType MAGNUM_LOCAL imageTypeForInternalFormat(TextureFormat internalFormat);
+        PixelFormat MAGNUM_LOCAL imageFormatForInternalFormat(TextureFormat internalFormat);
+        PixelType MAGNUM_LOCAL imageTypeForInternalFormat(TextureFormat internalFormat);
         #endif
 
         GLuint _id;

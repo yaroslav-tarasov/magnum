@@ -82,7 +82,7 @@ more information.
 @note Not available on GCC < 4.7. Use <tt>%AnimableGroup<2, T></tt> instead.
 @see @ref AnimableGroup2D, @ref BasicAnimableGroup3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicAnimableGroup2D = AnimableGroup<2, T>;
 #endif
 #endif
@@ -109,7 +109,7 @@ more information.
 @note Not available on GCC < 4.7. Use <tt>%AnimableGroup<3, T></tt> instead.
 @see @ref AnimableGroup3D, @ref BasicAnimableGroup2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicAnimableGroup3D = AnimableGroup<3, T>;
 #endif
 #endif

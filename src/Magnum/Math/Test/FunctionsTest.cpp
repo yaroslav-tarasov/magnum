@@ -321,8 +321,8 @@ void FunctionsTest::denormalizeUnsigned() {
 
     CORRADE_COMPARE(Math::denormalize<UnsignedLong>(0.0l), 0);
     {
-        #ifdef CORRADE_MSVC2013_COMPATIBILITY
-        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC 2013.");
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC <= 2015.");
         #endif
         CORRADE_COMPARE(Math::denormalize<UnsignedLong>(1.0l), std::numeric_limits<UnsignedLong>::max());
     }
@@ -349,15 +349,15 @@ void FunctionsTest::denormalizeSigned() {
     CORRADE_COMPARE(Math::denormalize<Int>(1.0), std::numeric_limits<Int>::max());
 
     {
-        #ifdef CORRADE_MSVC2013_COMPATIBILITY
-        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC 2013.");
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC <= 2015.");
         #endif
         CORRADE_COMPARE(Math::denormalize<Long>(-1.0l), std::numeric_limits<Long>::min()+1);
     }
     CORRADE_COMPARE(Math::denormalize<Long>(0.0l), 0);
     {
-        #ifdef CORRADE_MSVC2013_COMPATIBILITY
-        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC 2013.");
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC <= 2015.");
         #endif
         CORRADE_COMPARE(Math::denormalize<Long>(1.0l), std::numeric_limits<Long>::max());
     }
@@ -382,8 +382,8 @@ void FunctionsTest::renormalizeUnsinged() {
 
     CORRADE_COMPARE(Math::normalize<long double>(Math::denormalize<UnsignedLong>(0.0l)), 0.0l);
     {
-        #ifdef CORRADE_MSVC2013_COMPATIBILITY
-        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC 2013.");
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC <= 2015.");
         #endif
         CORRADE_COMPARE(Math::normalize<long double>(Math::denormalize<UnsignedLong>(1.0l)), 1.0l);
     }
@@ -407,8 +407,8 @@ void FunctionsTest::renormalizeSinged() {
     CORRADE_COMPARE(Math::normalize<long double>(Math::denormalize<Long>(-1.0l)), -1.0l);
     CORRADE_COMPARE(Math::normalize<long double>(Math::denormalize<Long>(0.0l)), 0.0l);
     {
-        #ifdef CORRADE_MSVC2013_COMPATIBILITY
-        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC 2013.");
+        #ifdef CORRADE_MSVC2015_COMPATIBILITY
+        CORRADE_EXPECT_FAIL("Long double (de)normalization is broken on MSVC <= 2015.");
         #endif
         CORRADE_COMPARE(Math::normalize<long double>(Math::denormalize<Long>(1.0l)), 1.0l);
     }

@@ -31,8 +31,8 @@
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/Endianness.h>
 
-#include "Magnum/ColorFormat.h"
 #include "Magnum/Image.h"
+#include "Magnum/PixelFormat.h"
 #include "Magnum/Math/Swizzle.h"
 #include "Magnum/Math/Vector4.h"
 #include "MagnumPlugins/TgaImporter/TgaHeader.h"
@@ -55,14 +55,21 @@ TgaImageConverter::TgaImageConverter(PluginManager::AbstractManager& manager, st
 
 auto TgaImageConverter::doFeatures() const -> Features { return Feature::ConvertData; }
 
-Containers::Array<char> TgaImageConverter::doExportToData(const ImageView2D& image) const {
-    if(image.format() != ColorFormat::RGB &&
-       image.format() != ColorFormat::RGBA
+Containers::Array<char> TgaImageConverter::doExportToData(const ImageView2D& image) {
+    #ifndef MAGNUM_TARGET_GLES
+    if(image.storage().swapBytes()) {
+        Error() << "Trade::TgaImageConverter::exportToData(): pixel byte swap is not supported";
+        return nullptr;
+    }
+    #endif
+
+    if(image.format() != PixelFormat::RGB &&
+       image.format() != PixelFormat::RGBA
        #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
-       && image.format() != ColorFormat::Red
+       && image.format() != PixelFormat::Red
        #endif
        #ifdef MAGNUM_TARGET_GLES2
-       && image.format() != ColorFormat::Luminance
+       && image.format() != PixelFormat::Luminance
        #endif
        )
     {
@@ -70,7 +77,7 @@ Containers::Array<char> TgaImageConverter::doExportToData(const ImageView2D& ima
         return {};
     }
 
-    if(image.type() != ColorType::UnsignedByte) {
+    if(image.type() != PixelType::UnsignedByte) {
         Error() << "Trade::TgaImageConverter::exportToData(): unsupported color type" << image.type();
         return {};
     }
@@ -82,15 +89,15 @@ Containers::Array<char> TgaImageConverter::doExportToData(const ImageView2D& ima
     /* Fill header */
     auto header = reinterpret_cast<TgaHeader*>(data.begin());
     switch(image.format()) {
-        case ColorFormat::RGB:
-        case ColorFormat::RGBA:
+        case PixelFormat::RGB:
+        case PixelFormat::RGBA:
             header->imageType = 2;
             break;
         #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
-        case ColorFormat::Red:
+        case PixelFormat::Red:
         #endif
         #ifdef MAGNUM_TARGET_GLES2
-        case ColorFormat::Luminance:
+        case PixelFormat::Luminance:
         #endif
             header->imageType = 3;
             break;
@@ -100,13 +107,21 @@ Containers::Array<char> TgaImageConverter::doExportToData(const ImageView2D& ima
     header->width = UnsignedShort(Utility::Endianness::littleEndian(image.size().x()));
     header->height = UnsignedShort(Utility::Endianness::littleEndian(image.size().y()));
 
-    /* Fill data */
-    std::copy(image.data(), image.data()+pixelSize*image.size().product(), data.begin()+sizeof(TgaHeader));
+    /* Image data pointer including skip */
+    const char* imageData = image.data() + std::get<0>(image.dataProperties());
 
-    if(image.format() == ColorFormat::RGB) {
+    /* Fill data or copy them row by row if we need to drop the padding */
+    const std::size_t rowSize = image.size().x()*pixelSize;
+    const std::size_t rowStride = std::get<1>(image.dataProperties()).x();
+    if(rowStride != rowSize) {
+        for(std::int_fast32_t y = 0; y != image.size().y(); ++y)
+            std::copy_n(imageData + y*rowStride, rowSize, data.begin() + sizeof(TgaHeader) + y*rowSize);
+    } else std::copy_n(imageData, pixelSize*image.size().product(), data.begin() + sizeof(TgaHeader));
+
+    if(image.format() == PixelFormat::RGB) {
         auto pixels = reinterpret_cast<Math::Vector3<UnsignedByte>*>(data.begin()+sizeof(TgaHeader));
         std::transform(pixels, pixels + image.size().product(), pixels, bgr);
-    } else if(image.format() == ColorFormat::RGBA) {
+    } else if(image.format() == PixelFormat::RGBA) {
         auto pixels = reinterpret_cast<Math::Vector4<UnsignedByte>*>(data.begin()+sizeof(TgaHeader));
         std::transform(pixels, pixels + image.size().product(), pixels, bgra);
     }

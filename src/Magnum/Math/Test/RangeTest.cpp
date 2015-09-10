@@ -223,8 +223,10 @@ void RangeTest::constructConversion() {
     constexpr Range2D b({1.3f, 2.7f}, {-15.0f, 7.0f});
     constexpr Range3D c({1.3f, 2.7f, -1.5f}, {-15.0f, 7.0f, 0.3f});
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Range1Di d(a);
     CORRADE_COMPARE(d, Range1Di(1, -15));
@@ -273,12 +275,15 @@ void RangeTest::convert() {
 
     /* GCC 5.1 fills the result with zeros instead of properly calling
        delegated copy constructor if using constexpr. Reported here:
-       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
-    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
-    constexpr /* Not constexpr under GCC < 4.7 */
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450
+       Not constexpr under GCC < 4.7.
+       MSVC 2015: Can't use delegating constructors with constexpr:
+       https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    constexpr
     #endif
     Range<2, Float> g{b};
-    #if !defined(__GNUC__) || defined(__clang__)
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_MSVC2015_COMPATIBILITY)
     constexpr
     #endif
     Range1D h{a};
@@ -295,15 +300,19 @@ void RangeTest::convert() {
     CORRADE_COMPARE(i, e);
     CORRADE_COMPARE(j, f);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Why can't be conversion constexpr on MSVC? */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Dim k(d);
     CORRADE_COMPARE(k.offset, a.offset);
     CORRADE_COMPARE(k.size, a.size);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Why can't be conversion constexpr on MSVC? */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Rect l(e);
     CORRADE_COMPARE(l.x, b.x);
@@ -311,8 +320,10 @@ void RangeTest::convert() {
     CORRADE_COMPARE(l.w, b.w);
     CORRADE_COMPARE(l.h, b.h);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Why can't be conversion constexpr on MSVC? */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Box m(f);
     CORRADE_COMPARE(m.x, c.x);
@@ -479,7 +490,7 @@ void RangeTest::scaled() {
 
 template<class T> class BasicRect: public Math::Range<2, T> {
     public:
-        /* MSVC 2013 can't cope with {} here */
+        /* MSVC 2015 can't handle {} here */
         template<class ...U> constexpr BasicRect(U&&... args): Math::Range<2, T>(args...) {}
 
         MAGNUM_RANGE_SUBCLASS_IMPLEMENTATION(2, BasicRect, Vector2)

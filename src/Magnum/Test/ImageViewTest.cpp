@@ -25,8 +25,8 @@
 
 #include <Corrade/TestSuite/Tester.h>
 
-#include "Magnum/ColorFormat.h"
 #include "Magnum/ImageView.h"
+#include "Magnum/PixelFormat.h"
 
 namespace Magnum { namespace Test {
 
@@ -34,6 +34,7 @@ struct ImageViewTest: TestSuite::Tester {
     explicit ImageViewTest();
 
     void construct();
+    void constructNullptr();
     void constructCompressed();
 
     void setData();
@@ -42,6 +43,7 @@ struct ImageViewTest: TestSuite::Tester {
 
 ImageViewTest::ImageViewTest() {
     addTests<ImageViewTest>({&ImageViewTest::construct,
+              &ImageViewTest::constructNullptr,
               &ImageViewTest::constructCompressed,
 
               &ImageViewTest::setData,
@@ -50,42 +52,67 @@ ImageViewTest::ImageViewTest() {
 
 void ImageViewTest::construct() {
     const char data[3]{};
-    ImageView2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
+    ImageView2D a{PixelStorage{}.setAlignment(1),
+        PixelFormat::Red, PixelType::UnsignedByte, {1, 3}, data};
 
-    CORRADE_COMPARE(a.format(), ColorFormat::Red);
-    CORRADE_COMPARE(a.type(), ColorType::UnsignedByte);
+    CORRADE_COMPARE(a.storage().alignment(), 1);
+    CORRADE_COMPARE(a.format(), PixelFormat::Red);
+    CORRADE_COMPARE(a.type(), PixelType::UnsignedByte);
     CORRADE_COMPARE(a.size(), Vector2i(1, 3));
     CORRADE_COMPARE(a.data(), data);
 }
 
+void ImageViewTest::constructNullptr() {
+    /* Just verify that it won't assert when passing nullptr array -- useful
+       e.g. for old-style texture allocation using setImage() */
+    ImageView2D a{PixelFormat::RGBA, PixelType::UnsignedByte, {256, 128}, nullptr};
+    CORRADE_COMPARE(a.size(), (Vector2i{256, 128}));
+}
+
 void ImageViewTest::constructCompressed() {
     const char data[8]{};
-    CompressedImageView2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, data};
+    CompressedImageView2D a{
+        #ifndef MAGNUM_TARGET_GLES
+        CompressedPixelStorage{}.setCompressedBlockSize(Vector3i{4}),
+        #endif
+        CompressedPixelFormat::RGBAS3tcDxt1, {4, 4}, data};
 
-    CORRADE_COMPARE(a.format(), CompressedColorFormat::RGBAS3tcDxt1);
+    #ifndef MAGNUM_TARGET_GLES
+    CORRADE_COMPARE(a.storage().compressedBlockSize(), Vector3i{4});
+    #endif
+    CORRADE_COMPARE(a.format(), CompressedPixelFormat::RGBAS3tcDxt1);
     CORRADE_COMPARE(a.size(), Vector2i(4, 4));
     CORRADE_COMPARE(a.data(), data);
 }
 
 void ImageViewTest::setData() {
     const char data[3]{};
-    ImageView2D a(ColorFormat::Red, ColorType::UnsignedByte, {1, 3}, data);
-    const char data2[8]{};
+    ImageView2D a{PixelStorage{}.setAlignment(1),
+        PixelFormat::Red, PixelType::UnsignedByte, {1, 3}, data};
+    const char data2[3]{};
     a.setData(data2);
 
-    CORRADE_COMPARE(a.format(), ColorFormat::Red);
-    CORRADE_COMPARE(a.type(), ColorType::UnsignedByte);
+    CORRADE_COMPARE(a.storage().alignment(), 1);
+    CORRADE_COMPARE(a.format(), PixelFormat::Red);
+    CORRADE_COMPARE(a.type(), PixelType::UnsignedByte);
     CORRADE_COMPARE(a.size(), Vector2i(1, 3));
     CORRADE_COMPARE(a.data(), data2);
 }
 
 void ImageViewTest::setDataCompressed() {
     const char data[8]{};
-    CompressedImageView2D a{CompressedColorFormat::RGBAS3tcDxt1, {4, 4}, data};
+    CompressedImageView2D a{
+        #ifndef MAGNUM_TARGET_GLES
+        CompressedPixelStorage{}.setCompressedBlockSize(Vector3i{4}),
+        #endif
+        CompressedPixelFormat::RGBAS3tcDxt1, {4, 4}, data};
     const char data2[16]{};
     a.setData(data2);
 
-    CORRADE_COMPARE(a.format(), CompressedColorFormat::RGBAS3tcDxt1);
+    #ifndef MAGNUM_TARGET_GLES
+    CORRADE_COMPARE(a.storage().compressedBlockSize(), Vector3i{4});
+    #endif
+    CORRADE_COMPARE(a.format(), CompressedPixelFormat::RGBAS3tcDxt1);
     CORRADE_COMPARE(a.size(), Vector2i(4, 4));
     CORRADE_COMPARE(a.data(), data2);
 }

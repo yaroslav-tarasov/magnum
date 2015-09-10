@@ -71,7 +71,7 @@ Common usage is to fully configure all texture parameters and then set the
 data from e.g. @ref Image. Example configuration of high quality texture with
 trilinear anisotropic filtering, i.e. the best you can ask for:
 @code
-Image2D image(ColorFormat::RGBA, ColorType::UnsignedByte, {4096, 4096}, data);
+Image2D image(PixelFormat::RGBA, PixelType::UnsignedByte, {4096, 4096}, data);
 
 Texture2D texture;
 texture.setMagnificationFilter(Sampler::Filter::Linear)
@@ -611,7 +611,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *      @fn_gl_extension{TextureStorage3D,EXT,direct_state_access},
          *      eventually @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
          *      @fn_gl{TexStorage1D}/@fn_gl{TexStorage2D}/@fn_gl{TexStorage3D}
-         * @todo allow the user to specify ColorType explicitly to avoid
+         * @todo allow the user to specify PixelType explicitly to avoid
          *      issues in WebGL (see setSubImage())
          */
         Texture<dimensions>& setStorage(Int levels, TextureFormat internalFormat, const typename DimensionTraits<dimensions, Int>::VectorType& size) {
@@ -650,7 +650,8 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *
          * Image parameters like format and type of pixel data are taken from
          * given image, image size is taken from the texture using
-         * @ref imageSize().
+         * @ref imageSize().  The storage is not reallocated if it is large
+         * enough to contain the new data.
          *
          * If neither @extension{ARB,direct_state_access} (part of OpenGL 4.5)
          * nor @extension{EXT,direct_state_access} is available, the texture is
@@ -665,7 +666,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *      eventually @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
          *      @fn_gl{GetTexLevelParameter} with @def_gl{TEXTURE_WIDTH},
          *      @def_gl{TEXTURE_HEIGHT}, @def_gl{TEXTURE_DEPTH}, then
-         *      @fn_gl2{GetTextureImage,GetTexImage},
+         *      @fn_gl{PixelStore}, then @fn_gl2{GetTextureImage,GetTexImage},
          *      @fn_gl_extension{GetnTexImage,ARB,robustness},
          *      @fn_gl_extension{GetTextureImage,EXT,direct_state_access},
          *      eventually @fn_gl{GetTexImage}
@@ -680,7 +681,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * Image2D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte});
+         * Image2D image = texture.image(0, {PixelFormat::RGBA, PixelType::UnsignedByte});
          * @endcode
          */
         Image<dimensions> image(Int level, Image<dimensions>&& image);
@@ -691,7 +692,9 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @param image             Buffer image where to put the data
          * @param usage             Buffer usage
          *
-         * See @ref image(Int, Image&) for more information.
+         * See @ref image(Int, Image&) for more information. The storage is not
+         * reallocated if it is large enough to contain the new data, which
+         * means that @p usage might get ignored.
          * @requires_gl Texture image queries are not available in OpenGL ES or
          *      WebGL. See @ref Framebuffer::read() for possible workaround.
          * @todo Make it more flexible (usable with
@@ -705,7 +708,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * BufferImage2D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+         * BufferImage2D image = texture.image(0, {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
          * @endcode
          */
         BufferImage<dimensions> image(Int level, BufferImage<dimensions>&& image, BufferUsage usage);
@@ -716,7 +719,8 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @param image             Image where to put the compressed data
          *
          * Compression format and data size are taken from the texture, image
-         * size is taken using @ref imageSize().
+         * size is taken using @ref imageSize(). The storage is not reallocated
+         * if it is large enough to contain the new data.
          *
          * If neither @extension{ARB,direct_state_access} (part of OpenGL 4.5)
          * nor @extension{EXT,direct_state_access} is available, the texture is
@@ -732,6 +736,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *      @def_gl{TEXTURE_COMPRESSED_IMAGE_SIZE},
          *      @def_gl{TEXTURE_INTERNAL_FORMAT}, @def_gl{TEXTURE_WIDTH},
          *      @def_gl{TEXTURE_HEIGHT}, @def_gl{TEXTURE_DEPTH}, then
+         *      @fn_gl{PixelStore}, then
          *      @fn_gl2{GetCompressedTextureImage,GetCompressedTexImage},
          *      @fn_gl_extension{GetnCompressedTexImage,ARB,robustness},
          *      @fn_gl_extension{GetCompressedTextureImage,EXT,direct_state_access},
@@ -759,7 +764,8 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @param usage             Buffer usage
          *
          * See @ref compressedImage(Int, CompressedImage&) for more
-         * information.
+         * information. The storage is not reallocated if it is large enough to
+         * contain the new data, which means that @p usage might get ignored.
          * @requires_gl Texture image queries are not available in OpenGL ES or
          *      WebGL. See @ref Framebuffer::read() for possible workaround.
          * @todo Make it more flexible (usable with
@@ -785,7 +791,10 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @param image             Image where to put the data
          *
          * Image parameters like format and type of pixel data are taken from
-         * given image.
+         * given image. The storage is not reallocated if it is large enough to
+         * contain the new data.
+         *
+         * The operation is protected from buffer overflow.
          * @see @fn_gl{GetTextureSubImage}
          * @requires_gl45 Extension @extension{ARB,get_texture_sub_image}
          * @requires_gl Texture image queries are not available in OpenGL ES or
@@ -799,7 +808,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * Image2D image = texture.subImage(0, rect, {ColorFormat::RGBA, ColorType::UnsignedByte});
+         * Image2D image = texture.subImage(0, rect, {PixelFormat::RGBA, PixelType::UnsignedByte});
          * @endcode
          */
         Image<dimensions> subImage(Int level, const typename DimensionTraits<dimensions, Int>::RangeType& range, Image<dimensions>&& image);
@@ -812,7 +821,9 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * @param usage             Buffer usage
          *
          * See @ref subImage(Int, const RangeTypeFor<dimensions, Int>&, Image&)
-         * for more information.
+         * for more information. The storage is not reallocated if it is large
+         * enough to contain the new data, which means that @p usage might get
+         * ignored.
          * @requires_gl45 Extension @extension{ARB,get_texture_sub_image}
          * @requires_gl Texture image queries are not available in OpenGL ES or
          *      WebGL. See @ref Framebuffer::read() for possible workaround.
@@ -825,7 +836,7 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * BufferImage2D image = texture.subImage(0, rect, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+         * BufferImage2D image = texture.subImage(0, rect, {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
          * @endcode
          */
         BufferImage<dimensions> subImage(Int level, const typename DimensionTraits<dimensions, Int>::RangeType& range, BufferImage<dimensions>&& image, BufferUsage usage);
@@ -844,8 +855,9 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * and has better performance characteristics. This call also has no
          * equivalent in @extension{ARB,direct_state_access}, thus the texture
          * needs to be bound to some texture unit before the operation.
-         * @see @ref maxSize(), @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
-         *      @fn_gl{TexImage1D} / @fn_gl{TexImage2D} / @fn_gl{TexImage3D}
+         * @see @ref maxSize(), @fn_gl{PixelStore}, then @fn_gl{ActiveTexture},
+         *      @fn_gl{BindTexture} and @fn_gl{TexImage1D} / @fn_gl{TexImage2D}
+         *      / @fn_gl{TexImage3D}
          * @deprecated_gl Prefer to use @ref setStorage() and @ref setSubImage()
          *      instead.
          */
@@ -894,9 +906,9 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * also has no equivalent in @extension{ARB,direct_state_access}, thus
          * the texture needs to be bound to some texture unit before the
          * operation.
-         * @see @ref maxSize(), @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
-         *      @fn_gl{CompressedTexImage1D} / @fn_gl{CompressedTexImage2D} /
-         *      @fn_gl{CompressedTexImage3D}
+         * @see @ref maxSize(), @fn_gl{PixelStore}, then @fn_gl{ActiveTexture},
+         *      @fn_gl{BindTexture} and @fn_gl{CompressedTexImage1D} /
+         *      @fn_gl{CompressedTexImage2D} / @fn_gl{CompressedTexImage3D}
          * @deprecated_gl Prefer to use @ref setStorage() and
          *      @ref setCompressedSubImage() instead.
          */
@@ -944,17 +956,17 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the texture is bound before the operation (if not
          * already).
-         * @see @ref setStorage(), @fn_gl2{TextureSubImage1D,TexSubImage1D} /
+         * @see @ref setStorage(), @fn_gl{PixelStore}, @fn_gl2{TextureSubImage1D,TexSubImage1D} /
          *      @fn_gl2{TextureSubImage2D,TexSubImage2D} / @fn_gl2{TextureSubImage3D,TexSubImage3D},
          *      @fn_gl_extension{TextureSubImage1D,EXT,direct_state_access} /
          *      @fn_gl_extension{TextureSubImage2D,EXT,direct_state_access} /
          *      @fn_gl_extension{TextureSubImage3D,EXT,direct_state_access},
          *      eventually @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
          *      @fn_gl{TexSubImage1D} / @fn_gl{TexSubImage2D} / @fn_gl{TexSubImage3D}
-         * @requires_gles In @ref MAGNUM_TARGET_WEBGL "WebGL" the @ref ColorType
+         * @requires_gles In @ref MAGNUM_TARGET_WEBGL "WebGL" the @ref PixelType
          *      of data passed in @p image must match the original one
          *      specified in @ref setImage(). It means that you might not be
-         *      able to use @ref setStorage() as it uses implicit @ref ColorType
+         *      able to use @ref setStorage() as it uses implicit @ref PixelType
          *      value.
          */
         Texture<dimensions>& setSubImage(Int level, const typename DimensionTraits<dimensions, Int>::VectorType& offset, const ImageView<dimensions>& image) {
@@ -997,7 +1009,8 @@ template<UnsignedInt dimensions> class Texture: public AbstractTexture {
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the texture is bound before the operation (if not
          * already).
-         * @see @ref setStorage(), @fn_gl2{CompressedTextureSubImage1D,CompressedTexSubImage1D} /
+         * @see @ref setStorage(), @fn_gl{PixelStore},
+         *      @fn_gl2{CompressedTextureSubImage1D,CompressedTexSubImage1D} /
          *      @fn_gl2{CompressedTextureSubImage2D,CompressedTexSubImage2D} /
          *      @fn_gl2{CompressedTextureSubImage3D,CompressedTexSubImage3D},
          *      @fn_gl_extension{CompressedTextureSubImage1D,EXT,direct_state_access} /

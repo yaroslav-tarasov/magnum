@@ -34,9 +34,10 @@
 #include "Magnum/RenderbufferFormat.h"
 #endif
 
-/* If not included, the following members have bad offsets, causing weird
-   runtime behavior */
-#ifdef CORRADE_MSVC2013_COMPATIBILITY
+#ifdef _MSC_VER
+/* Otherwise the member function pointers will have different size based on
+   whether the header was included or not. CAUSES SERIOUS MEMORY CORRUPTION AND
+   IS NOT CAUGHT BY ANY WARNING WHATSOEVER! AARGH! */
 #include "Magnum/Renderbuffer.h"
 #endif
 
@@ -90,7 +91,7 @@ struct FramebufferState {
     void(Renderbuffer::*renderbufferStorageMultisampleImplementation)(GLsizei, RenderbufferFormat, const Vector2i&);
     #endif
 
-    void(*readImplementation)(const Range2Di&, ColorFormat, ColorType, std::size_t, GLvoid*);
+    void(*readImplementation)(const Range2Di&, PixelFormat, PixelType, std::size_t, GLvoid*);
 
     GLuint readBinding, drawBinding, renderbufferBinding;
     GLint maxDrawBuffers, maxColorAttachments, maxRenderbufferSize;

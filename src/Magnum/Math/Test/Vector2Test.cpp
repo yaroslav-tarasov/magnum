@@ -148,7 +148,10 @@ void Vector2Test::constructConversion() {
 
 void Vector2Test::constructCopy() {
     constexpr Vector<2, Float> a(1.5f, 2.5f);
-    constexpr Vector2 b(a);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Why can't be copy constexpr? */
+    constexpr
+    #endif
+    Vector2 b(a);
     CORRADE_COMPARE(b, Vector2(1.5f, 2.5f));
 }
 
@@ -159,8 +162,10 @@ void Vector2Test::convert() {
     constexpr Vector2 c(a);
     CORRADE_COMPARE(c, b);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Why can't be conversion constexpr on MSVC? */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Vec2 d(b);
     CORRADE_COMPARE(d.x, a.x);

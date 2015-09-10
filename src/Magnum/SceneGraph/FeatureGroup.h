@@ -126,7 +126,7 @@ Convenience alternative to `FeatureGroup<2, Feature, T>`. See
     instead.
 @see @ref FeatureGroup2D, @ref BasicFeatureGroup3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class Feature, class T> using BasicFeatureGroup2D = FeatureGroup<2, Feature, T>;
 #endif
 
@@ -139,7 +139,7 @@ Convenience alternative to `BasicFeatureGroup2D<Feature, Float>`. See
     instead.
 @see @ref FeatureGroup3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class Feature> using FeatureGroup2D = BasicFeatureGroup2D<Feature, Float>;
 #endif
 
@@ -152,7 +152,7 @@ Convenience alternative to `FeatureGroup<3, Feature, T>`. See
     instead.
 @see @ref FeatureGroup3D, @ref BasicFeatureGroup2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class Feature, class T> using BasicFeatureGroup3D = FeatureGroup<3, Feature, T>;
 #endif
 
@@ -165,7 +165,7 @@ Convenience alternative to `BasicFeatureGroup3D<Feature, Float>`. See
     instead.
 @see @ref FeatureGroup2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class Feature> using FeatureGroup3D = BasicFeatureGroup3D<Feature, Float>;
 #endif
 #endif

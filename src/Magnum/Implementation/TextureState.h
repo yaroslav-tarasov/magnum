@@ -38,9 +38,10 @@
 #include "Magnum/TextureFormat.h"
 #endif
 
-/* Otherwise we get a pretty nice memory corruption only with a warning about
-   architecture-dependent alignment of `setBufferImplementation` variable */
-#ifdef CORRADE_MSVC2013_COMPATIBILITY
+#ifdef _MSC_VER
+/* Otherwise the member function pointers will have different size based on
+   whether the header was included or not. CAUSES SERIOUS MEMORY CORRUPTION AND
+   IS NOT CAUGHT BY ANY WARNING WHATSOEVER! AARGH! */
 #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
 #include "Magnum/BufferTexture.h"
 #else
@@ -87,18 +88,18 @@ struct TextureState {
     void(AbstractTexture::*storage3DMultisampleImplementation)(GLsizei, TextureFormat, const Vector3i&, GLboolean);
     #endif
     #ifndef MAGNUM_TARGET_GLES
-    void(AbstractTexture::*getImageImplementation)(GLint, ColorFormat, ColorType, std::size_t, GLvoid*);
+    void(AbstractTexture::*getImageImplementation)(GLint, PixelFormat, PixelType, std::size_t, GLvoid*);
     void(AbstractTexture::*getCompressedImageImplementation)(GLint, std::size_t, GLvoid*);
     #endif
     #ifndef MAGNUM_TARGET_GLES
-    void(AbstractTexture::*subImage1DImplementation)(GLint, const Math::Vector<1, GLint>&, const Math::Vector<1, GLsizei>&, ColorFormat, ColorType, const GLvoid*);
-    void(AbstractTexture::*compressedSubImage1DImplementation)(GLint, const Math::Vector<1, GLint>&, const Math::Vector<1, GLsizei>&, CompressedColorFormat, Containers::ArrayView<const GLvoid>);
+    void(AbstractTexture::*subImage1DImplementation)(GLint, const Math::Vector<1, GLint>&, const Math::Vector<1, GLsizei>&, PixelFormat, PixelType, const GLvoid*);
+    void(AbstractTexture::*compressedSubImage1DImplementation)(GLint, const Math::Vector<1, GLint>&, const Math::Vector<1, GLsizei>&, CompressedPixelFormat, const GLvoid*, GLsizei);
     #endif
-    void(AbstractTexture::*subImage2DImplementation)(GLint, const Vector2i&, const Vector2i&, ColorFormat, ColorType, const GLvoid*);
-    void(AbstractTexture::*compressedSubImage2DImplementation)(GLint, const Vector2i&, const Vector2i&, CompressedColorFormat, Containers::ArrayView<const GLvoid>);
+    void(AbstractTexture::*subImage2DImplementation)(GLint, const Vector2i&, const Vector2i&, PixelFormat, PixelType, const GLvoid*);
+    void(AbstractTexture::*compressedSubImage2DImplementation)(GLint, const Vector2i&, const Vector2i&, CompressedPixelFormat, const GLvoid*, GLsizei);
     #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
-    void(AbstractTexture::*subImage3DImplementation)(GLint, const Vector3i&, const Vector3i&, ColorFormat, ColorType, const GLvoid*);
-    void(AbstractTexture::*compressedSubImage3DImplementation)(GLint, const Vector3i&, const Vector3i&, CompressedColorFormat, Containers::ArrayView<const GLvoid>);
+    void(AbstractTexture::*subImage3DImplementation)(GLint, const Vector3i&, const Vector3i&, PixelFormat, PixelType, const GLvoid*);
+    void(AbstractTexture::*compressedSubImage3DImplementation)(GLint, const Vector3i&, const Vector3i&, CompressedPixelFormat, const GLvoid*, GLsizei);
     #endif
     void(AbstractTexture::*invalidateImageImplementation)(GLint);
     void(AbstractTexture::*invalidateSubImageImplementation)(GLint, const Vector3i&, const Vector3i&);
@@ -112,11 +113,11 @@ struct TextureState {
     Vector2i(CubeMapTexture::*getCubeImageSizeImplementation)(Int);
     #endif
     #ifndef MAGNUM_TARGET_GLES
-    void(CubeMapTexture::*getCubeImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, ColorFormat, ColorType, std::size_t, GLvoid*);
+    void(CubeMapTexture::*getCubeImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, PixelFormat, PixelType, std::size_t, GLvoid*);
     void(CubeMapTexture::*getCompressedCubeImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, std::size_t, GLvoid*);
     #endif
-    void(CubeMapTexture::*cubeSubImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, const Vector2i&, ColorFormat, ColorType, const GLvoid*);
-    void(CubeMapTexture::*cubeCompressedSubImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, const Vector2i&, CompressedColorFormat, Containers::ArrayView<const GLvoid>);
+    void(CubeMapTexture::*cubeSubImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, const Vector2i&, PixelFormat, PixelType, const GLvoid*);
+    void(CubeMapTexture::*cubeCompressedSubImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, const Vector2i&, CompressedPixelFormat, const GLvoid*, GLsizei);
 
     GLint maxSize,
         #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))

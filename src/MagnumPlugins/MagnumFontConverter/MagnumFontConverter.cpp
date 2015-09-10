@@ -29,8 +29,8 @@
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/Directory.h>
 
-#include "Magnum/ColorFormat.h"
 #include "Magnum/Image.h"
+#include "Magnum/PixelFormat.h"
 #include "Magnum/Text/GlyphCache.h"
 #include "Magnum/Text/AbstractFont.h"
 #include "MagnumPlugins/TgaImageConverter/TgaImageConverter.h"
@@ -45,12 +45,7 @@ auto MagnumFontConverter::doFeatures() const -> Features {
     return Feature::ExportFont|Feature::ConvertData|Feature::MultiFile;
 }
 
-#ifndef __MINGW32__
-std::vector<std::pair<std::string, Containers::Array<char>>> MagnumFontConverter::doExportFontToData(AbstractFont& font, GlyphCache& cache, const std::string& filename, const std::u32string& characters) const
-#else
-std::vector<std::pair<std::string, Containers::Array<char>>> MagnumFontConverter::doExportFontToData(AbstractFont& font, GlyphCache& cache, const std::string& filename, const std::vector<char32_t>& characters) const
-#endif
-{
+std::vector<std::pair<std::string, Containers::Array<char>>> MagnumFontConverter::doExportFontToData(AbstractFont& font, GlyphCache& cache, const std::string& filename, const std::u32string& characters) const {
     Utility::Configuration configuration;
 
     configuration.setValue("version", 1);
@@ -124,7 +119,7 @@ std::vector<std::pair<std::string, Containers::Array<char>>> MagnumFontConverter
     std::copy(confStr.begin(), confStr.end(), confData.begin());
 
     /* Save cache image */
-    Image2D image(ColorFormat::Red, ColorType::UnsignedByte);
+    Image2D image(PixelFormat::Red, PixelType::UnsignedByte);
     cache.texture().image(0, image);
     auto tgaData = Trade::TgaImageConverter().exportToData(image);
 

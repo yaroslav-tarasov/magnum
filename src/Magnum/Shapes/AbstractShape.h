@@ -51,11 +51,11 @@ This class is not directly instantiable, use @ref Shape instead. See
 @see @ref AbstractShape2D, @ref AbstractShape3D
 */
 template<UnsignedInt dimensions> class MAGNUM_SHAPES_EXPORT AbstractShape: public SceneGraph::AbstractGroupedFeature<dimensions, AbstractShape<dimensions>, Float> {
-    /* MSVC can't cope with <> here */
-    #ifndef CORRADE_MSVC2013_COMPATIBILITY
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
     friend const Implementation::AbstractShape<dimensions>& Implementation::getAbstractShape<>(const AbstractShape<dimensions>&);
     #else
-    template<UnsignedInt dimensions_> friend const Implementation::AbstractShape<dimensions_>& Implementation::getAbstractShape(const Shapes::AbstractShape<dimensions_>&);
+    /* Otherwise it complains that this is not a function */
+    template<UnsignedInt _dimensions> friend const Implementation::AbstractShape<_dimensions>& Implementation::getAbstractShape(const Shapes::AbstractShape<_dimensions>&);
     #endif
 
     public:

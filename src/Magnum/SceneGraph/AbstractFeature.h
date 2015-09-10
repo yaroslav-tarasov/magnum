@@ -297,7 +297,8 @@ Convenience alternative to `AbstractFeature<2, T>`. See
 @note Not available on GCC < 4.7. Use <tt>%AbstractFeature<2, T></tt> instead.
 @see @ref AbstractFeature2D, @ref AbstractBasicFeature3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
+template<class T> using AbstractBasicFeature2D = AbstractFeature<2, T>;
 template<class T> using AbstractBasicFeature2D = AbstractFeature<2, T>;
 #endif
 #endif
@@ -324,7 +325,7 @@ Convenience alternative to `AbstractFeature<3, T>`. See
 @note Not available on GCC < 4.7. Use <tt>%AbstractFeature<3, T></tt> instead.
 @see @ref AbstractFeature3D, @ref AbstractBasicFeature2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using AbstractBasicFeature3D = AbstractFeature<3, T>;
 #endif
 #endif

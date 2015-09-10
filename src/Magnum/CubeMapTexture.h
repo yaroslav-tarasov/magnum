@@ -57,7 +57,7 @@ See @ref Texture documentation for introduction.
 Common usage is to fully configure all texture parameters and then set the
 data from e.g. set of Image objects:
 @code
-Image2D positiveX(ColorFormat::RGBA, ColorType::UnsignedByte, {256, 256}, data);
+Image2D positiveX(PixelFormat::RGBA, PixelType::UnsignedByte, {256, 256}, data);
 // ...
 
 CubeMapTexture texture;
@@ -453,10 +453,13 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *
          * Image parameters like format and type of pixel data are taken from
          * given image, image size is taken from the texture using
-         * @ref imageSize().
+         * @ref imageSize(). The storage is not reallocated if it is large
+         * enough to contain the new data.
+         *
+         * The operation is protected from buffer overflow.
          * @see @fn_gl2{GetTextureLevelParameter,GetTexLevelParameter} with
          *      @def_gl{TEXTURE_WIDTH}, @def_gl{TEXTURE_HEIGHT}, then
-         *      @fn_gl2{GetTextureImage,GetTexImage}
+         *      @fn_gl{PixelStore}, then @fn_gl2{GetTextureImage,GetTexImage}
          * @requires_gl45 Extension @extension{ARB,direct_state_access}
          * @requires_gl Texture image queries are not available in OpenGL ES or
          *      WebGL. See @ref Framebuffer::read() for possible workaround.
@@ -467,7 +470,7 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * Image3D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte});
+         * Image3D image = texture.image(0, {PixelFormat::RGBA, PixelType::UnsignedByte});
          * @endcode
          */
         Image3D image(Int level, Image3D&& image);
@@ -475,7 +478,9 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
         /**
          * @brief Read given mip level of texture to buffer image
          *
-         * See @ref image(Int, Image3D&) for more information.
+         * See @ref image(Int, Image3D&) for more information. The storage is
+         * not reallocated if it is large enough to contain the new data, which
+         * means that @p usage might get ignored.
          * @requires_gl45 Extension @extension{ARB,direct_state_access}
          * @requires_gl Texture image queries are not available in OpenGL ES or
          *      WebGL. See @ref Framebuffer::read() for possible workaround.
@@ -486,7 +491,7 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * BufferImage3D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+         * BufferImage3D image = texture.image(0, {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
          * @endcode
          */
         BufferImage3D image(Int level, BufferImage3D&& image, BufferUsage usage);
@@ -495,7 +500,8 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          * @brief Read given mip level of compressed texture to image
          *
          * Compression format and data size are taken from the texture, image
-         * size is taken using @ref imageSize().
+         * size is taken using @ref imageSize(). The storage is not reallocated
+         * if it is large enough to contain the new data.
          * @see @fn_gl2{GetTextureLevelParameter,GetTexLevelParameter} with
          *      @def_gl{TEXTURE_COMPRESSED_IMAGE_SIZE},
          *      @def_gl{TEXTURE_INTERNAL_FORMAT}, @def_gl{TEXTURE_WIDTH},
@@ -520,7 +526,8 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          * @brief Read given mip level of compressed texture to buffer image
          *
          * See @ref compressedImage(Int, CompressedImage3D&) for more
-         * information.
+         * information. The storage is not reallocated if it is large enough to
+         * contain the new data, which means that @p usage might get ignored.
          * @requires_gl45 Extension @extension{ARB,direct_state_access}
          * @requires_gl Texture image queries are not available in OpenGL ES or
          *      WebGL. See @ref Framebuffer::read() for possible workaround.
@@ -541,7 +548,8 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *
          * Image parameters like format and type of pixel data are taken from
          * given image, image size is taken from the texture using
-         * @ref imageSize().
+         * @ref imageSize(). The storage is not reallocated if it is large
+         * enough to contain the new data.
          *
          * If neither @extension{ARB,get_texture_sub_image} (part of OpenGL
          * 4.5) nor @extension{EXT,direct_state_access} is available, the
@@ -556,8 +564,8 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *      @fn_gl_extension{GetTextureLevelParameter,EXT,direct_state_access},
          *      eventually @fn_gl{ActiveTexture}, @fn_gl{BindTexture} and
          *      @fn_gl{GetTexLevelParameter} with @def_gl{TEXTURE_WIDTH},
-         *      @def_gl{TEXTURE_HEIGHT}, then @fn_gl{GetTextureSubImage},
-         *      @fn_gl_extension{GetnTexImage,ARB,robustness},
+         *      @def_gl{TEXTURE_HEIGHT}, then @fn_gl{PixelStore}, then
+         *      @fn_gl{GetTextureSubImage}, @fn_gl_extension{GetnTexImage,ARB,robustness},
          *      @fn_gl_extension{GetTextureImage,EXT,direct_state_access},
          *      eventually @fn_gl{GetTexImage}
          * @requires_gl Texture image queries are not available in OpenGL ES or
@@ -569,7 +577,7 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * Image2D image = texture.image(CubeMapTexture::Coordinate::PositiveX, 0, {ColorFormat::RGBA, ColorType::UnsignedByte});
+         * Image2D image = texture.image(CubeMapTexture::Coordinate::PositiveX, 0, {PixelFormat::RGBA, PixelType::UnsignedByte});
          * @endcode
          */
         Image2D image(Coordinate coordinate, Int level, Image2D&& image);
@@ -577,7 +585,9 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
         /**
          * @brief Read given mip level and coordinate of texture to buffer image
          *
-         * See @ref image(Coordinate, Int, Image2D&) for more information.
+         * See @ref image(Coordinate, Int, Image2D&) for more information. The
+         * storage is not reallocated if it is large enough to contain the new
+         * data, which means that @p usage might get ignored.
          * @requires_gl Texture image queries are not available in OpenGL ES or
          *      WebGL. See @ref Framebuffer::read() for possible workaround.
          */
@@ -587,7 +597,7 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * BufferImage2D image = texture.image(CubeMapTexture::Coordinate::PositiveX, 0, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+         * BufferImage2D image = texture.image(CubeMapTexture::Coordinate::PositiveX, 0, {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
          * @endcode
          */
         BufferImage2D image(Coordinate coordinate, Int level, BufferImage2D&& image, BufferUsage usage);
@@ -596,7 +606,8 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          * @brief Read given mip level and coordinate of compressed texture to image
          *
          * Compression format and data size are taken from the texture, image
-         * size is taken using @ref imageSize().
+         * size is taken using @ref imageSize(). The storage is not reallocated
+         * if it is large enough to contain the new data.
          *
          * If neither @extension{ARB,get_texture_sub_image} (part of OpenGL
          * 4.5) nor @extension{EXT,direct_state_access} is available, the
@@ -612,7 +623,8 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *      eventually @fn_gl{GetTexLevelParameter} with
          *      @def_gl{TEXTURE_COMPRESSED_IMAGE_SIZE},
          *      @def_gl{TEXTURE_INTERNAL_FORMAT}, @def_gl{TEXTURE_WIDTH},
-         *      @def_gl{TEXTURE_HEIGHT}, then @fn_gl{GetCompressedTextureSubImage},
+         *      @def_gl{TEXTURE_HEIGHT}, then @fn_gl{PixelStore}, then
+         *      @fn_gl{GetCompressedTextureSubImage},
          *      @fn_gl_extension{GetnCompressedTexImage,ARB,robustness},
          *      @fn_gl_extension{GetCompressedTextureImage,EXT,direct_state_access},
          *      eventually @fn_gl{GetCompressedTexImage}
@@ -634,7 +646,9 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          * @brief Read given mip level and coordinate of compressed texture to buffer image
          *
          * See @ref compressedImage(Coordinate, Int, CompressedImage2D&) for
-         * more information.
+         * more information. The storage is not reallocated if it is large
+         * enough to contain the new data, which means that @p usage might get
+         * ignored.
          * @requires_gl Texture image queries are not available in OpenGL ES or
          *      WebGL. See @ref Framebuffer::read() for possible workaround.
          */
@@ -666,7 +680,7 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * Image3D image = texture.subImage(0, range, {ColorFormat::RGBA, ColorType::UnsignedByte});
+         * Image3D image = texture.subImage(0, range, {PixelFormat::RGBA, PixelType::UnsignedByte});
          * @endcode
          */
         Image3D subImage(Int level, const Range3Di& range, Image3D&& image);
@@ -688,7 +702,7 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * BufferImage3D image = texture.subImage(0, range, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+         * BufferImage3D image = texture.subImage(0, range, {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
          * @endcode
          */
         BufferImage3D subImage(Int level, const Range3Di& range, BufferImage3D&& image, BufferUsage usage);
@@ -952,10 +966,10 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
         #endif
 
         #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL getImageImplementationDefault(Coordinate coordinate, GLint level, const Vector2i& size, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
-        void MAGNUM_LOCAL getImageImplementationDSA(Coordinate coordinate, GLint level, const Vector2i& size, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
-        void MAGNUM_LOCAL getImageImplementationDSAEXT(Coordinate coordinate, GLint level, const Vector2i& size, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
-        void MAGNUM_LOCAL getImageImplementationRobustness(Coordinate coordinate, GLint level, const Vector2i& size, ColorFormat format, ColorType type, std::size_t dataSize, GLvoid* data);
+        void MAGNUM_LOCAL getImageImplementationDefault(Coordinate coordinate, GLint level, const Vector2i& size, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
+        void MAGNUM_LOCAL getImageImplementationDSA(Coordinate coordinate, GLint level, const Vector2i& size, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
+        void MAGNUM_LOCAL getImageImplementationDSAEXT(Coordinate coordinate, GLint level, const Vector2i& size, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
+        void MAGNUM_LOCAL getImageImplementationRobustness(Coordinate coordinate, GLint level, const Vector2i& size, PixelFormat format, PixelType type, std::size_t dataSize, GLvoid* data);
 
         void MAGNUM_LOCAL getCompressedImageImplementationDefault(Coordinate coordinate, GLint level, const Vector2i& size, std::size_t dataSize, GLvoid* data);
         void MAGNUM_LOCAL getCompressedImageImplementationDSA(Coordinate coordinate, GLint level, const Vector2i& size, std::size_t dataSize, GLvoid* data);
@@ -963,16 +977,16 @@ class MAGNUM_EXPORT CubeMapTexture: public AbstractTexture {
         void MAGNUM_LOCAL getCompressedImageImplementationRobustness(Coordinate coordinate, GLint level, const Vector2i& size, std::size_t dataSize, GLvoid* data);
         #endif
 
-        void MAGNUM_LOCAL subImageImplementationDefault(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, ColorFormat format, ColorType type, const GLvoid* data);
+        void MAGNUM_LOCAL subImageImplementationDefault(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, PixelFormat format, PixelType type, const GLvoid* data);
         #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL subImageImplementationDSA(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, ColorFormat format, ColorType type, const GLvoid* data);
-        void MAGNUM_LOCAL subImageImplementationDSAEXT(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, ColorFormat format, ColorType type, const GLvoid* data);
+        void MAGNUM_LOCAL subImageImplementationDSA(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, PixelFormat format, PixelType type, const GLvoid* data);
+        void MAGNUM_LOCAL subImageImplementationDSAEXT(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, PixelFormat format, PixelType type, const GLvoid* data);
         #endif
 
-        void MAGNUM_LOCAL compressedSubImageImplementationDefault(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
+        void MAGNUM_LOCAL compressedSubImageImplementationDefault(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
         #ifndef MAGNUM_TARGET_GLES
-        void MAGNUM_LOCAL compressedSubImageImplementationDSA(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
-        void MAGNUM_LOCAL compressedSubImageImplementationDSAEXT(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, CompressedColorFormat format, Containers::ArrayView<const GLvoid> data);
+        void MAGNUM_LOCAL compressedSubImageImplementationDSA(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
+        void MAGNUM_LOCAL compressedSubImageImplementationDSAEXT(Coordinate coordinate, GLint level, const Vector2i& offset, const Vector2i& size, CompressedPixelFormat format, const GLvoid* data, GLsizei dataSize);
         #endif
 };
 

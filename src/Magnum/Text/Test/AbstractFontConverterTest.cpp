@@ -74,47 +74,27 @@ namespace {
 void AbstractFontConverterTest::convertGlyphs() {
     class GlyphExporter: public AbstractFontConverter {
         public:
-            #ifndef __MINGW32__
             GlyphExporter(std::u32string& characters): characters(characters) {}
-            #else
-            GlyphExporter(std::vector<char32_t>& characters): characters(characters) {}
-            #endif
 
         private:
             Features doFeatures() const override { return Feature::ConvertData|Feature::ExportFont; }
 
-            #ifndef __MINGW32__
-            Containers::Array<char> doExportFontToSingleData(AbstractFont&, GlyphCache&, const std::u32string& characters) const override
-            #else
-            Containers::Array<char> doExportFontToSingleData(AbstractFont&, GlyphCache&, const std::vector<char32_t>& characters) const override
-            #endif
-            {
+            Containers::Array<char> doExportFontToSingleData(AbstractFont&, GlyphCache&, const std::u32string& characters) const override {
                 this->characters = characters;
                 return {};
             }
 
-            #ifndef __MINGW32__
             std::u32string& characters;
-            #else
-            std::vector<char32_t>& characters;
-            #endif
     };
 
-    #ifndef __MINGW32__
     std::u32string characters;
-    #else
-    std::vector<char32_t> characters;
-    #endif
     GlyphExporter exporter(characters);
     exporter.exportFontToSingleData(nullFont, nullGlyphCache, "abC01a0 ");
-    #if !defined(__MINGW32__) && !defined(CORRADE_MSVC2013_COMPATIBILITY)
+    #ifndef CORRADE_MSVC2013_COMPATIBILITY
     CORRADE_COMPARE(characters, U" 01Cab");
     #elif defined(CORRADE_MSVC2013_COMPATIBILITY)
     CORRADE_COMPARE(characters, (std::u32string{
             ' ', '0', '1', 'C', 'a', 'b'}));
-    #else
-    CORRADE_COMPARE(characters, (std::vector<char32_t>{
-            U' ', U'0', U'1', U'C', U'a', U'b'}));
     #endif
 }
 
@@ -123,12 +103,7 @@ void AbstractFontConverterTest::exportFontToSingleData() {
         private:
             Features doFeatures() const override { return Feature::ConvertData|Feature::ExportFont; }
 
-            #ifndef __MINGW32__
-            Containers::Array<char> doExportFontToSingleData(AbstractFont&, GlyphCache&, const std::u32string&) const override
-            #else
-            Containers::Array<char> doExportFontToSingleData(AbstractFont&, GlyphCache&, const std::vector<char32_t>&) const override
-            #endif
-            {
+            Containers::Array<char> doExportFontToSingleData(AbstractFont&, GlyphCache&, const std::u32string&) const override {
                 Containers::Array<char> data(1);
                 data[0] = '\xee';
                 return data;
@@ -149,12 +124,7 @@ void AbstractFontConverterTest::exportFontToFile() {
         private:
             Features doFeatures() const override { return Feature::ConvertData|Feature::ExportFont|Feature::MultiFile; }
 
-            #ifndef __MINGW32__
-            std::vector<std::pair<std::string, Containers::Array<char>>> doExportFontToData(AbstractFont&, GlyphCache&, const std::string& filename, const std::u32string&) const override
-            #else
-            std::vector<std::pair<std::string, Containers::Array<char>>> doExportFontToData(AbstractFont&, GlyphCache&, const std::string& filename, const std::vector<char32_t>&) const override
-            #endif
-            {
+            std::vector<std::pair<std::string, Containers::Array<char>>> doExportFontToData(AbstractFont&, GlyphCache&, const std::string& filename, const std::u32string&) const override {
                 /* Why the hell GCC 4.9 fails to do proper move so I need to
                    work around that this ugly way?! */
                 std::vector<std::pair<std::string, Containers::Array<char>>> ret;

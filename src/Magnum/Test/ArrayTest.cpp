@@ -51,11 +51,12 @@ void ArrayTest::construct() {
     constexpr Array<3, Int> a = {5, 6, 7};
     CORRADE_COMPARE(a, (Array<3, Int>(5, 6, 7)));
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr Array<3, Int> a2 = 5;
-    #else
-    Array<3, Int> a2 = 5; /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
+    Array<3, Int> a2 = 5;
     CORRADE_COMPARE(a2, (Array<3, Int>(5, 5, 5)));
 
     constexpr Array1D b = 5;

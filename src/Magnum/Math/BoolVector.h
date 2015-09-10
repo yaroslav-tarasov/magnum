@@ -102,10 +102,15 @@ template<std::size_t size> class BoolVector {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         inline explicit BoolVector(T value);
         #else
+        template<class T, class U = typename std::enable_if<std::is_same<bool, T>::value && size != 1, bool>::type>
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class T, class U = typename std::enable_if<std::is_same<bool, T>::value && size != 1, bool>::type> constexpr explicit BoolVector(T value): BoolVector(typename Implementation::GenerateSequence<DataSize>::Type(), value ? FullSegmentMask : 0) {}
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        explicit BoolVector(T value): BoolVector(typename Implementation::GenerateSequence<DataSize>::Type(), value ? FullSegmentMask : 0) {}
         #else
-        template<class T, class U = typename std::enable_if<std::is_same<bool, T>::value && size != 1, bool>::type> explicit BoolVector(T value) {
+        explicit BoolVector(T value) {
             *this = BoolVector(typename Implementation::GenerateSequence<DataSize>::Type(), value ? FullSegmentMask : 0);
         }
         #endif

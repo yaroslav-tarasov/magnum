@@ -149,8 +149,16 @@ void RectangularMatrixTest::construct() {
 }
 
 void RectangularMatrixTest::constructDefault() {
-    constexpr Matrix4x3 a;
-    constexpr Matrix4x3 b{ZeroInit};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    constexpr
+    #endif
+    Matrix4x3 a;
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    constexpr
+    #endif
+    Matrix4x3 b{ZeroInit};
     CORRADE_COMPARE(a, Matrix4x3(Vector3(0.0f, 0.0f, 0.0f),
                                  Vector3(0.0f, 0.0f, 0.0f),
                                  Vector3(0.0f, 0.0f, 0.0f),
@@ -180,8 +188,10 @@ void RectangularMatrixTest::constructNoInit() {
 void RectangularMatrixTest::constructConversion() {
     constexpr Matrix2x2 a(Vector2(  1.3f, 2.7f),
                           Vector2(-15.0f, 7.0f));
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Matrix2x2i b(a);
 
@@ -242,16 +252,16 @@ void RectangularMatrixTest::convert() {
 
     /* GCC 5.1 fills the result with zeros instead of properly calling
        delegated copy constructor if using constexpr. Reported here:
-       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
-    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
-    constexpr /* Not constexpr under GCC < 4.7 */
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450
+       Not constexpr under GCC < 4.7.
+       MSVC 2015: Can't use delegating constructors with constexpr:
+       https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    constexpr
     #endif
     Matrix2x3 c{a};
     CORRADE_COMPARE(c, b);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
-    #endif
     Mat2x3 d(b);
     for(std::size_t i = 0; i != 5; ++i)
         CORRADE_COMPARE(d.a[i], a.a[i]);
@@ -286,9 +296,15 @@ void RectangularMatrixTest::data() {
     constexpr Matrix3x4 a(Vector4(3.0f,  5.0f, 8.0f, 4.0f),
                           Vector4(4.5f,  4.0f, 7.0f, 3.0f),
                           Vector4(7.0f, -1.7f, 8.0f, 0.0f));
-    constexpr Vector4 b = a[2];
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Probably because copy is not constexpr */
+    constexpr
+    #endif
+    Vector4 b = a[2];
     constexpr Float c = a[1][2];
-    constexpr Float d = *a.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Apparently dereferencing pointer is verboten */
+    constexpr
+    #endif
+    Float d = *a.data();
     CORRADE_COMPARE(b, Vector4(7.0f, -1.7f, 8.0f, 0.0f));
     CORRADE_COMPARE(c, 7.0f);
     CORRADE_COMPARE(d, 3.0f);
@@ -427,13 +443,19 @@ void RectangularMatrixTest::diagonal() {
                           Vector3( 4.0f,  5.0f,  7.0f),
                           Vector3( 8.0f,  9.0f, 11.0f),
                           Vector3(12.0f, 13.0f, 15.0f));
-    constexpr Vector3 aDiagonal = a.diagonal();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Probably because copy is not constexpr */
+    constexpr
+    #endif
+    Vector3 aDiagonal = a.diagonal();
     CORRADE_COMPARE(aDiagonal, diagonal);
 
     constexpr Matrix3x4 b(Vector4(-1.0f, 4.0f,  8.0f, 12.0f),
                           Vector4( 1.0f, 5.0f,  9.0f, 13.0f),
                           Vector4( 3.0f, 7.0f, 11.0f, 15.0f));
-    constexpr Vector3 bDiagonal = b.diagonal();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Probably because copy is not constexpr */
+    constexpr
+    #endif
+    Vector3 bDiagonal = b.diagonal();
     CORRADE_COMPARE(bDiagonal, diagonal);
 }
 
@@ -455,7 +477,7 @@ void RectangularMatrixTest::vector() {
 
 template<std::size_t size, class T> class BasicMat: public Math::RectangularMatrix<size, size, T> {
     public:
-        /* MSVC 2013 can't cope with {} here */
+        /* MSVC 2015 can't handle {} here */
         template<class ...U> constexpr BasicMat(U&&... args): Math::RectangularMatrix<size, size, T>(args...) {}
 
         MAGNUM_RECTANGULARMATRIX_SUBCLASS_IMPLEMENTATION(size, size, BasicMat<size, T>)
@@ -465,7 +487,7 @@ MAGNUM_MATRIX_OPERATOR_IMPLEMENTATION(BasicMat<size, T>)
 
 template<class T> class BasicMat2x2: public BasicMat<2, T> {
     public:
-        /* MSVC 2013 can't cope with {} here */
+        /* MSVC 2015 can't handle {} here */
         template<class ...U> constexpr BasicMat2x2(U&&... args): BasicMat<2, T>(args...) {}
 
         MAGNUM_RECTANGULARMATRIX_SUBCLASS_IMPLEMENTATION(2, 2, BasicMat2x2<T>)

@@ -222,7 +222,7 @@ information.
 @note Not available on GCC < 4.7. Use <tt>%Drawable<2, T></tt> instead.
 @see @ref Drawable2D, @ref BasicDrawable3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicDrawable2D = Drawable<2, T>;
 #endif
 #endif
@@ -247,7 +247,7 @@ information.
 @note Not available on GCC < 4.7. Use <tt>%Drawable<3, T></tt> instead.
 @see @ref Drawable3D, @ref BasicDrawable3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicDrawable3D = Drawable<3, T>;
 #endif
 #endif
@@ -271,7 +271,7 @@ See @ref Drawable for more information.
     @ref DrawableGroup2D, @ref DrawableGroup3D
 */
 #ifndef CORRADE_GCC46_COMPATIBILITY
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<UnsignedInt dimensions, class T> using DrawableGroup = FeatureGroup<dimensions, Drawable<dimensions, T>, T>;
 #endif
 #else
@@ -287,7 +287,7 @@ more information.
 @note Not available on GCC < 4.7. Use <tt>%DrawableGroup<2, T></tt> instead.
 @see @ref DrawableGroup2D, @ref BasicDrawableGroup3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicDrawableGroup2D = DrawableGroup<2, T>;
 #endif
 #endif
@@ -312,7 +312,7 @@ more information.
 @note Not available on GCC < 4.7. Use <tt>%DrawableGroup<3, T></tt> instead.
 @see @ref DrawableGroup3D, @ref BasicDrawableGroup2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicDrawableGroup3D = DrawableGroup<3, T>;
 #endif
 #endif

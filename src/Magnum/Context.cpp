@@ -48,6 +48,7 @@
 #include "Implementation/BufferState.h"
 #include "Implementation/FramebufferState.h"
 #include "Implementation/MeshState.h"
+#include "Implementation/RendererState.h"
 #include "Implementation/ShaderProgramState.h"
 #include "Implementation/TextureState.h"
 #ifndef MAGNUM_TARGET_GLES2
@@ -326,6 +327,7 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,EXT,discard_framebuffer),
         _extension(GL,EXT,blend_minmax),
         _extension(GL,EXT,shader_texture_lod),
+        _extension(GL,EXT,unpack_subimage),
         _extension(GL,EXT,occlusion_query_boolean),
         _extension(GL,EXT,shadow_samplers),
         _extension(GL,EXT,texture_rg),
@@ -338,6 +340,7 @@ const std::vector<Extension>& Extension::extensions(Version version) {
         _extension(GL,NV,draw_buffers),
         _extension(GL,NV,fbo_color_attachments),
         _extension(GL,NV,read_buffer),
+        _extension(GL,NV,pack_subimage),
         _extension(GL,NV,draw_instanced),
         _extension(GL,NV,framebuffer_blit),
         _extension(GL,NV,framebuffer_multisample),
@@ -683,6 +686,11 @@ void Context::resetState(const States states) {
         _state->framebuffer->reset();
     if(states & State::Meshes)
         _state->mesh->reset();
+
+    if(states & State::PixelStorage) {
+        _state->renderer->unpackPixelStorage.reset();
+        _state->renderer->packPixelStorage.reset();
+    }
 
     /* Nothing to reset for renderer yet */
 

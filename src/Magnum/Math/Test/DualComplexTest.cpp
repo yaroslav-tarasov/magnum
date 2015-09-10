@@ -171,7 +171,10 @@ void DualComplexTest::constructFromVector() {
 
 void DualComplexTest::constructCopy() {
     constexpr Math::Dual<Complex> a({-1.0f, 2.5f}, {3.0f, -7.5f});
-    constexpr DualComplex b(a);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Why can't be copy constexpr? */
+    constexpr
+    #endif
+    DualComplex b(a);
     CORRADE_COMPARE(b, DualComplex({-1.0f, 2.5f}, {3.0f, -7.5f}));
 }
 
@@ -181,15 +184,20 @@ void DualComplexTest::convert() {
 
     /* GCC 5.1 fills the result with zeros instead of properly calling
        delegated copy constructor if using constexpr. Reported here:
-       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
-    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
-    constexpr /* Not constexpr under GCC < 4.7 */
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450
+       Not constexpr under GCC < 4.7.
+       MSVC 2015: Can't use delegating constructors with constexpr:
+       https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    constexpr
     #endif
     DualComplex c{a};
     CORRADE_COMPARE(c, b);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY ) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Why can't be conversion constexpr on MSVC? */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     DualCmpl d(b);
     CORRADE_COMPARE(d.re, a.re);

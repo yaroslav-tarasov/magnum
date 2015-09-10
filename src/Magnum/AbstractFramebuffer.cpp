@@ -281,10 +281,23 @@ AbstractFramebuffer& AbstractFramebuffer::clear(const FramebufferClearMask mask)
 
 void AbstractFramebuffer::read(const Range2Di& rectangle, Image2D& image) {
     bindInternal(FramebufferTarget::Read);
-    const std::size_t dataSize = image.dataSize(rectangle.size());
-    char* const data = new char[dataSize];
-    (Context::current()->state().framebuffer->readImplementation)(rectangle, image.format(), image.type(), dataSize, data);
-    image.setData(image.format(), image.type(), rectangle.size(), data);
+
+    /* Reallocate only if needed */
+    const std::size_t dataSize = Implementation::imageDataSizeFor(image, rectangle.size());
+    Containers::Array<char> data{image.release()};
+    if(data.size() < dataSize)
+        data = Containers::Array<char>{dataSize};
+
+    #ifndef MAGNUM_TARGET_GLES2
+    Buffer::unbindInternal(Buffer::TargetHint::PixelPack);
+    #endif
+    image.storage().applyPack();
+    (Context::current()->state().framebuffer->readImplementation)(rectangle, image.format(), image.type(), data.size(), data
+        #ifdef MAGNUM_TARGET_GLES2
+        + Implementation::pixelStorageSkipOffsetFor(image, rectangle.size())
+        #endif
+        );
+    image.setData(image.storage(), image.format(), image.type(), rectangle.size(), std::move(data));
 }
 
 Image2D AbstractFramebuffer::read(const Range2Di& rectangle, Image2D&& image) {
@@ -295,13 +308,17 @@ Image2D AbstractFramebuffer::read(const Range2Di& rectangle, Image2D&& image) {
 #ifndef MAGNUM_TARGET_GLES2
 void AbstractFramebuffer::read(const Range2Di& rectangle, BufferImage2D& image, BufferUsage usage) {
     bindInternal(FramebufferTarget::Read);
-    /* If the buffer doesn't have sufficient size, resize it */
-    /** @todo Explicitly reset also when buffer usage changes */
-    if(image.size() != rectangle.size())
-        image.setData(image.format(), image.type(), rectangle.size(), nullptr, usage);
+
+    /* Reallocate only if needed */
+    const std::size_t dataSize = Implementation::imageDataSizeFor(image, rectangle.size());
+    if(image.dataSize() < dataSize)
+        image.setData(image.storage(), image.format(), image.type(), rectangle.size(), {nullptr, dataSize}, usage);
+    else
+        image.setData(image.storage(), image.format(), image.type(), rectangle.size(), nullptr, usage);
 
     image.buffer().bindInternal(Buffer::TargetHint::PixelPack);
-    (Context::current()->state().framebuffer->readImplementation)(rectangle, image.format(), image.type(), image.dataSize(rectangle.size()), nullptr);
+    image.storage().applyPack();
+    (Context::current()->state().framebuffer->readImplementation)(rectangle, image.format(), image.type(), dataSize, nullptr);
 }
 
 BufferImage2D AbstractFramebuffer::read(const Range2Di& rectangle, BufferImage2D&& image, BufferUsage usage) {
@@ -456,12 +473,12 @@ void AbstractFramebuffer::readBufferImplementationDSAEXT(GLenum buffer) {
 }
 #endif
 
-void AbstractFramebuffer::readImplementationDefault(const Range2Di& rectangle, const ColorFormat format, const ColorType type, const std::size_t, GLvoid* const data) {
+void AbstractFramebuffer::readImplementationDefault(const Range2Di& rectangle, const PixelFormat format, const PixelType type, const std::size_t, GLvoid* const data) {
     glReadPixels(rectangle.min().x(), rectangle.min().y(), rectangle.sizeX(), rectangle.sizeY(), GLenum(format), GLenum(type), data);
 }
 
 #ifndef MAGNUM_TARGET_WEBGL
-void AbstractFramebuffer::readImplementationRobustness(const Range2Di& rectangle, const ColorFormat format, const ColorType type, const std::size_t dataSize, GLvoid* const data) {
+void AbstractFramebuffer::readImplementationRobustness(const Range2Di& rectangle, const PixelFormat format, const PixelType type, const std::size_t dataSize, GLvoid* const data) {
     #ifndef MAGNUM_TARGET_GLES
     glReadnPixelsARB(rectangle.min().x(), rectangle.min().y(), rectangle.sizeX(), rectangle.sizeY(), GLenum(format), GLenum(type), dataSize, data);
     #elif !defined(CORRADE_TARGET_NACL)

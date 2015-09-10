@@ -99,18 +99,20 @@ void BoolVectorTest::constructNoInit() {
 }
 
 void BoolVectorTest::constructOneValue() {
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr BoolVector19 a(false);
-    #else
-    BoolVector19 a(false); /* not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
+    BoolVector19 a(false);
     CORRADE_COMPARE(a, BoolVector19(0x00, 0x00, 0x00));
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr BoolVector19 b(true);
-    #else
-    BoolVector19 b(true); /* not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
+    BoolVector19 b(true);
     CORRADE_COMPARE(b, BoolVector19(0xff, 0xff, 0x07));
 
     CORRADE_VERIFY(!(std::is_convertible<bool, BoolVector19>::value));
@@ -143,7 +145,10 @@ void BoolVectorTest::data() {
     constexpr bool b = a[9];
     CORRADE_COMPARE(b, true);
 
-    constexpr UnsignedByte c = *a.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Apparently dereferencing pointer is verboten */
+    constexpr
+    #endif
+    UnsignedByte c = *a.data();
     CORRADE_COMPARE(c, 0x08);
 
     BoolVector19 d(0x08, 0x03, 0x04);

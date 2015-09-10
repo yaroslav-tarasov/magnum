@@ -201,8 +201,10 @@ void VectorTest::constructNoInit() {
 }
 
 void VectorTest::constructOneValue() {
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Vector4 a(7.25f);
 
@@ -222,8 +224,10 @@ void VectorTest::constructOneComponent() {
 
 void VectorTest::constructConversion() {
     constexpr Vector4 a(1.3f, 2.7f, -15.0f, 7.0f);
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Vector4i b(a);
 
@@ -245,15 +249,20 @@ void VectorTest::convert() {
 
     /* GCC 5.1 fills the result with zeros instead of properly calling
        delegated copy constructor if using constexpr. Reported here:
-       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450 */
-    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_GCC46_COMPATIBILITY)
-    constexpr /* Not constexpr under GCC < 4.7 */
+       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66450
+       Not constexpr under GCC < 4.7.
+       MSVC 2015: Can't use delegating constructors with constexpr:
+       https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    #if (!defined(__GNUC__) || defined(__clang__)) && !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    constexpr
     #endif
     Vector3 c{a};
     CORRADE_COMPARE(c, b);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Why can't be conversion constexpr on MSVC? */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Vec3 d(b);
     CORRADE_COMPARE(d.x, a.x);
@@ -292,7 +301,10 @@ void VectorTest::data() {
     /* Pointer chasings, i.e. *(b.data()[3]), are not possible */
     constexpr Vector4 a(1.0f, 2.0f, -3.0f, 4.5f);
     constexpr Float f = a[3];
-    constexpr Float g = *a.data();
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Apparently dereferencing pointer is verboten */
+    constexpr
+    #endif
+    Float g = *a.data();
     CORRADE_COMPARE(f, 4.5f);
     CORRADE_COMPARE(g, 1.0f);
 }
@@ -485,7 +497,7 @@ void VectorTest::angle() {
 
 template<class T> class BasicVec2: public Math::Vector<2, T> {
     public:
-        /* MSVC 2013 can't cope with {} here */
+        /* MSVC 2015 can't handle {} here */
         template<class ...U> constexpr BasicVec2(U&&... args): Math::Vector<2, T>(args...) {}
 
         MAGNUM_VECTOR_SUBCLASS_IMPLEMENTATION(2, BasicVec2)
@@ -574,8 +586,14 @@ void VectorTest::subclass() {
 
     {
         constexpr Vector<1, Float> a = 5.0f;
-        constexpr Vec2 b = Vec2::pad(a);
-        constexpr Vec2 c = Vec2::pad(a, -1.0f);
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Probably because copy is not constexpr */
+        constexpr
+        #endif
+        Vec2 b = Vec2::pad(a);
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Probably because copy is not constexpr */
+        constexpr
+        #endif
+        Vec2 c = Vec2::pad(a, -1.0f);
         CORRADE_COMPARE(b, Vec2(5.0f, 0.0f));
         CORRADE_COMPARE(c, Vec2(5.0f, -1.0f));
     }

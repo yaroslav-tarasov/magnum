@@ -523,7 +523,7 @@ using Math::operator "" _radf;
    FramebufferTarget enums used only directly with framebuffer instance */
 class AbstractFramebuffer;
 
-/* AbstractQuery is not used directly */
+class AbstractQuery;
 class AbstractShaderProgram;
 class AbstractTexture;
 
@@ -564,12 +564,6 @@ enum class BufferTextureFormat: GLenum;
 template<class T> using BasicColor3 CORRADE_DEPRECATED_ALIAS("use Math::Color3 instead") = Math::Color3<T>;
 template<class T> using BasicColor4 CORRADE_DEPRECATED_ALIAS("use Math::Color4 instead") = Math::Color4<T>;
 #endif
-#endif
-
-#ifndef CORRADE_GCC45_COMPATIBILITY
-enum class ColorFormat: GLenum;
-enum class ColorType: GLenum;
-enum class CompressedColorFormat: GLenum;
 #endif
 
 class Context;
@@ -628,6 +622,23 @@ class MeshView;
 template<UnsignedInt> class MultisampleTexture;
 typedef MultisampleTexture<2> MultisampleTexture2D;
 typedef MultisampleTexture<3> MultisampleTexture2DArray;
+#endif
+
+#ifndef CORRADE_GCC45_COMPATIBILITY
+enum class PixelFormat: GLenum;
+enum class PixelType: GLenum;
+enum class CompressedPixelFormat: GLenum;
+
+#ifdef MAGNUM_BUILD_DEPRECATED
+typedef CORRADE_DEPRECATED("use PixelFormat instead") PixelFormat ColorFormat;
+typedef CORRADE_DEPRECATED("use PixelType instead") PixelType ColorType;
+typedef CORRADE_DEPRECATED("use CompressedPixelFormat instead") CompressedPixelFormat CompressedColorFormat;
+#endif
+#endif
+
+class PixelStorage;
+#ifndef MAGNUM_TARGET_GLES
+class CompressedPixelStorage;
 #endif
 
 /* ObjectFlag, ObjectFlags are used only in conjunction with *::wrap() function */

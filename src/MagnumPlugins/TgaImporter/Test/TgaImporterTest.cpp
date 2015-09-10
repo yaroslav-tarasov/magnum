@@ -29,7 +29,7 @@
 #include <Corrade/TestSuite/Compare/Container.h>
 #include <Corrade/Utility/Directory.h>
 
-#include "Magnum/ColorFormat.h"
+#include "Magnum/PixelFormat.h"
 #include "Magnum/Trade/ImageData.h"
 #include "MagnumPlugins/TgaImporter/TgaImporter.h"
 
@@ -53,14 +53,11 @@ class TgaImporterTest: public TestSuite::Tester {
         void grayscaleBits8();
         void grayscaleBits16();
 
-        void file();
-
         void useTwice();
 };
 
 TgaImporterTest::TgaImporterTest() {
-    addTests<TgaImporterTest>({&TgaImporterTest::openNonexistent,
-              &TgaImporterTest::openShort,
+    addTests<TgaImporterTest>({&TgaImporterTest::openShort,
               &TgaImporterTest::paletted,
               &TgaImporterTest::compressed,
 
@@ -71,18 +68,7 @@ TgaImporterTest::TgaImporterTest() {
               &TgaImporterTest::grayscaleBits8,
               &TgaImporterTest::grayscaleBits16,
 
-              &TgaImporterTest::file,
-
               &TgaImporterTest::useTwice});
-}
-
-void TgaImporterTest::openNonexistent() {
-    std::ostringstream debug;
-    Error::setOutput(&debug);
-
-    TgaImporter importer;
-    CORRADE_VERIFY(!importer.openFile("nonexistent.file"));
-    CORRADE_COMPARE(debug.str(), "Trade::TgaImporter::openFile(): cannot open file nonexistent.file\n");
 }
 
 void TgaImporterTest::openShort() {
@@ -146,9 +132,10 @@ void TgaImporterTest::colorBits24() {
 
     std::optional<Trade::ImageData2D> image = importer.image2D(0);
     CORRADE_VERIFY(image);
-    CORRADE_COMPARE(image->format(), ColorFormat::RGB);
+    CORRADE_COMPARE(image->storage().alignment(), 1);
+    CORRADE_COMPARE(image->format(), PixelFormat::RGB);
     CORRADE_COMPARE(image->size(), Vector2i(2, 3));
-    CORRADE_COMPARE(image->type(), ColorType::UnsignedByte);
+    CORRADE_COMPARE(image->type(), PixelType::UnsignedByte);
     CORRADE_COMPARE_AS(image->data(), Containers::ArrayView<const char>{pixels},
         TestSuite::Compare::Container);
 }
@@ -170,9 +157,10 @@ void TgaImporterTest::colorBits32() {
 
     std::optional<Trade::ImageData2D> image = importer.image2D(0);
     CORRADE_VERIFY(image);
-    CORRADE_COMPARE(image->format(), ColorFormat::RGBA);
+    CORRADE_COMPARE(image->storage().alignment(), 4);
+    CORRADE_COMPARE(image->format(), PixelFormat::RGBA);
     CORRADE_COMPARE(image->size(), Vector2i(2, 3));
-    CORRADE_COMPARE(image->type(), ColorType::UnsignedByte);
+    CORRADE_COMPARE(image->type(), PixelType::UnsignedByte);
     CORRADE_COMPARE_AS(image->data(), Containers::ArrayView<const char>{pixels},
         TestSuite::Compare::Container);
 }
@@ -189,13 +177,14 @@ void TgaImporterTest::grayscaleBits8() {
 
     std::optional<Trade::ImageData2D> image = importer.image2D(0);
     CORRADE_VERIFY(image);
+    CORRADE_COMPARE(image->storage().alignment(), 1);
     #ifndef MAGNUM_TARGET_GLES2
-    CORRADE_COMPARE(image->format(), ColorFormat::Red);
+    CORRADE_COMPARE(image->format(), PixelFormat::Red);
     #else
-    CORRADE_COMPARE(image->format(), ColorFormat::Luminance);
+    CORRADE_COMPARE(image->format(), PixelFormat::Luminance);
     #endif
     CORRADE_COMPARE(image->size(), Vector2i(2, 3));
-    CORRADE_COMPARE(image->type(), ColorType::UnsignedByte);
+    CORRADE_COMPARE(image->type(), PixelType::UnsignedByte);
     CORRADE_COMPARE_AS(image->data(), Containers::ArrayView<const char>{data}.suffix(18),
         TestSuite::Compare::Container);
 }
@@ -209,29 +198,6 @@ void TgaImporterTest::grayscaleBits16() {
     Error::setOutput(&debug);
     CORRADE_VERIFY(!importer.image2D(0));
     CORRADE_COMPARE(debug.str(), "Trade::TgaImporter::image2D(): unsupported grayscale bits-per-pixel: 16\n");
-}
-
-void TgaImporterTest::file() {
-    TgaImporter importer;
-    const char data[] = {
-        0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 3, 0, 8, 0,
-        1, 2,
-        3, 4,
-        5, 6
-    };
-    CORRADE_VERIFY(importer.openFile(Utility::Directory::join(TGAIMPORTER_TEST_DIR, "file.tga")));
-
-    std::optional<Trade::ImageData2D> image = importer.image2D(0);
-    CORRADE_VERIFY(image);
-    #ifndef MAGNUM_TARGET_GLES2
-    CORRADE_COMPARE(image->format(), ColorFormat::Red);
-    #else
-    CORRADE_COMPARE(image->format(), ColorFormat::Luminance);
-    #endif
-    CORRADE_COMPARE(image->size(), Vector2i(2, 3));
-    CORRADE_COMPARE(image->type(), ColorType::UnsignedByte);
-    CORRADE_COMPARE_AS(image->data(), Containers::ArrayView<const char>{data}.suffix(18),
-        TestSuite::Compare::Container);
 }
 
 void TgaImporterTest::useTwice() {

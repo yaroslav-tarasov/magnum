@@ -157,7 +157,7 @@ See @ref TranslationTransformation for more information.
     instead.
 @see @ref TranslationTransformation2D, @ref BasicTranslationTransformation3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class TranslationType = T>
 #else
@@ -188,7 +188,7 @@ See @ref TranslationTransformation for more information.
     instead.
 @see @ref TranslationTransformation3D, @ref BasicTranslationTransformation2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class TranslationType = T>
 #else

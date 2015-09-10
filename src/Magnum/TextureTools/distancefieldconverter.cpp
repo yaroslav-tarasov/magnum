@@ -28,8 +28,8 @@
 #include <Corrade/PluginManager/Manager.h>
 
 #include "Magnum/Math/Range.h"
-#include "Magnum/ColorFormat.h"
 #include "Magnum/Image.h"
+#include "Magnum/PixelFormat.h"
 #include "Magnum/Renderer.h"
 #include "Magnum/Texture.h"
 #include "Magnum/TextureFormat.h"
@@ -65,13 +65,13 @@ Arguments:
 -   `output` -- output image
 -   `-h`, `--help` -- display help message and exit
 -   `--importer IMPORTER` -- image importer plugin (default: @ref Trade::AnyImageImporter "AnyImageImporter")
--   `--converter CONVERTER` -- image converter plugin (default: @ref Trade::TgaImageConverter "TgaImageConverter")
+-   `--converter CONVERTER` -- image converter plugin (default: @ref Trade::AnyImageConverter "AnyImageConverter")
 -   `--plugin-dir DIR` -- base plugin dir (defaults to plugin directory in
     Magnum install location)
 -   `--output-size "X Y"` -- size of output image
 -   `--radius N` -- distance field computation radius
 
-Images with @ref ColorFormat::Red, @ref ColorFormat::RGB or @ref ColorFormat::RGBA
+Images with @ref PixelFormat::Red, @ref PixelFormat::RGB or @ref PixelFormat::RGBA
 are accepted on input.
 
 The resulting image can be then used with @ref Shaders::DistanceFieldVector
@@ -80,11 +80,11 @@ the algorithm and parameters.
 
 @section magnum-distancefield-example Example usage
 
-    magnum-distancefieldconverter --importer PngImporter --output-size "256 256" --radius 24 logo.png logo.tga
+    magnum-distancefieldconverter --output-size "256 256" --radius 24 logo-src.png logo.png
 
-This will open binary `logo.png` image using @ref Trade::PngImporter "PngImporter"
-plugin and converts it to 256x256 distance field `logo.tga` using
-@ref Trade::TgaImageConverter "TgaImageConverter".
+This will open monochrome `logo-src.png` image using any plugin that can open
+PNG files and converts it to 256x256 distance field `logo.png` using any plugin
+that can write PNG files.
 
 */
 
@@ -104,7 +104,7 @@ DistanceFieldConverter::DistanceFieldConverter(const Arguments& arguments): Plat
     args.addArgument("input").setHelp("input", "input image")
         .addArgument("output").setHelp("output", "output image")
         .addOption("importer", "AnyImageImporter").setHelp("importer", "image importer plugin")
-        .addOption("converter", "TgaImageConverter").setHelp("converter", "image converter plugin")
+        .addOption("converter", "AnyImageConverter").setHelp("converter", "image converter plugin")
         .addOption("plugin-dir", MAGNUM_PLUGINS_DIR).setHelpKey("plugin-dir", "DIR").setHelp("plugin-dir", "base plugin dir")
         .addNamedArgument("output-size").setHelpKey("output-size", "\"X Y\"").setHelp("output-size", "size of output image")
         .addNamedArgument("radius").setHelpKey("radius", "N").setHelp("radius", "distance field computation radius")
@@ -136,9 +136,9 @@ int DistanceFieldConverter::exec() {
 
     /* Decide about internal format */
     TextureFormat internalFormat;
-    if(image->format() == ColorFormat::Red) internalFormat = TextureFormat::R8;
-    else if(image->format() == ColorFormat::RGB) internalFormat = TextureFormat::RGB8;
-    else if(image->format() == ColorFormat::RGBA) internalFormat = TextureFormat::RGBA8;
+    if(image->format() == PixelFormat::Red) internalFormat = TextureFormat::R8;
+    else if(image->format() == PixelFormat::RGB) internalFormat = TextureFormat::RGB8;
+    else if(image->format() == PixelFormat::RGBA) internalFormat = TextureFormat::RGBA8;
     else {
         Error() << "Unsupported image format" << image->format();
         return 1;
@@ -163,7 +163,7 @@ int DistanceFieldConverter::exec() {
     TextureTools::distanceField(input, output, {{}, args.value<Vector2i>("output-size")}, args.value<Int>("radius"), image->size());
 
     /* Save image */
-    Image2D result(ColorFormat::Red, ColorType::UnsignedByte);
+    Image2D result(PixelFormat::Red, PixelType::UnsignedByte);
     output.image(0, result);
     if(!converter->exportToFile(result, args.value("output"))) {
         Error() << "Cannot save file" << args.value("output");

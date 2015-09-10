@@ -51,9 +51,10 @@ namespace Magnum { namespace Trade {
 /**
 @brief TGA image converter plugin
 
-Supports images with format @ref ColorFormat::RGB, @ref ColorFormat::RGBA or
-@ref ColorFormat::Red (or @ref ColorFormat::Luminance in OpenGL ES 2.0 and
-WebGL 1.0) and type @ref ColorType::UnsignedByte.
+Supports images with format @ref PixelFormat::RGB, @ref PixelFormat::RGBA or
+@ref PixelFormat::Red (or @ref PixelFormat::Luminance in OpenGL ES 2.0 and
+WebGL 1.0) and type @ref PixelType::UnsignedByte. Does *not* support
+non-default @ref PixelStorage::swapBytes() values.
 
 This plugin is built if `WITH_TGAIMAGECONVERTER` is enabled when building
 Magnum. To use dynamic plugin, you need to load `TgaImageConverter` plugin
@@ -73,7 +74,7 @@ class MAGNUM_TGAIMAGECONVERTER_EXPORT TgaImageConverter: public AbstractImageCon
 
     private:
         Features MAGNUM_TGAIMAGECONVERTER_LOCAL doFeatures() const override;
-        Containers::Array<char> MAGNUM_TGAIMAGECONVERTER_LOCAL doExportToData(const ImageView2D& image) const override;
+        Containers::Array<char> MAGNUM_TGAIMAGECONVERTER_LOCAL doExportToData(const ImageView2D& image) override;
 };
 
 }}

@@ -266,7 +266,7 @@ information.
 @note Not available on GCC < 4.7. Use <tt>Camera<2, T></tt> instead.
 @see @ref Camera2D, @ref BasicCamera3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicCamera2D = Camera<2, T>;
 #endif
 #endif
@@ -293,7 +293,7 @@ information.
 @note Not available on GCC < 4.7. Use <tt>Camera<3, T></tt> instead.
 @see @ref Camera3D, @ref BasicCamera2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicCamera3D = Camera<3, T>;
 #endif
 #endif

@@ -28,8 +28,8 @@
 
 #include "Magnum/configure.h"
 #include "Magnum/BufferImage.h"
-#include "Magnum/ColorFormat.h"
 #include "Magnum/Image.h"
+#include "Magnum/PixelFormat.h"
 #include "Magnum/RectangleTexture.h"
 #include "Magnum/TextureFormat.h"
 #include "Magnum/Math/Color.h"
@@ -99,6 +99,13 @@ RectangleTextureGLTest::RectangleTextureGLTest() {
 
               &RectangleTextureGLTest::invalidateImage,
               &RectangleTextureGLTest::invalidateSubImage});
+}
+
+namespace {
+    template<std::size_t size, class T> Containers::ArrayView<const T> unsafeSuffix(const T(&data)[size], std::size_t offset) {
+        static_assert(sizeof(T) == 1, "");
+        return {data - offset, size + offset};
+    }
 }
 
 void RectangleTextureGLTest::construct() {
@@ -253,6 +260,9 @@ namespace {
                                       0x04, 0x05, 0x06, 0x07,
                                       0x08, 0x09, 0x0a, 0x0b,
                                       0x0c, 0x0d, 0x0e, 0x0f };
+
+    const auto DataStorage = PixelStorage{}.setSkip({0, 1, 0});
+    const auto DataOffset = 8;
 }
 
 void RectangleTextureGLTest::image() {
@@ -260,18 +270,18 @@ void RectangleTextureGLTest::image() {
         CORRADE_SKIP(Extensions::GL::ARB::texture_rectangle::string() + std::string(" is not supported."));
 
     RectangleTexture texture;
-    texture.setImage(TextureFormat::RGBA8,
-        ImageView2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data));
+    texture.setImage(TextureFormat::RGBA8, ImageView2D{
+        DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte, Vector2i(2), unsafeSuffix(Data, DataOffset)});
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Image2D image = texture.image({ColorFormat::RGBA, ColorType::UnsignedByte});
+    Image2D image = texture.image({DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector2i(2));
     CORRADE_COMPARE_AS(
-        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.data().size()).suffix(DataOffset),
         Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
 }
 
@@ -284,18 +294,19 @@ void RectangleTextureGLTest::imageBuffer() {
         CORRADE_SKIP(Extensions::GL::ARB::texture_rectangle::string() + std::string(" is not supported."));
 
     RectangleTexture texture;
-    texture.setImage(TextureFormat::RGBA8,
-        BufferImage2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data, BufferUsage::StaticDraw));
+    texture.setImage(TextureFormat::RGBA8, BufferImage2D{
+        DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte, Vector2i(2), unsafeSuffix(Data, DataOffset), BufferUsage::StaticDraw});
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    BufferImage2D image = texture.image({ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+    BufferImage2D image = texture.image({DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
     const auto imageData = image.buffer().data<UnsignedByte>();
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector2i(2));
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData.suffix(DataOffset),
+        Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
 }
 
 void RectangleTextureGLTest::compressedImageBuffer() {
@@ -319,19 +330,19 @@ void RectangleTextureGLTest::subImage() {
 
     RectangleTexture texture;
     texture.setImage(TextureFormat::RGBA8,
-        ImageView2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(4), Zero));
-    texture.setSubImage(Vector2i(1),
-        ImageView2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data));
+        ImageView2D(PixelFormat::RGBA, PixelType::UnsignedByte, Vector2i(4), Zero));
+    texture.setSubImage(Vector2i(1), ImageView2D{
+        DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte, Vector2i(2), unsafeSuffix(Data, DataOffset)});
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Image2D image = texture.image({ColorFormat::RGBA, ColorType::UnsignedByte});
+    Image2D image = texture.image({PixelFormat::RGBA, PixelType::UnsignedByte});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector2i(4));
     CORRADE_COMPARE_AS(
-        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.data().size()),
         Containers::ArrayView<const UnsignedByte>{SubDataComplete}, TestSuite::Compare::Container);
 }
 
@@ -345,13 +356,13 @@ void RectangleTextureGLTest::subImageBuffer() {
 
     RectangleTexture texture;
     texture.setImage(TextureFormat::RGBA8,
-        ImageView2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(4), Zero));
-    texture.setSubImage(Vector2i(1),
-        BufferImage2D(ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i(2), Data, BufferUsage::StaticDraw));
+        ImageView2D(PixelFormat::RGBA, PixelType::UnsignedByte, Vector2i(4), Zero));
+    texture.setSubImage(Vector2i(1), BufferImage2D{
+        DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte, Vector2i(2), unsafeSuffix(Data, DataOffset), BufferUsage::StaticDraw});
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    BufferImage2D image = texture.image({ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+    BufferImage2D image = texture.image({PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
     const auto imageData = image.buffer().data<UnsignedByte>();
 
     MAGNUM_VERIFY_NO_ERROR();
@@ -372,17 +383,18 @@ void RectangleTextureGLTest::subImageQuery() {
 
     RectangleTexture texture;
     texture.setStorage(TextureFormat::RGBA8, Vector2i{4})
-           .setSubImage({}, ImageView2D{ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i{4}, SubDataComplete});
+           .setSubImage({}, ImageView2D{PixelFormat::RGBA, PixelType::UnsignedByte, Vector2i{4}, SubDataComplete});
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Image2D image = texture.subImage(Range2Di::fromSize(Vector2i{1}, Vector2i{2}), {ColorFormat::RGBA, ColorType::UnsignedByte});
+    Image2D image = texture.subImage(Range2Di::fromSize(Vector2i{1}, Vector2i{2}),
+        {DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector2i{2});
     CORRADE_COMPARE_AS(
-        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.data().size()).suffix(DataOffset),
         Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
 }
 
@@ -394,17 +406,19 @@ void RectangleTextureGLTest::subImageQueryBuffer() {
 
     RectangleTexture texture;
     texture.setStorage(TextureFormat::RGBA8, Vector2i{4})
-           .setSubImage({}, ImageView2D{ColorFormat::RGBA, ColorType::UnsignedByte, Vector2i{4}, SubDataComplete});
+           .setSubImage({}, ImageView2D{PixelFormat::RGBA, PixelType::UnsignedByte, Vector2i{4}, SubDataComplete});
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    BufferImage2D image = texture.subImage(Range2Di::fromSize(Vector2i{1}, Vector2i{2}), {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+    BufferImage2D image = texture.subImage(Range2Di::fromSize(Vector2i{1}, Vector2i{2}),
+        {DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
     const auto imageData = image.buffer().data<UnsignedByte>();
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector2i{2});
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData.suffix(DataOffset),
+        Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
 }
 
 void RectangleTextureGLTest::invalidateImage() {

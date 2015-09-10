@@ -26,9 +26,9 @@
 #include <Corrade/TestSuite/Compare/Container.h>
 
 #include "Magnum/BufferImage.h"
-#include "Magnum/ColorFormat.h"
 #include "Magnum/CubeMapTextureArray.h"
 #include "Magnum/Image.h"
+#include "Magnum/PixelFormat.h"
 #include "Magnum/TextureFormat.h"
 #include "Magnum/Math/Color.h"
 #include "Magnum/Math/Range.h"
@@ -73,6 +73,12 @@ struct CubeMapTextureArrayGLTest: AbstractOpenGLTester {
 
     void invalidateImage();
     void invalidateSubImage();
+
+private:
+    #ifndef MAGNUM_TARGET_GLES
+    CompressedPixelStorage _compressedDataStorage, _compressedSubDataStorage;
+    #endif
+    std::size_t _compressedDataOffset, _compressedSubDataOffset;
 };
 
 CubeMapTextureArrayGLTest::CubeMapTextureArrayGLTest() {
@@ -110,6 +116,30 @@ CubeMapTextureArrayGLTest::CubeMapTextureArrayGLTest() {
 
               &CubeMapTextureArrayGLTest::invalidateImage,
               &CubeMapTextureArrayGLTest::invalidateSubImage});
+
+    #ifndef MAGNUM_TARGET_GLES
+    if(Context::current()->isExtensionSupported<Extensions::GL::ARB::compressed_texture_pixel_storage>())
+    {
+        _compressedDataStorage = _compressedSubDataStorage = CompressedPixelStorage{}
+            .setCompressedBlockSize({4, 4, 1})
+            .setCompressedBlockDataSize(16)
+            .setSkip({0, 0, 4});
+        _compressedDataOffset = _compressedSubDataOffset = 16*4;
+    } else
+    #endif
+    {
+        #ifndef MAGNUM_TARGET_GLES
+        _compressedDataStorage = _compressedSubDataStorage = {};
+        #endif
+        _compressedDataOffset = _compressedSubDataOffset = 0;
+    }
+}
+
+namespace {
+    template<std::size_t size, class T> Containers::ArrayView<const T> unsafeSuffix(const T(&data)[size], std::size_t offset) {
+        static_assert(sizeof(T) == 1, "");
+        return {data - offset, size + offset};
+    }
 }
 
 void CubeMapTextureArrayGLTest::construct() {
@@ -358,6 +388,9 @@ namespace {
         0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f
     };
 
+    const auto DataStorage = PixelStorage{}.setSkip({0, 0, 1});
+    const auto DataOffset = 16;
+
     /* Just 4x4 0x00 - 0x3f compressed using RGBA DXT3 by the driver, repeated
        six times */
     constexpr UnsignedByte CompressedData[] = {
@@ -388,19 +421,19 @@ void CubeMapTextureArrayGLTest::image() {
 
     CubeMapTextureArray texture;
     texture.setImage(0, TextureFormat::RGBA8,
-        ImageView3D(ColorFormat::RGBA, ColorType::UnsignedByte, {2, 2, 6}, Data));
+        ImageView3D{DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte, {2, 2, 6}, unsafeSuffix(Data, DataOffset)});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     /** @todo How to test this on ES? */
     #ifndef MAGNUM_TARGET_GLES
-    Image3D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte});
+    Image3D image = texture.image(0, {DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector3i(2, 2, 6));
     CORRADE_COMPARE_AS(
-        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        (Containers::ArrayView<const UnsignedByte>{image.data<UnsignedByte>(), image.data().size()}.suffix(DataOffset)),
         Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
     #endif
 }
@@ -417,19 +450,22 @@ void CubeMapTextureArrayGLTest::compressedImage() {
         CORRADE_SKIP(Extensions::GL::EXT::texture_compression_s3tc::string() + std::string(" is not supported."));
 
     CubeMapTextureArray texture;
-    texture.setCompressedImage(0, CompressedImageView3D{CompressedColorFormat::RGBAS3tcDxt3,
-        {4, 4, 6}, CompressedData});
+    texture.setCompressedImage(0, CompressedImageView3D{
+        #ifndef MAGNUM_TARGET_GLES
+        _compressedDataStorage,
+        #endif
+        CompressedPixelFormat::RGBAS3tcDxt3, {4, 4, 6}, unsafeSuffix(CompressedData, _compressedDataOffset)});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     #ifndef MAGNUM_TARGET_GLES
-    CompressedImage3D image = texture.compressedImage(0, {});
+    CompressedImage3D image = texture.compressedImage(0, {_compressedDataStorage});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), (Vector3i{4, 4, 6}));
     CORRADE_COMPARE_AS(
-        (Containers::ArrayView<const UnsignedByte>{image.data<UnsignedByte>(), image.data().size()}),
+        (Containers::ArrayView<const UnsignedByte>{image.data<UnsignedByte>(), image.data().size()}.suffix(_compressedDataOffset)),
         Containers::ArrayView<const UnsignedByte>{CompressedData}, TestSuite::Compare::Container);
     #endif
 }
@@ -444,20 +480,21 @@ void CubeMapTextureArrayGLTest::imageBuffer() {
     #endif
 
     CubeMapTextureArray texture;
-    texture.setImage(0, TextureFormat::RGBA8,
-        BufferImage3D(ColorFormat::RGBA, ColorType::UnsignedByte, {2, 2, 6}, Data, BufferUsage::StaticDraw));
+    texture.setImage(0, TextureFormat::RGBA8, BufferImage3D{DataStorage,
+        PixelFormat::RGBA, PixelType::UnsignedByte, {2, 2, 6}, unsafeSuffix(Data, DataOffset), BufferUsage::StaticDraw});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     /** @todo How to test this on ES? */
     #ifndef MAGNUM_TARGET_GLES
-    BufferImage3D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+    BufferImage3D image = texture.image(0, {DataStorage, PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
     const auto imageData = image.buffer().data<UnsignedByte>();
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector3i(2, 2, 6));
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData.suffix(DataOffset),
+        Containers::ArrayView<const UnsignedByte>{Data}, TestSuite::Compare::Container);
     #endif
 }
 
@@ -473,20 +510,24 @@ void CubeMapTextureArrayGLTest::compressedImageBuffer() {
         CORRADE_SKIP(Extensions::GL::EXT::texture_compression_s3tc::string() + std::string(" is not supported."));
 
     CubeMapTextureArray texture;
-    texture.setCompressedImage(0, CompressedBufferImage3D{CompressedColorFormat::RGBAS3tcDxt3,
-        {4, 4, 6}, CompressedData, BufferUsage::StaticDraw});
+    texture.setCompressedImage(0, CompressedBufferImage3D{
+        #ifndef MAGNUM_TARGET_GLES
+        _compressedDataStorage,
+        #endif
+        CompressedPixelFormat::RGBAS3tcDxt3, {4, 4, 6}, unsafeSuffix(CompressedData, _compressedDataOffset), BufferUsage::StaticDraw});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     /** @todo How to test this on ES? */
     #ifndef MAGNUM_TARGET_GLES
-    CompressedBufferImage3D image = texture.compressedImage(0, {}, BufferUsage::StaticRead);
+    CompressedBufferImage3D image = texture.compressedImage(0, {_compressedDataStorage}, BufferUsage::StaticRead);
     const auto imageData = image.buffer().data<UnsignedByte>();
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), (Vector3i{4, 4, 6}));
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{CompressedData}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData.suffix(_compressedDataOffset),
+        Containers::ArrayView<const UnsignedByte>{CompressedData}, TestSuite::Compare::Container);
     #endif
 }
 
@@ -509,6 +550,9 @@ namespace {
         0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
         0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f
     };
+
+    const auto SubDataStorage = PixelStorage{}.setSkip({0, 0, 1});
+    const std::size_t SubDataOffset = 16;
 
     /* Just 4x4x4 0x00 - 0xff compressed using RGBA DXT3 by the driver */
     constexpr UnsignedByte CompressedSubData[] = {
@@ -627,21 +671,21 @@ void CubeMapTextureArrayGLTest::subImage() {
 
     CubeMapTextureArray texture;
     texture.setImage(0, TextureFormat::RGBA8,
-        ImageView3D(ColorFormat::RGBA, ColorType::UnsignedByte, {4, 4, 6}, Zero));
-    texture.setSubImage(0, Vector3i(1),
-        ImageView3D(ColorFormat::RGBA, ColorType::UnsignedByte, {2, 2, 4}, SubData));
+        ImageView3D(PixelFormat::RGBA, PixelType::UnsignedByte, {4, 4, 6}, Zero));
+    texture.setSubImage(0, Vector3i(1), ImageView3D{SubDataStorage,
+        PixelFormat::RGBA, PixelType::UnsignedByte, {2, 2, 4}, unsafeSuffix(SubData, SubDataOffset)});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     /** @todo How to test this on ES? */
     #ifndef MAGNUM_TARGET_GLES
-    Image3D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte});
+    Image3D image = texture.image(0, {PixelFormat::RGBA, PixelType::UnsignedByte});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector3i(4, 4, 6));
     CORRADE_COMPARE_AS(
-        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        (Containers::ArrayView<const UnsignedByte>{image.data<UnsignedByte>(), image.data().size()}),
         Containers::ArrayView<const UnsignedByte>{SubDataComplete}, TestSuite::Compare::Container);
     #endif
 }
@@ -658,10 +702,13 @@ void CubeMapTextureArrayGLTest::compressedSubImage() {
         CORRADE_SKIP(Extensions::GL::EXT::texture_compression_s3tc::string() + std::string(" is not supported."));
 
     CubeMapTextureArray texture;
-    texture.setCompressedImage(0, CompressedImageView3D{CompressedColorFormat::RGBAS3tcDxt3,
+    texture.setCompressedImage(0, CompressedImageView3D{CompressedPixelFormat::RGBAS3tcDxt3,
         {12, 12, 6}, CompressedZero});
-    texture.setCompressedSubImage(0, {4, 4, 1},
-        CompressedImageView3D{CompressedColorFormat::RGBAS3tcDxt3, Vector3i{4}, CompressedSubData});
+    texture.setCompressedSubImage(0, {4, 4, 1}, CompressedImageView3D{
+        #ifndef MAGNUM_TARGET_GLES
+        _compressedSubDataStorage,
+        #endif
+        CompressedPixelFormat::RGBAS3tcDxt3, Vector3i{4}, unsafeSuffix(CompressedSubData, _compressedSubDataOffset)});
 
     MAGNUM_VERIFY_NO_ERROR();
 
@@ -688,15 +735,15 @@ void CubeMapTextureArrayGLTest::subImageBuffer() {
 
     CubeMapTextureArray texture;
     texture.setImage(0, TextureFormat::RGBA8,
-        ImageView3D(ColorFormat::RGBA, ColorType::UnsignedByte, {4, 4, 6}, Zero));
-    texture.setSubImage(0, Vector3i(1),
-        BufferImage3D(ColorFormat::RGBA, ColorType::UnsignedByte, {2, 2, 4}, SubData, BufferUsage::StaticDraw));
+        ImageView3D(PixelFormat::RGBA, PixelType::UnsignedByte, {4, 4, 6}, Zero));
+    texture.setSubImage(0, Vector3i(1), BufferImage3D{SubDataStorage,
+        PixelFormat::RGBA, PixelType::UnsignedByte, {2, 2, 4}, unsafeSuffix(SubData, SubDataOffset), BufferUsage::StaticDraw});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     /** @todo How to test this on ES? */
     #ifndef MAGNUM_TARGET_GLES
-    BufferImage3D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+    BufferImage3D image = texture.image(0, {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
     const auto imageData = image.buffer().data<UnsignedByte>();
 
     MAGNUM_VERIFY_NO_ERROR();
@@ -718,10 +765,13 @@ void CubeMapTextureArrayGLTest::compressedSubImageBuffer() {
         CORRADE_SKIP(Extensions::GL::EXT::texture_compression_s3tc::string() + std::string(" is not supported."));
 
     CubeMapTextureArray texture;
-    texture.setCompressedImage(0, CompressedImageView3D{CompressedColorFormat::RGBAS3tcDxt3,
+    texture.setCompressedImage(0, CompressedImageView3D{CompressedPixelFormat::RGBAS3tcDxt3,
         {12, 12, 6}, CompressedZero});
-    texture.setCompressedSubImage(0, {4, 4, 1},
-        CompressedBufferImage3D(CompressedColorFormat::RGBAS3tcDxt3, Vector3i{4}, CompressedSubData, BufferUsage::StaticDraw));
+    texture.setCompressedSubImage(0, {4, 4, 1}, CompressedBufferImage3D{
+        #ifndef MAGNUM_TARGET_GLES
+        _compressedSubDataStorage,
+        #endif
+        CompressedPixelFormat::RGBAS3tcDxt3, Vector3i{4}, unsafeSuffix(CompressedSubData, _compressedSubDataOffset), BufferUsage::StaticDraw});
 
     MAGNUM_VERIFY_NO_ERROR();
 
@@ -746,17 +796,18 @@ void CubeMapTextureArrayGLTest::subImageQuery() {
 
     CubeMapTextureArray texture;
     texture.setStorage(1, TextureFormat::RGBA8, {4, 4, 6})
-           .setSubImage(0, {}, ImageView3D{ColorFormat::RGBA, ColorType::UnsignedByte, {4, 4, 6}, SubDataComplete});
+           .setSubImage(0, {}, ImageView3D{PixelFormat::RGBA, PixelType::UnsignedByte, {4, 4, 6}, SubDataComplete});
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    Image3D image = texture.subImage(0, Range3Di::fromSize(Vector3i{1}, {2, 2, 4}), {ColorFormat::RGBA, ColorType::UnsignedByte});
+    Image3D image = texture.subImage(0, Range3Di::fromSize(Vector3i{1}, {2, 2, 4}),
+        {SubDataStorage, PixelFormat::RGBA, PixelType::UnsignedByte});
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector3i(2, 2, 4));
     CORRADE_COMPARE_AS(
-        Containers::ArrayView<const UnsignedByte>(image.data<UnsignedByte>(), image.pixelSize()*image.size().product()),
+        (Containers::ArrayView<const UnsignedByte>{image.data<UnsignedByte>(), image.data().size()}.suffix(SubDataOffset)),
         Containers::ArrayView<const UnsignedByte>{SubData}, TestSuite::Compare::Container);
 }
 
@@ -768,17 +819,19 @@ void CubeMapTextureArrayGLTest::subImageQueryBuffer() {
 
     CubeMapTextureArray texture;
     texture.setStorage(1, TextureFormat::RGBA8, {4, 4, 6})
-           .setSubImage(0, {}, ImageView3D{ColorFormat::RGBA, ColorType::UnsignedByte, {4, 4, 6}, SubDataComplete});
+           .setSubImage(0, {}, ImageView3D{PixelFormat::RGBA, PixelType::UnsignedByte, {4, 4, 6}, SubDataComplete});
 
     MAGNUM_VERIFY_NO_ERROR();
 
-    BufferImage3D image = texture.subImage(0, Range3Di::fromSize(Vector3i{1}, {2, 2, 4}), {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+    BufferImage3D image = texture.subImage(0, Range3Di::fromSize(Vector3i{1}, {2, 2, 4}),
+        {SubDataStorage, PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
     const auto imageData = image.buffer().data<UnsignedByte>();
 
     MAGNUM_VERIFY_NO_ERROR();
 
     CORRADE_COMPARE(image.size(), Vector3i(2, 2, 4));
-    CORRADE_COMPARE_AS(imageData, Containers::ArrayView<const UnsignedByte>{SubData}, TestSuite::Compare::Container);
+    CORRADE_COMPARE_AS(imageData.suffix(SubDataOffset),
+        Containers::ArrayView<const UnsignedByte>{SubData}, TestSuite::Compare::Container);
 }
 #endif
 
@@ -795,7 +848,7 @@ void CubeMapTextureArrayGLTest::generateMipmap() {
 
     CubeMapTextureArray texture;
     texture.setImage(0, TextureFormat::RGBA8,
-        ImageView3D(ColorFormat::RGBA, ColorType::UnsignedByte, {32, 32, 24}));
+        ImageView3D(PixelFormat::RGBA, PixelType::UnsignedByte, {32, 32, 24}));
 
     CORRADE_COMPARE(texture.imageSize(0), Vector3i(32, 32, 24));
     CORRADE_COMPARE(texture.imageSize(1), Vector3i(0));

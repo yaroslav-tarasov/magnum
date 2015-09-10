@@ -27,15 +27,28 @@
 
 namespace Magnum {
 
-template<UnsignedInt dimensions> void Image<dimensions>::setData(ColorFormat format, ColorType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, void* data) {
-    delete[] _data;
+template<UnsignedInt dimensions> Image<dimensions>::Image(PixelStorage storage, PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _storage{storage}, _format{format}, _type{type}, _size{size}, _data{std::move(data)} {
+    CORRADE_ASSERT(Implementation::imageDataSize(*this) <= _data.size(), "Image::Image(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+}
+
+template<UnsignedInt dimensions> void Image<dimensions>::setData(PixelStorage storage, PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data) {
+    _storage = storage;
     _format = format;
     _type = type;
     _size = size;
-    _data = reinterpret_cast<char*>(data);
+    CORRADE_ASSERT(Implementation::imageDataSize(*this) <= data.size(), "Image::setData(): bad image data size, got" << data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+    _data = std::move(data);
 }
 
-template<UnsignedInt dimensions> void CompressedImage<dimensions>::setData(CompressedColorFormat format, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::Array<char>&& data) {
+template<UnsignedInt dimensions> void CompressedImage<dimensions>::setData(
+    #ifndef MAGNUM_TARGET_GLES
+    CompressedPixelStorage storage,
+    #endif
+    CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data)
+{
+    #ifndef MAGNUM_TARGET_GLES
+    _storage = storage;
+    #endif
     _format = format;
     _size = size;
     _data = std::move(data);

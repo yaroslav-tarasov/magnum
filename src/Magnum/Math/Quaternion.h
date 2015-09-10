@@ -226,7 +226,12 @@ template<class T> class Quaternion {
 
         /** @brief Construct quaternion from external representation */
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(std::declval<U>()))> constexpr explicit Quaternion(const U& other): Quaternion{Implementation::QuaternionConverter<T, U>::from(other)} {}
+        template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(std::declval<U>()))>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        explicit Quaternion(const U& other): Quaternion{Implementation::QuaternionConverter<T, U>::from(other)} {}
         #else
         #ifndef CORRADE_GCC44_COMPATIBILITY
         template<class U, class V = decltype(Implementation::QuaternionConverter<T, U>::from(std::declval<U>()))> explicit Quaternion(const U& other)

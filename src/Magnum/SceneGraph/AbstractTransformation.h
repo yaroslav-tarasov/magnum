@@ -116,7 +116,7 @@ Convenience alternative to `AbstractTransformation<2, T>`. See
     instead.
 @see @ref AbstractTransformation2D, @ref AbstractBasicTransformation3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using AbstractBasicTransformation2D = AbstractTransformation<2, T>;
 #endif
 #endif
@@ -142,7 +142,7 @@ Convenience alternative to `AbstractTransformation<3, T>`. See
     instead.
 @see @ref AbstractTransformation3D, @ref AbstractBasicTransformation2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using AbstractBasicTransformation3D = AbstractTransformation<3, T>;
 #endif
 #endif

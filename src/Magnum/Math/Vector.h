@@ -99,6 +99,13 @@ template<std::size_t size, class T> class Vector {
     template<std::size_t, class> friend class Matrix;
     #endif
 
+    #ifdef CORRADE_MSVC2015_COMPATIBILITY
+    /* Delegating constexpr constructor workarounds */
+    friend class Vector2<T>;
+    friend class Vector3<T>;
+    friend class Vector4<T>;
+    #endif
+
     public:
         typedef T Type;         /**< @brief Underlying data type */
 
@@ -227,7 +234,12 @@ template<std::size_t size, class T> class Vector {
 
         /** @brief Construct vector from external representation */
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class U, class V = decltype(Implementation::VectorConverter<size, T, U>::from(std::declval<U>()))> constexpr explicit Vector(const U& other): Vector(Implementation::VectorConverter<size, T, U>::from(other)) {}
+        template<class U, class V = decltype(Implementation::VectorConverter<size, T, U>::from(std::declval<U>()))>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        explicit Vector(const U& other): Vector(Implementation::VectorConverter<size, T, U>::from(other)) {}
         #else
         #ifndef CORRADE_GCC44_COMPATIBILITY
         template<class U, class V = decltype(Implementation::VectorConverter<size, T, U>::from(std::declval<U>()))> explicit Vector(const U& other)
@@ -1455,7 +1467,7 @@ template<std::size_t size, class T> struct ConfigurationValue<Magnum::Math::Vect
     }
 };
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
+#if !defined(DOXYGEN_GENERATING_OUTPUT) && !defined(__MINGW32__)
 /* Vectors */
 extern template struct MAGNUM_EXPORT ConfigurationValue<Magnum::Math::Vector<2, Magnum::Float>>;
 extern template struct MAGNUM_EXPORT ConfigurationValue<Magnum::Math::Vector<3, Magnum::Float>>;

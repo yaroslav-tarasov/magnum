@@ -75,7 +75,7 @@ calling @ref setStorage() and then specify each layer separately using
 texture.setStorage(levels, TextureFormat::RGBA8, {64, 64, 16});
 
 for(std::size_t i = 0; i != 16; ++i) {
-    Image3D image(ColorFormat::RGBA, ColorType::UnsignedByte, {64, 64, 1}, ...);
+    Image3D image(PixelFormat::RGBA, PixelType::UnsignedByte, {64, 64, 1}, ...);
     texture.setSubImage(0, Vector3i::zAxis(i), image);
 }
 @endcode
@@ -422,7 +422,7 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * Image3D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte});
+         * Image3D image = texture.image(0, {PixelFormat::RGBA, PixelType::UnsignedByte});
          * @endcode
          */
         Image<dimensions+1> image(Int level, Image<dimensions+1>&& image);
@@ -444,7 +444,7 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * BufferImage3D image = texture.image(0, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+         * BufferImage3D image = texture.image(0, {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
          * @endcode
          */
         BufferImage<dimensions+1> image(Int level, BufferImage<dimensions+1>&& image, BufferUsage usage);
@@ -510,7 +510,7 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * Image3D image = texture.subImage(0, range, {ColorFormat::RGBA, ColorType::UnsignedByte});
+         * Image3D image = texture.subImage(0, range, {PixelFormat::RGBA, PixelType::UnsignedByte});
          * @endcode
          */
         Image<dimensions+1> subImage(Int level, const typename DimensionTraits<dimensions+1, Int>::RangeType& range, Image<dimensions+1>&& image);
@@ -532,7 +532,7 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          *
          * Convenience alternative to the above, example usage:
          * @code
-         * BufferImage3D image = texture.subImage(0, range, {ColorFormat::RGBA, ColorType::UnsignedByte}, BufferUsage::StaticRead);
+         * BufferImage3D image = texture.subImage(0, range, {PixelFormat::RGBA, PixelType::UnsignedByte}, BufferUsage::StaticRead);
          * @endcode
          */
         BufferImage<dimensions+1> subImage(Int level, const typename DimensionTraits<dimensions+1, Int>::RangeType& range, BufferImage<dimensions+1>&& image, BufferUsage usage);
@@ -612,7 +612,8 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the texture is bound before the operation (if not
          * already).
-         * @see @ref setStorage(), @fn_gl2{TextureSubImage2D,TexSubImage2D}/
+         * @see @ref setStorage(), @fn_gl{PixelStore}, then
+         *      @fn_gl2{TextureSubImage2D,TexSubImage2D}/
          *      @fn_gl2{TextureSubImage3D,TexSubImage3D},
          *      @fn_gl_extension{TextureSubImage2D,EXT,direct_state_access}/
          *      @fn_gl_extension{TextureSubImage3D,EXT,direct_state_access},
@@ -647,7 +648,8 @@ template<UnsignedInt dimensions> class TextureArray: public AbstractTexture {
          * nor @extension{EXT,direct_state_access} desktop extension is
          * available, the texture is bound before the operation (if not
          * already).
-         * @see @ref setStorage(), @fn_gl2{CompressedTextureSubImage2D,CompressedTexSubImage2D}/
+         * @see @ref setStorage(), @fn_gl{PixelStore}, then
+         *      @fn_gl2{CompressedTextureSubImage2D,CompressedTexSubImage2D}/
          *      @fn_gl2{CompressedTextureSubImage3D,CompressedTexSubImage3D},
          *      @fn_gl_extension{CompressedTextureSubImage2D,EXT,direct_state_access}/
          *      @fn_gl_extension{CompressedTextureSubImage3D,EXT,direct_state_access},

@@ -50,25 +50,49 @@ template<UnsignedInt dimensions> class Image {
 
         /**
          * @brief Constructor
+         * @param storage           Storage of pixel data
          * @param format            Format of pixel data
          * @param type              Data type of pixel data
          * @param size              Image size
          * @param data              Image data
          *
-         * Note that the image data are not copied on construction, but they
-         * are deleted on class destruction.
+         * The data are expected to be of proper size for given @p storage
+         * parameters.
          */
-        explicit Image(ColorFormat format, ColorType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, void* data): _format{format}, _type{type}, _size{size}, _data{reinterpret_cast<char*>(data)} {}
+        explicit Image(PixelStorage storage, PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
+
+        /** @overload
+         * Similar to the above, but uses default @ref PixelStorage parameters.
+         */
+        explicit Image(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): Image{{}, format, type, size, std::move(data)} {}
+
+        #ifdef MAGNUM_BUILD_DEPRECATED
+        /** @copybrief Image(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::Array<char>&&)
+         * @deprecated Use @ref Image(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::Array<char>&&)
+         *      instead.
+         */
+        explicit CORRADE_DEPRECATED("use Image(PixelFormat, PixelType, const VectorTypeFor&, Containers::Array&&) instead") Image(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, void* data): Image{{}, format, type, size, Containers::Array<char>{reinterpret_cast<char*>(data), Implementation::imageDataSizeFor(format, type, size)}} {}
+        #endif
 
         /**
          * @brief Constructor
+         * @param storage           Storage of pixel data
          * @param format            Format of pixel data
          * @param type              Data type of pixel data
          *
          * Dimensions are set to zero and data pointer to `nullptr`, call
-         * @ref setData() to fill the image with data.
+         * @ref setData() to fill the image with data or use
+         * @ref Texture::image() "*Texture::image()"/
+         * @ref Texture::subImage() "*Texture::subImage()"/
+         * @ref AbstractFramebuffer::read() "*Framebuffer::read()" to fill the
+         * image with data using @p storage settings.
          */
-        /*implicit*/ Image(ColorFormat format, ColorType type): _format{format}, _type{type}, _data{} {}
+        /*implicit*/ Image(PixelStorage storage, PixelFormat format, PixelType type): _storage{storage}, _format{format}, _type{type}, _data{} {}
+
+        /** @overload
+         * Similar to the above, but uses default @ref PixelStorage parameters.
+         */
+        /*implicit*/ Image(PixelFormat format, PixelType type): Image{{}, format, type} {}
 
         /** @brief Copying is not allowed */
         Image(const Image<dimensions>&) = delete;
@@ -81,9 +105,6 @@ template<UnsignedInt dimensions> class Image {
 
         /** @brief Move assignment */
         Image<dimensions>& operator=(Image<dimensions>&& other) noexcept;
-
-        /** @brief Destructor */
-        ~Image() { delete[] _data; }
 
         /** @brief Conversion to view */
         /*implicit*/ operator ImageView<dimensions>()
@@ -98,70 +119,100 @@ template<UnsignedInt dimensions> class Image {
         /*implicit*/ operator ImageView<dimensions>() const && = delete;
         #endif
 
+        /** @brief Storage of pixel data */
+        PixelStorage storage() const { return _storage; }
+
         /** @brief Format of pixel data */
-        ColorFormat format() const { return _format; }
+        PixelFormat format() const { return _format; }
 
         /** @brief Data type of pixel data */
-        ColorType type() const { return _type; }
+        PixelType type() const { return _type; }
 
-        /** @brief Pixel size (in bytes) */
-        std::size_t pixelSize() const { return Implementation::imagePixelSize(_format, _type); }
+        /**
+         * @brief Pixel size (in bytes)
+         *
+         * @see @ref PixelStorage::pixelSize()
+         */
+        std::size_t pixelSize() const { return PixelStorage::pixelSize(_format, _type); }
 
         /** @brief Image size */
         typename DimensionTraits<Dimensions, Int>::VectorType size() const { return _size; }
 
         /**
-         * @brief Size of data required to store image of given size
+         * @brief Image data properties
          *
-         * Takes color format, type and row alignment of this image into
-         * account.
-         * @see @ref pixelSize()
+         * See @ref PixelStorage::dataProperties() for more information.
          */
-        std::size_t dataSize(const typename DimensionTraits<Dimensions, Int>::VectorType& size) const {
-            return Implementation::imageDataSize<dimensions>(_format, _type, size);
+        std::tuple<std::size_t, typename DimensionTraits<dimensions, std::size_t>::VectorType, std::size_t> dataProperties() const {
+            return Implementation::imageDataProperties<dimensions>(*this);
         }
 
         /**
-         * @brief Pointer to raw data
+         * @brief Raw data
          *
          * @see @ref release()
          */
+        Containers::ArrayView<char> data() { return _data; }
+
+        /** @overload */
+        Containers::ArrayView<const char> data() const { return _data; }
+
+        /** @overload */
         template<class T = char> T* data() {
-            return reinterpret_cast<T*>(_data);
+            return reinterpret_cast<T*>(_data.data());
         }
 
         /** @overload */
         template<class T = char> const T* data() const {
-            return reinterpret_cast<const T*>(_data);
+            return reinterpret_cast<const T*>(_data.data());
         }
 
         /**
          * @brief Set image data
+         * @param storage           Storage of pixel data
          * @param format            Format of pixel data
          * @param type              Data type of pixel data
          * @param size              Image size
          * @param data              Image data
          *
-         * Deletes previous data and replaces them with new. Note that the
-         * data are not copied, but they are deleted on destruction.
+         * Deletes previous data and replaces them with new. The data are
+         * expected to be of proper size for given @p storage parameters.
          * @see @ref release()
          */
-        void setData(ColorFormat format, ColorType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, void* data);
+        void setData(PixelStorage storage, PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
+
+        /** @overload
+         * Similar to the above, but uses default @ref PixelStorage parameters.
+         */
+        void setData(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data) {
+            setData({}, format, type, size, std::move(data));
+        }
+
+        #ifdef MAGNUM_BUILD_DEPRECATED
+        /** @copybrief setData(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::Array<char>&&)
+         * @deprecated Use @ref setData(PixelFormat, PixelType, const VectorTypeFor<dimensions, Int>&, Containers::Array<char>&&)
+         *      instead.
+         */
+        void CORRADE_DEPRECATED("use setData(PixelFormat, PixelType, const VectorTypeFor&, Containers::ArrayView) instead")  setData(PixelFormat format, PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, void* data) {
+            setData({}, format, type, size, Containers::Array<char>{reinterpret_cast<char*>(data), Implementation::imageDataSizeFor(format, type, size)});
+        }
+        #endif
 
         /**
          * @brief Release data storage
          *
-         * Releases the ownership of the data pointer and resets internal state
-         * to default. Deleting the returned array is then user responsibility.
-         * @see @ref setData()
+         * Releases the ownership of the data array and resets internal state
+         * to default.
+         * @see @ref data()
          */
-        char* release();
+        Containers::Array<char> release();
 
     private:
-        ColorFormat _format;
-        ColorType _type;
+        PixelStorage _storage;
+        PixelFormat _format;
+        PixelType _type;
         Math::Vector<Dimensions, Int> _size;
-        char* _data;
+        Containers::Array<char> _data;
 };
 
 /** @brief One-dimensional image */
@@ -188,21 +239,57 @@ template<UnsignedInt dimensions> class CompressedImage {
             Dimensions = dimensions /**< Image dimension count */
         };
 
+        #ifndef MAGNUM_TARGET_GLES
         /**
          * @brief Constructor
-         * @param format            Format of compressed data
+         * @param storage           Storage of compressed pixel data
+         * @param format            Format of compressed pixel data
          * @param size              Image size
          * @param data              Image data
+         *
+         * @requires_gl42 Extension @extension{ARB,compressed_texture_pixel_storage}
+         * @requires_gl Compressed pixel storage is hardcoded in OpenGL ES and
+         *      WebGL.
          */
-        explicit CompressedImage(CompressedColorFormat format, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _format{format}, _size{size}, _data{std::move(data)} {}
+        explicit CompressedImage(CompressedPixelStorage storage, CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
+        #endif
+
+        /**
+         * @brief Constructor
+         * @param format            Format of compressed pixel data
+         * @param size              Image size
+         * @param data              Image data
+         *
+         * Similar the above, but uses default @ref CompressedPixelStorage
+         * parameters (or the hardcoded ones in OpenGL ES and WebGL).
+         */
+        explicit CompressedImage(CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
+
+        #ifndef MAGNUM_TARGET_GLES
+        /**
+         * @brief Constructor
+         * @param storage           Storage of compressed pixel data
+         *
+         * Format is undefined, size is zero and data are empty, call
+         * @ref setData() to fill the image with data or use
+         * @ref Texture::compressedImage() "*Texture::compressedImage()"/
+         * @ref Texture::compressedSubImage() "*Texture::compressedSubImage()"
+         * to fill the image with data using @p storage settings.
+         *
+         * @requires_gl42 Extension @extension{ARB,compressed_texture_pixel_storage}
+         * @requires_gl Compressed pixel storage is hardcoded in OpenGL ES and
+         *      WebGL.
+         */
+        /*implicit*/ CompressedImage(CompressedPixelStorage storage);
+        #endif
 
         /**
          * @brief Constructor
          *
-         * Format is undefined, size is zero and data are empty, call
-         * @ref setData() to fill the image with data.
+         * Similar the above, but uses default @ref CompressedPixelStorage
+         * parameters (or the hardcoded ones in OpenGL ES).
          */
-        /*implicit*/ CompressedImage(): _format{} {}
+        /*implicit*/ CompressedImage();
 
         /** @brief Copying is not allowed */
         CompressedImage(const CompressedImage<dimensions>&) = delete;
@@ -229,23 +316,49 @@ template<UnsignedInt dimensions> class CompressedImage {
         /*implicit*/ operator CompressedImageView<dimensions>() const && = delete;
         #endif
 
-        /** @brief Format of compressed data */
-        CompressedColorFormat format() const { return _format; }
+        #ifndef MAGNUM_TARGET_GLES
+        /**
+         * @brief Storage of compressed pixel data
+         *
+         * @requires_gl42 Extension @extension{ARB,compressed_texture_pixel_storage}
+         * @requires_gl Compressed pixel storage is hardcoded in OpenGL ES and
+         *      WebGL.
+         */
+        CompressedPixelStorage storage() const { return _storage; }
+        #endif
+
+        /** @brief Format of compressed pixel data */
+        CompressedPixelFormat format() const { return _format; }
 
         /** @brief Image size */
         typename DimensionTraits<Dimensions, Int>::VectorType size() const { return _size; }
 
-        /** @brief Raw data */
+        #ifndef MAGNUM_TARGET_GLES
+        /**
+         * @brief Compressed image data properties
+         *
+         * See @ref CompressedPixelStorage::dataProperties() for more
+         * information.
+         * @requires_gl42 Extension @extension{ARB,compressed_texture_pixel_storage}
+         * @requires_gl Compressed pixel storage is hardcoded in OpenGL ES and
+         *      WebGL.
+         */
+        std::tuple<std::size_t, typename DimensionTraits<dimensions, std::size_t>::VectorType, std::size_t> dataProperties() const {
+            return Implementation::compressedImageDataProperties<dimensions>(*this);
+        }
+        #endif
+
+        /**
+         * @brief Raw data
+         *
+         * @see @ref release()
+         */
         Containers::ArrayView<char> data() { return _data; }
 
         /** @overload */
         Containers::ArrayView<const char> data() const { return _data; }
 
-        /**
-         * @brief Pointer to raw data
-         *
-         * @see @ref release()
-         */
+        /** @overload */
         template<class T> T* data() {
             return reinterpret_cast<T*>(_data.data());
         }
@@ -255,29 +368,49 @@ template<UnsignedInt dimensions> class CompressedImage {
             return reinterpret_cast<const T*>(_data.data());
         }
 
+        #ifndef MAGNUM_TARGET_GLES
         /**
          * @brief Set image data
-         * @param format            Format of compressed data
+         * @param storage           Storage of compressed pixel data
+         * @param format            Format of compressed pixel data
          * @param size              Image size
          * @param data              Image data
          *
          * Deletes previous data and replaces them with new. Note that the
          * data are not copied, but they are deleted on destruction.
          * @see @ref release()
+         * @requires_gl42 Extension @extension{ARB,compressed_texture_pixel_storage}
+         * @requires_gl Compressed pixel storage is hardcoded in OpenGL ES and
+         *      WebGL.
          */
-        void setData(CompressedColorFormat format, const typename DimensionTraits<Dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
+        void setData(CompressedPixelStorage storage, CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
+        #endif
+
+        /**
+         * @brief Set image data
+         * @param format            Format of compressed pixel data
+         * @param size              Image size
+         * @param data              Image data
+         *
+         * Similar the above, but uses default @ref CompressedPixelStorage
+         * parameters (or the hardcoded ones in OpenGL ES and WebGL).
+         */
+        void setData(CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data);
 
         /**
          * @brief Release data storage
          *
-         * Releases the ownership of the data pointer and resets internal state
+         * Releases the ownership of the data array and resets internal state
          * to default.
          * @see @ref setData()
          */
         Containers::Array<char> release();
 
     private:
-        CompressedColorFormat _format;
+        #ifndef MAGNUM_TARGET_GLES
+        CompressedPixelStorage _storage;
+        #endif
+        CompressedPixelFormat _format;
         Math::Vector<Dimensions, Int> _size;
         Containers::Array<char> _data;
 };
@@ -291,18 +424,22 @@ typedef CompressedImage<2> CompressedImage2D;
 /** @brief Three-dimensional compressed image */
 typedef CompressedImage<3> CompressedImage3D;
 
-template<UnsignedInt dimensions> inline Image<dimensions>::Image(Image<dimensions>&& other) noexcept: _format{std::move(other._format)}, _type{std::move(other._type)}, _size{std::move(other._size)}, _data{std::move(other._data)} {
+template<UnsignedInt dimensions> inline Image<dimensions>::Image(Image<dimensions>&& other) noexcept: _storage{std::move(other._storage)}, _format{std::move(other._format)}, _type{std::move(other._type)}, _size{std::move(other._size)}, _data{std::move(other._data)} {
     other._size = {};
-    other._data = nullptr;
 }
 
-template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(CompressedImage<dimensions>&& other) noexcept: _format{std::move(other._format)}, _size{std::move(other._size)}, _data{std::move(other._data)} {
+template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(CompressedImage<dimensions>&& other) noexcept:
+    #ifndef MAGNUM_TARGET_GLES
+    _storage{std::move(other._storage)},
+    #endif
+    _format{std::move(other._format)}, _size{std::move(other._size)}, _data{std::move(other._data)}
+{
     other._size = {};
-    other._data = nullptr;
 }
 
 template<UnsignedInt dimensions> inline Image<dimensions>& Image<dimensions>::operator=(Image<dimensions>&& other) noexcept {
     using std::swap;
+    swap(_storage, other._storage);
     swap(_format, other._format);
     swap(_type, other._type);
     swap(_size, other._size);
@@ -312,6 +449,9 @@ template<UnsignedInt dimensions> inline Image<dimensions>& Image<dimensions>::op
 
 template<UnsignedInt dimensions> inline CompressedImage<dimensions>& CompressedImage<dimensions>::operator=(CompressedImage<dimensions>&& other) noexcept {
     using std::swap;
+    #ifndef MAGNUM_TARGET_GLES
+    swap(_storage, other._storage);
+    #endif
     swap(_format, other._format);
     swap(_size, other._size);
     swap(_data, other._data);
@@ -325,7 +465,7 @@ const &
 const
 #endif
 {
-    return ImageView<dimensions>{_format, _type, _size, _data};
+    return ImageView<dimensions>{_storage, _format, _type, _size, _data};
 }
 
 template<UnsignedInt dimensions> inline CompressedImage<dimensions>::operator CompressedImageView<dimensions>()
@@ -335,24 +475,54 @@ const &
 const
 #endif
 {
-    return CompressedImageView<dimensions>{_format, _size, _data};
+    return CompressedImageView<dimensions>{
+        #ifndef MAGNUM_TARGET_GLES
+        _storage,
+        #endif
+        _format, _size, _data};
 }
 
-template<UnsignedInt dimensions> inline char* Image<dimensions>::release() {
-    /** @todo I need `std::exchange` NOW. */
-    char* const data = _data;
+template<UnsignedInt dimensions> inline Containers::Array<char> Image<dimensions>::release() {
+    Containers::Array<char> data{std::move(_data)};
     _size = {};
-    _data = nullptr;
     return data;
 }
 
 template<UnsignedInt dimensions> inline Containers::Array<char> CompressedImage<dimensions>::release() {
-    /** @todo I need `std::exchange` NOW. */
     Containers::Array<char> data{std::move(_data)};
     _size = {};
-    _data = nullptr;
     return data;
 }
+
+template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(
+    #ifndef MAGNUM_TARGET_GLES
+    const CompressedPixelStorage storage,
+    #endif
+    const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data):
+    #ifndef MAGNUM_TARGET_GLES
+    _storage{storage},
+    #endif
+    _format{format}, _size{size}, _data{std::move(data)} {}
+
+template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(
+    #ifndef MAGNUM_TARGET_GLES
+    const CompressedPixelStorage storage
+    #endif
+    )
+    #ifndef MAGNUM_TARGET_GLES
+    : _storage{storage}
+    #endif
+    {}
+
+#ifndef MAGNUM_TARGET_GLES
+template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): CompressedImage{{}, format, size, std::move(data)} {}
+
+template<UnsignedInt dimensions> inline CompressedImage<dimensions>::CompressedImage(): CompressedImage{CompressedPixelStorage{}} {}
+
+template<UnsignedInt dimensions> inline void CompressedImage<dimensions>::setData(const CompressedPixelFormat format, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data) {
+    setData({}, format, size, std::move(data));
+}
+#endif
 
 }
 

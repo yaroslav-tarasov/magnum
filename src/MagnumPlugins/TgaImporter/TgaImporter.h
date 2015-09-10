@@ -29,6 +29,7 @@
  * @brief Class @ref Magnum::Trade::TgaImporter
  */
 
+#include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/VisibilityMacros.h>
 
 #include "Magnum/Trade/AbstractImporter.h"
@@ -62,11 +63,15 @@ of another plugin, you need to request `TgaImporter` component of `Magnum`
 package in CMake and link to `${MAGNUM_TGAIMPORTER_LIBRARIES}`. See
 @ref building, @ref cmake and @ref plugins for more information.
 
-The images are imported with @ref ColorType::UnsignedByte and @ref ColorFormat::RGB,
-@ref ColorFormat::RGBA or @ref ColorFormat::Red, respectively. Grayscale images
-require extension @extension{ARB,texture_rg}. In OpenGL ES 2.0, if
-@es_extension{EXT,texture_rg} is not supported and in WebGL 1.0, grayscale
-images use @ref ColorFormat::Luminance instead of @ref ColorFormat::Red.
+The images are imported with @ref PixelType::UnsignedByte and @ref PixelFormat::RGB,
+@ref PixelFormat::RGBA or @ref PixelFormat::Red, respectively. Grayscale images
+require extension @extension{ARB,texture_rg}. Imported images are imported with
+default @ref PixelStorage parameters except for alignment, which may be changed
+to `1` if the data require it.
+
+In OpenGL ES 2.0, if @es_extension{EXT,texture_rg} is not supported and in
+WebGL 1.0, grayscale images use @ref PixelFormat::Luminance instead of
+@ref PixelFormat::Red.
 */
 class MAGNUM_TGAIMPORTER_EXPORT TgaImporter: public AbstractImporter {
     public:
@@ -82,12 +87,11 @@ class MAGNUM_TGAIMPORTER_EXPORT TgaImporter: public AbstractImporter {
         Features MAGNUM_TGAIMPORTER_LOCAL doFeatures() const override;
         bool MAGNUM_TGAIMPORTER_LOCAL doIsOpened() const override;
         void MAGNUM_TGAIMPORTER_LOCAL doOpenData(Containers::ArrayView<const char> data) override;
-        void MAGNUM_TGAIMPORTER_LOCAL doOpenFile(const std::string& filename) override;
         void MAGNUM_TGAIMPORTER_LOCAL doClose() override;
         UnsignedInt MAGNUM_TGAIMPORTER_LOCAL doImage2DCount() const override;
         std::optional<ImageData2D> MAGNUM_TGAIMPORTER_LOCAL doImage2D(UnsignedInt id) override;
 
-        std::istream* in;
+        Containers::Array<char> _in;
 };
 
 }}

@@ -58,6 +58,7 @@ template<class T> class Dual {
         #ifdef DOXYGEN_GENERATING_OUTPUT
         explicit Dual(NoInitT);
         #else
+        /* MSVC 2015 can't handle {} instead of ::value */
         template<class U = T, class = typename std::enable_if<std::is_pod<U>::value>::type> Dual(NoInitT) {}
         template<class U = T, class V = T, class = typename std::enable_if<std::is_constructible<U, NoInitT>::value>::type> Dual(NoInitT): _real{NoInit}, _dual{NoInit} {}
         #endif

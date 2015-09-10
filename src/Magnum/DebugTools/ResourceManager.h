@@ -37,7 +37,8 @@
 #include "Magnum/SceneGraph/SceneGraph.h"
 #include "Magnum/Shapes/Shapes.h"
 
-#ifdef CORRADE_MSVC2013_COMPATIBILITY
+/** @todo fix this better */
+#ifdef CORRADE_MSVC2015_COMPATIBILITY
 #include "Magnum/AbstractShaderProgram.h"
 #include "Magnum/Buffer.h"
 #include "Magnum/Mesh.h"

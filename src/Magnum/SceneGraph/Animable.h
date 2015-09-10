@@ -333,7 +333,7 @@ information.
 @note Not available on GCC < 4.7. Use <tt>%Animable<2, T></tt> instead.
 @see @ref Animable2D, @ref BasicAnimable3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicAnimable2D = Animable<2, T>;
 #endif
 #endif
@@ -360,7 +360,7 @@ information.
 @note Not available on GCC < 4.7. Use <tt>%Animable<3, T></tt> instead.
 @see @ref Animable3D, @ref BasicAnimable2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using BasicAnimable3D = Animable<3, T>;
 #endif
 #endif

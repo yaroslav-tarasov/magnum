@@ -134,9 +134,21 @@ void MatrixTest::construct() {
 }
 
 void MatrixTest::constructIdentity() {
-    constexpr Matrix4x4 identity;
-    constexpr Matrix4x4 identity2{IdentityInit};
-    constexpr Matrix4x4 identity3{IdentityInit, 4.0f};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    constexpr
+    #endif
+    Matrix4x4 identity;
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    constexpr
+    #endif
+    Matrix4x4 identity2{IdentityInit};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    constexpr
+    #endif
+    Matrix4x4 identity3{IdentityInit, 4.0f};
 
     Matrix4x4 identityExpected(Vector4(1.0f, 0.0f, 0.0f, 0.0f),
                                Vector4(0.0f, 1.0f, 0.0f, 0.0f),
@@ -154,7 +166,11 @@ void MatrixTest::constructIdentity() {
 }
 
 void MatrixTest::constructZero() {
-    constexpr Matrix4x4 a{ZeroInit};
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY
+    /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+    constexpr
+    #endif
+    Matrix4x4 a{ZeroInit};
     CORRADE_COMPARE(a, Matrix4x4(Vector4(0.0f, 0.0f, 0.0f, 0.0f),
                                  Vector4(0.0f, 0.0f, 0.0f, 0.0f),
                                  Vector4(0.0f, 0.0f, 0.0f, 0.0f),
@@ -202,7 +218,10 @@ void MatrixTest::constructCopy() {
                                                Vector4(4.5f,  4.0f, 7.0f,  2.0f),
                                                Vector4(1.0f,  2.0f, 3.0f, -1.0f),
                                                Vector4(7.9f, -1.0f, 8.0f, -1.5f));
-    constexpr Matrix4x4 b(a);
+    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Why can't be copy constexpr? */
+    constexpr
+    #endif
+    Matrix4x4 b(a);
     CORRADE_COMPARE(b, Matrix4x4(Vector4(3.0f,  5.0f, 8.0f, -3.0f),
                                  Vector4(4.5f,  4.0f, 7.0f,  2.0f),
                                  Vector4(1.0f,  2.0f, 3.0f, -1.0f),
@@ -220,8 +239,10 @@ void MatrixTest::convert() {
     constexpr Matrix3x3 c(b);
     CORRADE_COMPARE(c, b);
 
-    #ifndef CORRADE_GCC46_COMPATIBILITY
-    constexpr /* Not constexpr under GCC < 4.7 */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Why can't be conversion constexpr on MSVC? */
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
     #endif
     Mat3 d(b);
     for(std::size_t i = 0; i != 9; ++i)
@@ -319,13 +340,13 @@ void MatrixTest::invertedOrthogonal() {
 
 template<class T> class BasicVec2: public Math::Vector<2, T> {
     public:
-        /* MSVC 2013 can't cope with {} here */
+        /* MSVC 2015 can't handle {} here */
         template<class ...U> constexpr BasicVec2(U&&... args): Math::Vector<2, T>(args...) {}
 };
 
 template<class T> class BasicMat2: public Math::Matrix<2, T> {
     public:
-        /* MSVC 2013 can't cope with {} here */
+        /* MSVC 2015 can't handle {} here */
         template<class ...U> constexpr BasicMat2(U&&... args): Math::Matrix<2, T>(args...) {}
 
         MAGNUM_MATRIX_SUBCLASS_IMPLEMENTATION(2, BasicMat2, BasicVec2)

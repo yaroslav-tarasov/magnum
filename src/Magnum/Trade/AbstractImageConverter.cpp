@@ -35,50 +35,89 @@ namespace Magnum { namespace Trade {
 
 AbstractImageConverter::AbstractImageConverter() = default;
 
-AbstractImageConverter::AbstractImageConverter(PluginManager::AbstractManager& manager, std::string plugin): AbstractPlugin(manager, std::move(plugin)) {}
+AbstractImageConverter::AbstractImageConverter(PluginManager::Manager<AbstractImageConverter>& manager): PluginManager::AbstractManagingPlugin<AbstractImageConverter>{manager} {}
 
-std::optional<Image2D> AbstractImageConverter::exportToImage(const ImageView2D& image) const {
+AbstractImageConverter::AbstractImageConverter(PluginManager::AbstractManager& manager, std::string plugin): PluginManager::AbstractManagingPlugin<AbstractImageConverter>{manager, std::move(plugin)} {}
+
+std::optional<Image2D> AbstractImageConverter::exportToImage(const ImageView2D& image) {
     CORRADE_ASSERT(features() & Feature::ConvertImage,
         "Trade::AbstractImageConverter::exportToImage(): feature not supported", {});
 
     return doExportToImage(image);
 }
 
-std::optional<Image2D> AbstractImageConverter::doExportToImage(const ImageView2D&) const {
+std::optional<Image2D> AbstractImageConverter::doExportToImage(const ImageView2D&) {
     CORRADE_ASSERT(false, "Trade::AbstractImageConverter::exportToImage(): feature advertised but not implemented", {});
     return std::nullopt;
 }
 
-std::optional<CompressedImage2D> AbstractImageConverter::exportToCompressedImage(const ImageView2D& image) const {
-    CORRADE_ASSERT(features() & Feature::CompressImage,
+std::optional<CompressedImage2D> AbstractImageConverter::exportToCompressedImage(const ImageView2D& image) {
+    CORRADE_ASSERT(features() & Feature::ConvertCompressedImage,
         "Trade::AbstractImageConverter::exportToCompressedImage(): feature not supported", {});
 
     return doExportToCompressedImage(image);
 }
 
-std::optional<CompressedImage2D> AbstractImageConverter::doExportToCompressedImage(const ImageView2D&) const {
+std::optional<CompressedImage2D> AbstractImageConverter::doExportToCompressedImage(const ImageView2D&) {
     CORRADE_ASSERT(false, "Trade::AbstractImageConverter::exportToCompressedImage(): feature advertised but not implemented", {});
     return std::nullopt;
 }
 
-Containers::Array<char> AbstractImageConverter::exportToData(const ImageView2D& image) const {
+Containers::Array<char> AbstractImageConverter::exportToData(const ImageView2D& image) {
     CORRADE_ASSERT(features() & Feature::ConvertData,
         "Trade::AbstractImageConverter::exportToData(): feature not supported", {});
 
     return doExportToData(image);
 }
 
-Containers::Array<char> AbstractImageConverter::doExportToData(const ImageView2D&) const {
+Containers::Array<char> AbstractImageConverter::doExportToData(const ImageView2D&) {
     CORRADE_ASSERT(false, "Trade::AbstractImageConverter::exportToData(): feature advertised but not implemented", {});
     return {};
 }
 
-bool AbstractImageConverter::exportToFile(const ImageView2D& image, const std::string& filename) const {
+Containers::Array<char> AbstractImageConverter::exportToData(const CompressedImageView2D& image) {
+    CORRADE_ASSERT(features() & Feature::ConvertCompressedData,
+        "Trade::AbstractImageConverter::exportToData(): feature not supported", {});
+
+    return doExportToData(image);
+}
+
+Containers::Array<char> AbstractImageConverter::doExportToData(const CompressedImageView2D&) {
+    CORRADE_ASSERT(false, "Trade::AbstractImageConverter::exportToData(): feature advertised but not implemented", {});
+    return {};
+}
+
+bool AbstractImageConverter::exportToFile(const ImageView2D& image, const std::string& filename) {
+    CORRADE_ASSERT(features() & Feature::ConvertFile,
+        "Trade::AbstractImageConverter::exportToFile(): feature not supported", {});
+
     return doExportToFile(image, filename);
 }
 
-bool AbstractImageConverter::doExportToFile(const ImageView2D& image, const std::string& filename) const {
+bool AbstractImageConverter::doExportToFile(const ImageView2D& image, const std::string& filename) {
     CORRADE_ASSERT(features() & Feature::ConvertData, "Trade::AbstractImageConverter::exportToFile(): not implemented", false);
+
+    const auto data = doExportToData(image);
+    if(!data) return false;
+
+    /* Open file */
+    if(!Utility::Directory::write(filename, data)) {
+        Error() << "Trade::AbstractImageConverter::exportToFile(): cannot write to file" << filename;
+        return false;
+    }
+
+    return true;
+}
+
+bool AbstractImageConverter::exportToFile(const CompressedImageView2D& image, const std::string& filename) {
+    CORRADE_ASSERT(features() & Feature::ConvertCompressedFile,
+        "Trade::AbstractImageConverter::exportToFile(): feature not supported", {});
+
+    return doExportToFile(image, filename);
+}
+
+bool AbstractImageConverter::doExportToFile(const CompressedImageView2D& image, const std::string& filename) {
+    CORRADE_ASSERT(features() & Feature::ConvertCompressedData, "Trade::AbstractImageConverter::exportToFile(): not implemented", false);
 
     const auto data = doExportToData(image);
     if(!data) return false;

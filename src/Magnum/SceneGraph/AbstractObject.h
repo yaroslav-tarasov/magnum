@@ -289,7 +289,7 @@ Convenience alternative to `AbstractObject<2, T>`. See
 @note Not available on GCC < 4.7. Use <tt>%AbstractObject<2, T></tt> instead.
 @see @ref AbstractObject2D, @ref AbstractBasicObject3D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using AbstractBasicObject2D = AbstractObject<2, T>;
 #endif
 #endif
@@ -316,7 +316,7 @@ Convenience alternative to `AbstractObject<3, T>`. See
 @note Not available on GCC < 4.7. Use <tt>%AbstractObject<3, T></tt> instead.
 @see @ref AbstractObject3D, @ref AbstractBasicObject2D
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using AbstractBasicObject3D = AbstractObject<3, T>;
 #endif
 #endif

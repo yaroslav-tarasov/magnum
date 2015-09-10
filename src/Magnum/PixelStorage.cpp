@@ -27,142 +27,275 @@
 
 #include <Corrade/Utility/Assert.h>
 
-#include "Magnum/ColorFormat.h"
-#include "Magnum/Math/Vector.h"
+#include "Magnum/Context.h"
+#include "Magnum/Extensions.h"
+#include "Magnum/PixelFormat.h"
+#include "Magnum/Math/Vector4.h"
 
-namespace Magnum { namespace Implementation {
+#include "Implementation/RendererState.h"
+#include "Implementation/State.h"
 
-std::size_t imagePixelSize(ColorFormat format, ColorType type) {
+namespace Magnum {
+
+std::size_t PixelStorage::pixelSize(PixelFormat format, PixelType type) {
     std::size_t size = 0;
     switch(type) {
-        case ColorType::UnsignedByte:
+        case PixelType::UnsignedByte:
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorType::Byte:
+        case PixelType::Byte:
         #endif
             size = 1; break;
-        case ColorType::UnsignedShort:
+        case PixelType::UnsignedShort:
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorType::Short:
+        case PixelType::Short:
         #endif
-        case ColorType::HalfFloat:
+        case PixelType::HalfFloat:
             size = 2; break;
-        case ColorType::UnsignedInt:
+        case PixelType::UnsignedInt:
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorType::Int:
+        case PixelType::Int:
         #endif
-        case ColorType::Float:
+        case PixelType::Float:
             size = 4; break;
 
         #ifndef MAGNUM_TARGET_GLES
-        case ColorType::UnsignedByte332:
-        case ColorType::UnsignedByte233Rev:
+        case PixelType::UnsignedByte332:
+        case PixelType::UnsignedByte233Rev:
             return 1;
         #endif
-        case ColorType::UnsignedShort565:
+        case PixelType::UnsignedShort565:
         #ifndef MAGNUM_TARGET_GLES
-        case ColorType::UnsignedShort565Rev:
+        case PixelType::UnsignedShort565Rev:
         #endif
-        case ColorType::UnsignedShort4444:
+        case PixelType::UnsignedShort4444:
         #ifndef MAGNUM_TARGET_WEBGL
-        case ColorType::UnsignedShort4444Rev:
+        case PixelType::UnsignedShort4444Rev:
         #endif
-        case ColorType::UnsignedShort5551:
+        case PixelType::UnsignedShort5551:
         #ifndef MAGNUM_TARGET_WEBGL
-        case ColorType::UnsignedShort1555Rev:
+        case PixelType::UnsignedShort1555Rev:
         #endif
             return 2;
         #ifndef MAGNUM_TARGET_GLES
-        case ColorType::UnsignedInt8888:
-        case ColorType::UnsignedInt8888Rev:
-        case ColorType::UnsignedInt1010102:
+        case PixelType::UnsignedInt8888:
+        case PixelType::UnsignedInt8888Rev:
+        case PixelType::UnsignedInt1010102:
         #endif
         #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
-        case ColorType::UnsignedInt2101010Rev:
+        case PixelType::UnsignedInt2101010Rev:
         #endif
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorType::UnsignedInt10F11F11FRev:
-        case ColorType::UnsignedInt5999Rev:
+        case PixelType::UnsignedInt10F11F11FRev:
+        case PixelType::UnsignedInt5999Rev:
         #endif
-        case ColorType::UnsignedInt248:
+        case PixelType::UnsignedInt248:
             return 4;
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorType::Float32UnsignedInt248Rev:
+        case PixelType::Float32UnsignedInt248Rev:
             return 8;
         #endif
     }
 
     switch(format) {
         #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
-        case ColorFormat::Red:
+        case PixelFormat::Red:
         #endif
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorFormat::RedInteger:
+        case PixelFormat::RedInteger:
         #endif
         #ifndef MAGNUM_TARGET_GLES
-        case ColorFormat::Green:
-        case ColorFormat::Blue:
-        case ColorFormat::GreenInteger:
-        case ColorFormat::BlueInteger:
+        case PixelFormat::Green:
+        case PixelFormat::Blue:
+        case PixelFormat::GreenInteger:
+        case PixelFormat::BlueInteger:
         #endif
         #ifdef MAGNUM_TARGET_GLES2
-        case ColorFormat::Luminance:
+        case PixelFormat::Luminance:
         #endif
-        case ColorFormat::DepthComponent:
+        case PixelFormat::DepthComponent:
         #ifndef MAGNUM_TARGET_WEBGL
-        case ColorFormat::StencilIndex:
+        case PixelFormat::StencilIndex:
         #endif
             return 1*size;
         #if !(defined(MAGNUM_TARGET_WEBGL) && defined(MAGNUM_TARGET_GLES2))
-        case ColorFormat::RG:
+        case PixelFormat::RG:
         #endif
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorFormat::RGInteger:
+        case PixelFormat::RGInteger:
         #endif
         #ifdef MAGNUM_TARGET_GLES2
-        case ColorFormat::LuminanceAlpha:
+        case PixelFormat::LuminanceAlpha:
         #endif
             return 2*size;
-        case ColorFormat::RGB:
+        case PixelFormat::RGB:
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorFormat::RGBInteger:
+        case PixelFormat::RGBInteger:
         #endif
         #ifndef MAGNUM_TARGET_GLES
-        case ColorFormat::BGR:
-        case ColorFormat::BGRInteger:
+        case PixelFormat::BGR:
+        case PixelFormat::BGRInteger:
         #endif
             return 3*size;
-        case ColorFormat::RGBA:
+        case PixelFormat::RGBA:
         #ifndef MAGNUM_TARGET_GLES2
-        case ColorFormat::RGBAInteger:
+        case PixelFormat::RGBAInteger:
         #endif
         #ifndef MAGNUM_TARGET_WEBGL
-        case ColorFormat::BGRA:
+        case PixelFormat::BGRA:
         #endif
         #ifndef MAGNUM_TARGET_GLES
-        case ColorFormat::BGRAInteger:
+        case PixelFormat::BGRAInteger:
         #endif
             return 4*size;
 
         /* Handled above */
-        case ColorFormat::DepthStencil:
-            CORRADE_ASSERT(false, "AbstractImage::pixelSize(): invalid ColorType specified for depth/stencil ColorFormat", 0);
+        case PixelFormat::DepthStencil:
+            CORRADE_ASSERT(false, "AbstractImage::pixelSize(): invalid PixelType specified for depth/stencil PixelFormat", 0);
     }
 
     CORRADE_ASSERT_UNREACHABLE();
 }
 
-template<UnsignedInt dimensions> std::size_t imageDataSize(const ColorFormat format, const ColorType type, Math::Vector<dimensions, Int> size) {
-    /** @todo Code this properly when all @fn_gl{PixelStore} parameters are implemented */
-    /* Row size, rounded to multiple of 4 bytes */
-    const std::size_t rowSize = ((size[0]*imagePixelSize(format, type) + 3)/4)*4;
+std::tuple<std::size_t, Math::Vector3<std::size_t>, std::size_t> PixelStorage::dataProperties(const PixelFormat format, const PixelType type, const Vector3i& size) const {
+    const std::size_t pixelSize = PixelStorage::pixelSize(format, type);
+    const Math::Vector3<std::size_t> dataSize{
+        std::size_t((((
+            #if !(defined(MAGNUM_TARGET_GLES2) && defined(MAGNUM_TARGET_WEBGL))
+            _rowLength ? _rowLength*pixelSize :
+            #endif
+            size[0]*pixelSize) + _alignment - 1)/_alignment)*_alignment),
+        #ifndef MAGNUM_TARGET_GLES2
+        std::size_t(_imageHeight ? _imageHeight : size.y()),
+        #else
+        std::size_t(size.y()),
+        #endif
+        std::size_t(size.z())};
+    const std::size_t offset = (Math::Vector3<std::size_t>{pixelSize, dataSize.x(), dataSize.xy().product()}*Math::Vector3<std::size_t>{_skip}).sum();
 
-    /** @todo Can't this be done somewhat nicer? */
-    size[0] = 1;
-    return rowSize*size.product();
+    return std::make_tuple(offset, size.product() ? dataSize : Math::Vector3<std::size_t>{}, pixelSize);
 }
 
-template MAGNUM_EXPORT std::size_t imageDataSize<1>(ColorFormat, ColorType, Math::Vector<1, Int>);
-template MAGNUM_EXPORT std::size_t imageDataSize<2>(ColorFormat, ColorType, Math::Vector<2, Int>);
-template MAGNUM_EXPORT std::size_t imageDataSize<3>(ColorFormat, ColorType, Math::Vector<3, Int>);
+#ifndef MAGNUM_TARGET_GLES
+std::tuple<std::size_t, Math::Vector3<std::size_t>, std::size_t> CompressedPixelStorage::dataProperties(const Vector3i& size) const {
+    CORRADE_ASSERT(_blockDataSize && _blockSize.product(), "CompressedPixelStorage::dataProperties(): expected non-zero storage parameters", {});
 
-}}
+    const Vector3i blockCount = (size + _blockSize - Vector3i{1})/_blockSize;
+    const Math::Vector3<std::size_t> dataSize{
+        std::size_t(_rowLength ? (_rowLength + _blockSize.x() - 1)/_blockSize.x() : blockCount.x()),
+        std::size_t(_imageHeight ? (_imageHeight + _blockSize.y() - 1)/_blockSize.y() : blockCount.y()),
+        std::size_t(blockCount.z())};
+
+    const Vector3i skipBlockCount = (_skip + _blockSize - Vector3i{1})/_blockSize;
+    const std::size_t offset = (Math::Vector3<std::size_t>{1, dataSize.x(), dataSize.xy().product()}*Math::Vector3<std::size_t>{skipBlockCount}).sum()*_blockDataSize;
+
+    return std::make_tuple(offset, size.product() ? dataSize : Math::Vector3<std::size_t>{}, _blockDataSize);
+}
+#endif
+
+void PixelStorage::applyInternal(const bool isUnpack) {
+    Implementation::RendererState::PixelStorage& state = isUnpack ?
+        Context::current()->state().renderer->unpackPixelStorage :
+        Context::current()->state().renderer->packPixelStorage;
+
+    #ifndef MAGNUM_TARGET_GLES
+    /* Byte swap */
+    if(state.swapBytes == std::nullopt || state.swapBytes != _swapBytes)
+        glPixelStorei(isUnpack ? GL_UNPACK_SWAP_BYTES : GL_PACK_SWAP_BYTES,
+          *(state.swapBytes = _swapBytes));
+    #endif
+
+    /* Alignment */
+    if(state.alignment == Implementation::RendererState::PixelStorage::DisengagedValue || state.alignment != _alignment)
+        glPixelStorei(isUnpack ? GL_UNPACK_ALIGNMENT : GL_PACK_ALIGNMENT,
+            state.alignment = _alignment);
+
+    /* Row length */
+    #if !(defined(MAGNUM_TARGET_GLES2) && defined(MAGNUM_TARGET_WEBGL))
+    if(state.rowLength == Implementation::RendererState::PixelStorage::DisengagedValue || state.rowLength != _rowLength)
+    {
+        /** @todo Use real value for GL_PACK_ROW_LENGTH_NV when it is in headers */
+        #ifndef MAGNUM_TARGET_GLES2
+        glPixelStorei(isUnpack ? GL_UNPACK_ROW_LENGTH : GL_PACK_ROW_LENGTH,
+            state.rowLength = _rowLength);
+        #elif !defined(MAGNUM_TARGET_WEBGL)
+        glPixelStorei(isUnpack ? GL_UNPACK_ROW_LENGTH_EXT : 0xD02 /*GL_PACK_ROW_LENGTH_NV*/,
+            state.rowLength = _rowLength);
+        #endif
+    }
+    #endif
+
+    #ifndef MAGNUM_TARGET_GLES
+    /* Image height (on ES for unpack only, taken care of below) */
+    if(state.imageHeight == Implementation::RendererState::PixelStorage::DisengagedValue || state.imageHeight != _imageHeight)
+        glPixelStorei(isUnpack ? GL_UNPACK_IMAGE_HEIGHT : GL_PACK_IMAGE_HEIGHT,
+            state.imageHeight = _imageHeight);
+    #endif
+
+    /* On ES2 done by modifying data pointer */
+    #ifndef MAGNUM_TARGET_GLES2
+    /* Skip pixels */
+    if(state.skip.x() == Implementation::RendererState::PixelStorage::DisengagedValue || state.skip.x() != _skip.x())
+        glPixelStorei(isUnpack ? GL_UNPACK_SKIP_PIXELS : GL_PACK_SKIP_PIXELS,
+            state.skip.x() = _skip.x());
+
+    /* Skip rows */
+    if(state.skip.y() == Implementation::RendererState::PixelStorage::DisengagedValue || state.skip.y() != _skip.y())
+        glPixelStorei(isUnpack ? GL_UNPACK_SKIP_ROWS : GL_PACK_SKIP_ROWS,
+            state.skip.y() = _skip.y());
+
+    #ifndef MAGNUM_TARGET_GLES
+    /* Skip images (on ES for unpack only, taken care of below) */
+    if(state.skip.z() == Implementation::RendererState::PixelStorage::DisengagedValue || state.skip.z() != _skip.z())
+        glPixelStorei(isUnpack ? GL_UNPACK_SKIP_IMAGES : GL_PACK_SKIP_IMAGES,
+            state.skip.z() = _skip.z());
+    #endif
+    #endif
+}
+
+void PixelStorage::applyUnpack() {
+    applyInternal(true);
+
+    #if defined(MAGNUM_TARGET_GLES) && !defined(MAGNUM_TARGET_GLES2)
+    Implementation::RendererState::PixelStorage& state = Context::current()->state().renderer->unpackPixelStorage;
+
+    /* Image height (on ES for unpack only) */
+    if(state.imageHeight == Implementation::RendererState::PixelStorage::DisengagedValue || state.imageHeight != _imageHeight)
+        glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, state.imageHeight = _imageHeight);
+
+    /* Skip images (on ES for unpack only) */
+    if(state.skip.z() == Implementation::RendererState::PixelStorage::DisengagedValue || state.skip.z() != _skip.z())
+        glPixelStorei(GL_UNPACK_SKIP_IMAGES, state.skip.z() = _skip.z());
+    #endif
+}
+
+#ifndef MAGNUM_TARGET_GLES
+void CompressedPixelStorage::applyInternal(const bool isUnpack) {
+    PixelStorage::applyInternal(isUnpack);
+
+    Implementation::RendererState::PixelStorage& state = isUnpack ?
+        Context::current()->state().renderer->unpackPixelStorage :
+        Context::current()->state().renderer->packPixelStorage;
+
+    /* Compressed block width */
+    if(state.compressedBlockSize.x() == Implementation::RendererState::PixelStorage::DisengagedValue || state.compressedBlockSize.x() != _blockSize.x())
+        glPixelStorei(isUnpack ? GL_UNPACK_COMPRESSED_BLOCK_WIDTH : GL_PACK_COMPRESSED_BLOCK_WIDTH,
+            state.compressedBlockSize.x() = _blockSize.x());
+
+    /* Compressed block height */
+    if(state.compressedBlockSize.y() == Implementation::RendererState::PixelStorage::DisengagedValue || state.compressedBlockSize.y() != _blockSize.y())
+        glPixelStorei(isUnpack ? GL_UNPACK_COMPRESSED_BLOCK_HEIGHT : GL_PACK_COMPRESSED_BLOCK_HEIGHT,
+            state.compressedBlockSize.y() = _blockSize.y());
+
+    /* Compressed block depth */
+    if(state.compressedBlockSize.z() == Implementation::RendererState::PixelStorage::DisengagedValue || state.compressedBlockSize.z() != _blockSize.z())
+        glPixelStorei(isUnpack ? GL_UNPACK_COMPRESSED_BLOCK_DEPTH : GL_PACK_COMPRESSED_BLOCK_DEPTH,
+            state.compressedBlockSize.z() = _blockSize.z());
+
+    /* Compressed block size */
+    if(state.compressedBlockDataSize == Implementation::RendererState::PixelStorage::DisengagedValue || state.compressedBlockDataSize != _blockDataSize)
+        glPixelStorei(isUnpack ? GL_UNPACK_COMPRESSED_BLOCK_SIZE : GL_PACK_COMPRESSED_BLOCK_SIZE,
+            state.compressedBlockDataSize = _blockDataSize);
+}
+#endif
+
+}

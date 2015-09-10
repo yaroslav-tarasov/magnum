@@ -152,7 +152,14 @@ template<class T> class Vector3: public Vector<3, T> {
             {}
 
         /** @copydoc Vector::Vector(T) */
-        constexpr explicit Vector3(T value): Vector<3, T>(value) {}
+        constexpr explicit Vector3(T value):
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY
+            Vector<3, T>(value)
+            #else
+            /* Avoid using non-constexpr version */
+            Vector<3, T>(value, value, value)
+            #endif
+            {}
 
         /**
          * @brief Constructor
@@ -173,11 +180,25 @@ template<class T> class Vector3: public Vector<3, T> {
         constexpr /*implicit*/ Vector3(const Vector2<T>& xy, T z): Vector<3, T>(xy[0], xy[1], z) {}
 
         /** @copydoc Vector::Vector(const Vector<size, U>&) */
-        template<class U> constexpr explicit Vector3(const Vector<3, U>& other): Vector<3, T>(other) {}
+        template<class U> constexpr explicit Vector3(const Vector<3, U>& other):
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY
+            Vector<3, T>(other)
+            #else
+            /* Avoid using non-constexpr version */
+            Vector<3, T>(typename Implementation::GenerateSequence<3>::Type(), other)
+            #endif
+            {}
 
         /** @brief Construct vector from external representation */
         #ifndef CORRADE_GCC44_COMPATIBILITY
-        template<class U, class V = decltype(Implementation::VectorConverter<3, T, U>::from(std::declval<U>()))> constexpr explicit Vector3(const U& other): Vector<3, T>(Implementation::VectorConverter<3, T, U>::from(other)) {}
+        template<class U, class V =
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Causes ICE */
+            decltype(Implementation::VectorConverter<3, T, U>::from(std::declval<U>()))
+            #else
+            decltype(Implementation::VectorConverter<3, T, U>())
+            #endif
+            >
+        constexpr explicit Vector3(const U& other): Vector<3, T>(Implementation::VectorConverter<3, T, U>::from(other)) {}
         #else
         template<class U, class V = decltype(Implementation::VectorConverter<3, T, U>::from(*static_cast<const U*>(nullptr)))> constexpr explicit Vector3(const U& other): Vector<3, T>(Implementation::VectorConverter<3, T, U>::from(other)) {}
         #endif

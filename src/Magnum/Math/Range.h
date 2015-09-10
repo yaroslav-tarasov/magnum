@@ -100,7 +100,12 @@ template<UnsignedInt dimensions, class T> class Range {
 
         /** @brief Construct range from external representation */
         #ifndef CORRADE_GCC46_COMPATIBILITY
-        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(std::declval<U>()))> constexpr explicit Range(const U& other): Range{Implementation::RangeConverter<dimensions, T, U>::from(other)} {}
+        template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(std::declval<U>()))>
+        #ifndef CORRADE_MSVC2015_COMPATIBILITY
+        /* Can't use delegating constructors with constexpr -- https://connect.microsoft.com/VisualStudio/feedback/details/1579279/c-constexpr-does-not-work-with-delegating-constructors */
+        constexpr
+        #endif
+        explicit Range(const U& other): Range{Implementation::RangeConverter<dimensions, T, U>::from(other)} {}
         #else
         #ifndef CORRADE_GCC44_COMPATIBILITY
         template<class U, class V = decltype(Implementation::RangeConverter<dimensions, T, U>::from(std::declval<U>()))> explicit Range(const U& other)
@@ -230,7 +235,7 @@ Convenience alternative to `Range<1, T>`. See @ref Range for more
 information.
 @note Not available on GCC < 4.7. Use <tt>%Range<1, T></tt> instead.
 */
-#ifndef CORRADE_MSVC2013_COMPATIBILITY /* Apparently cannot have multiply defined aliases */
+#ifndef CORRADE_MSVC2015_COMPATIBILITY /* Multiple definitions still broken */
 template<class T> using Range1D = Range<1, T>;
 #endif
 #endif
@@ -274,13 +279,20 @@ template<class T> class Range2D: public Range<2, T> {
          * @brief Construct range from external representation
          * @todoc Remove workaround when Doxygen no longer chokes on that line
          */
-        template<class U, class V = decltype(Implementation::RangeConverter<2, T, U>::from(
-            #ifndef CORRADE_GCC44_COMPATIBILITY
-            std::declval<U>()
+        template<class U, class V =
+            #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Causes ICE */
+            decltype(Implementation::RangeConverter<2, T, U>::from(
+                #ifndef CORRADE_GCC44_COMPATIBILITY
+                std::declval<U>()
+                #else
+                *static_cast<const U*>(nullptr)
+                #endif
+                ))
             #else
-            *static_cast<const U*>(nullptr)
+            decltype(Implementation::RangeConverter<2, T, U>())
             #endif
-        ))> constexpr explicit Range2D(const U& other)
+            >
+        constexpr explicit Range2D(const U& other)
             #ifndef DOXYGEN_GENERATING_OUTPUT
             /* MSVC 2015 can't handle {} here */
             : Range<2, T>(Implementation::RangeConverter<2, T, U>::from(other))
@@ -600,7 +612,7 @@ template<class T> struct ConfigurationValue<Magnum::Math::Range2D<T>>: public Co
 /** @configurationvalue{Magnum::Math::Range3D} */
 template<class T> struct ConfigurationValue<Magnum::Math::Range3D<T>>: public ConfigurationValue<Magnum::Math::Range<3, T>> {};
 
-#ifndef DOXYGEN_GENERATING_OUTPUT
+#if !defined(DOXYGEN_GENERATING_OUTPUT) && !defined(__MINGW32__)
 extern template struct MAGNUM_EXPORT ConfigurationValue<Magnum::Math::Range<2, Magnum::Float>>;
 extern template struct MAGNUM_EXPORT ConfigurationValue<Magnum::Math::Range<2, Magnum::Int>>;
 extern template struct MAGNUM_EXPORT ConfigurationValue<Magnum::Math::Range<3, Magnum::Float>>;
