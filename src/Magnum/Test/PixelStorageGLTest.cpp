@@ -77,7 +77,10 @@ PixelStorageGLTest::PixelStorageGLTest() {
 }
 
 namespace {
-    constexpr const char Data2D[] = {
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr
+    #endif
+    const char Data2D[] = {
         /* Skip */
         '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
         '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
@@ -90,7 +93,10 @@ namespace {
         '\x0c', '\x0d', '\x0e', '\x0f', '\x10', '\x11', '\x00', '\x00', '\x00', '\x00'
     };
 
-    constexpr const char ActualData[] = {
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr
+    #endif
+    const char ActualData[] = {
         '\x00', '\x01', '\x02', '\x03', '\x04', '\x05', '\x00', '\x00',
         '\x06', '\x07', '\x08', '\x09', '\x0a', '\x0b', '\x00', '\x00',
         '\x0c', '\x0d', '\x0e', '\x0f', '\x10', '\x11', '\x00', '\x00'
@@ -169,7 +175,10 @@ void PixelStorageGLTest::pack2D() {
 
 #ifndef MAGNUM_TARGET_GLES2
 namespace {
-    constexpr const char Data3D[] = {
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr
+    #endif
+    const char Data3D[] = {
         /* Skip */
         '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
         '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
@@ -248,7 +257,10 @@ void PixelStorageGLTest::pack3D() {
 
 #ifndef MAGNUM_TARGET_GLES
 namespace {
-    constexpr const UnsignedByte CompressedData2D[] = {
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr
+    #endif
+    const UnsignedByte CompressedData2D[] = {
         /* Skip */
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,
@@ -265,7 +277,10 @@ namespace {
     };
 
     /* Just 4x4 0x00 - 0x3f compressed using RGBA DXT3 by the driver */
-    constexpr const UnsignedByte ActualCompressedData[] = {
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr
+    #endif
+    const UnsignedByte ActualCompressedData[] = {
           0,  17,  17,  34,  34,  51,  51,  67,
         232,  57,   0,   0, 213, 255, 170,   2,
     };
@@ -327,7 +342,10 @@ void PixelStorageGLTest::packCompressed2D() {
 }
 
 namespace {
-    constexpr const UnsignedByte CompressedData3D[] = {
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr
+    #endif
+    const UnsignedByte CompressedData3D[] = {
         /* Skip image */
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,

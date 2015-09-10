@@ -405,7 +405,8 @@ void AbstractShaderProgramGLTest::uniformArray() {
     MAGNUM_VERIFY_NO_ERROR();
 
     /* Testing also implicit conversion to base type (Vector4[] -> Math::Vector<4, Float>[]) */
-    #ifndef CORRADE_MSVC2015_COMPATIBILITY /* Causes ICE */
+    #if !defined(CORRADE_MSVC2015_COMPATIBILITY) && !defined(CORRADE_GCC46_COMPATIBILITY)
+    /* Causes ICE on MSVC, can't use both const and constexpr on GCC 4.6 */
     constexpr
     #endif
     const Vector4 values[] = {
