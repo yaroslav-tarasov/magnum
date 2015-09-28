@@ -3,10 +3,10 @@
 branches:
   only:
   - master
+  - compatibility
 
 os:
 - linux
-- osx
 
 addons:
   apt:
@@ -14,7 +14,6 @@ addons:
     - ubuntu-toolchain-r-test
     - kalakris-cmake
     packages:
-    - g++-4.7
     - cmake
     - libopenal-dev
 
@@ -23,7 +22,6 @@ cache:
   - $HOME/sdl2
 
 install:
-- if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.7; fi
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export PLATFORM_GL_API=GLX; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export PLATFORM_GL_API=CGL; fi
 - printf "[General]\ndrivers=null" > ~/.alsoftrc
@@ -32,7 +30,7 @@ install:
 - if [ ! -e "$HOME/sdl2/include" ]; then curl -O http://www.libsdl.org/release/SDL2-2.0.3.tar.gz && tar -xzvf SDL2-2.0.3.tar.gz && cd SDL2-2.0.3 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/sdl2 -DCMAKE_BUILD_TYPE=Release && cmake --build . --target install && cd ../..; fi
 
 # Corrade
-- git clone --depth 1 git://github.com/mosra/corrade.git
+- git clone --branch compatibility --depth 1 git://github.com/mosra/corrade.git
 - cd corrade
 - mkdir build
 - cd build
