@@ -38,7 +38,7 @@
 #include "Magnum/TextureFormat.h"
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(MAGNUM_TARGET_GLES2)
 /* Otherwise the member function pointers will have different size based on
    whether the header was included or not. CAUSES SERIOUS MEMORY CORRUPTION AND
    IS NOT CAUGHT BY ANY WARNING WHATSOEVER! AARGH! */
@@ -73,7 +73,7 @@ struct TextureState {
     #endif
     void(AbstractTexture::*setMaxAnisotropyImplementation)(GLfloat);
     #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
-    void(AbstractTexture::*getLevelParameterivImplementation)(GLint, GLenum, GLint*);
+    void(AbstractTexture::*getLevelParameterivImplementation)(GLenum, GLint, GLenum, GLint*);
     #endif
     void(AbstractTexture::*mipmapImplementation)();
     #ifndef MAGNUM_TARGET_GLES
@@ -109,9 +109,6 @@ struct TextureState {
     void(BufferTexture::*setBufferRangeImplementation)(BufferTextureFormat, Buffer&, GLintptr, GLsizeiptr);
     #endif
 
-    #if !defined(MAGNUM_TARGET_GLES2) && !defined(MAGNUM_TARGET_WEBGL)
-    Vector2i(CubeMapTexture::*getCubeImageSizeImplementation)(Int);
-    #endif
     #ifndef MAGNUM_TARGET_GLES
     void(CubeMapTexture::*getCubeImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, PixelFormat, PixelType, std::size_t, GLvoid*);
     void(CubeMapTexture::*getCompressedCubeImageImplementation)(CubeMapTexture::Coordinate, GLint, const Vector2i&, std::size_t, GLvoid*);

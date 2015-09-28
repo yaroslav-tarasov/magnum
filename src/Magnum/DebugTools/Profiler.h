@@ -116,13 +116,13 @@ class MAGNUM_DEBUGTOOLS_EXPORT Profiler {
          */
         static const Section otherSection = 0;
 
-        explicit Profiler(): enabled(false), measureDuration(60), currentFrame(0), frameCount(0),
+        explicit Profiler(): _enabled(false), _measureDuration(60), _currentFrame(0), _frameCount(0),
             #ifndef CORRADE_MSVC2013_COMPATIBILITY
-            sections{"Other"},
+            _sections{"Other"},
             #else
-            sections({"Other"}),
+            _sections({"Other"}),
             #endif
-            currentSection(otherSection) {}
+            _currentSection(otherSection) {}
 
         /**
          * @brief Set measure duration
@@ -147,7 +147,7 @@ class MAGNUM_DEBUGTOOLS_EXPORT Profiler {
          * If the profiling is not enabled, calls to @ref start() and
          * @ref stop() have no effect.
          */
-        bool isEnabled() { return enabled; }
+        bool isEnabled() { return _enabled; }
 
         /**
          * @brief Enable profiling
@@ -221,13 +221,13 @@ class MAGNUM_DEBUGTOOLS_EXPORT Profiler {
 
         void save();
 
-        bool enabled;
-        std::size_t measureDuration, currentFrame, frameCount;
-        std::vector<std::string> sections;
-        std::vector<std::chrono::high_resolution_clock::duration> frameData;
-        std::vector<std::chrono::high_resolution_clock::duration> totalData;
-        std::chrono::high_resolution_clock::time_point previousTime;
-        Section currentSection;
+        bool _enabled;
+        std::size_t _measureDuration, _currentFrame, _frameCount;
+        std::vector<std::string> _sections;
+        std::vector<std::chrono::high_resolution_clock::duration> _frameData;
+        std::vector<std::chrono::high_resolution_clock::duration> _totalData;
+        std::chrono::high_resolution_clock::time_point _previousTime;
+        Section _currentSection;
 };
 
 }}

@@ -209,7 +209,7 @@ template<UnsignedInt dimensions> class BufferImage {
         }
         /* To avoid ambiguous overload when passing Containers::Array */
         template<class T> void setData(PixelFormat format, PixelType type, const typename DimensionTraits<Dimensions, Int>::VectorType& size, const Containers::Array<T>& data, BufferUsage usage) {
-            setData({}, format, type, size, Containers::ArrayView<const void>{data}, usage);
+            setData({}, format, type, size, Containers::ArrayView<const void>(data), usage);
         }
         #endif
         #endif

@@ -45,26 +45,26 @@ namespace Implementation {
 template<> void createDebugMesh(ShapeRenderer<2>& renderer, const Shapes::Implementation::AbstractShape<2>& shape) {
     switch(shape.type()) {
         case Shapes::AbstractShape2D::Type::AxisAlignedBox:
-            renderer.renderers.push_back(new Implementation::AxisAlignedBoxRenderer<2>(shape));
+            renderer._renderers.push_back(new Implementation::AxisAlignedBoxRenderer<2>(shape));
             break;
         case Shapes::AbstractShape2D::Type::Box:
-            renderer.renderers.push_back(new Implementation::BoxRenderer<2>(shape));
+            renderer._renderers.push_back(new Implementation::BoxRenderer<2>(shape));
             break;
         case Shapes::AbstractShape2D::Type::LineSegment:
-            renderer.renderers.push_back(new Implementation::LineSegmentRenderer<2>(shape));
+            renderer._renderers.push_back(new Implementation::LineSegmentRenderer<2>(shape));
             break;
         case Shapes::AbstractShape2D::Type::Point:
-            renderer.renderers.push_back(new Implementation::PointRenderer<2>(shape));
+            renderer._renderers.push_back(new Implementation::PointRenderer<2>(shape));
             break;
         case Shapes::AbstractShape2D::Type::Sphere:
         case Shapes::AbstractShape2D::Type::InvertedSphere: /* Isn't publicly subclassed, but shouldn't matter */
-            renderer.renderers.push_back(new Implementation::SphereRenderer<2>(shape));
+            renderer._renderers.push_back(new Implementation::SphereRenderer<2>(shape));
             break;
         case Shapes::AbstractShape2D::Type::Capsule:
-            renderer.renderers.push_back(new Implementation::CapsuleRenderer<2>(shape));
+            renderer._renderers.push_back(new Implementation::CapsuleRenderer<2>(shape));
             break;
         case Shapes::AbstractShape2D::Type::Cylinder:
-            renderer.renderers.push_back(new Implementation::CylinderRenderer<2>(shape));
+            renderer._renderers.push_back(new Implementation::CylinderRenderer<2>(shape));
             break;
         case Shapes::AbstractShape2D::Type::Composition: {
             const Shapes::Composition2D& composition =
@@ -80,26 +80,26 @@ template<> void createDebugMesh(ShapeRenderer<2>& renderer, const Shapes::Implem
 template<> void createDebugMesh(ShapeRenderer<3>& renderer, const Shapes::Implementation::AbstractShape<3>& shape) {
     switch(shape.type()) {
         case Shapes::AbstractShape3D::Type::AxisAlignedBox:
-            renderer.renderers.push_back(new Implementation::AxisAlignedBoxRenderer<3>(shape));
+            renderer._renderers.push_back(new Implementation::AxisAlignedBoxRenderer<3>(shape));
             break;
         case Shapes::AbstractShape3D::Type::Box:
-            renderer.renderers.push_back(new Implementation::BoxRenderer<3>(shape));
+            renderer._renderers.push_back(new Implementation::BoxRenderer<3>(shape));
             break;
         case Shapes::AbstractShape3D::Type::LineSegment:
-            renderer.renderers.push_back(new Implementation::LineSegmentRenderer<3>(shape));
+            renderer._renderers.push_back(new Implementation::LineSegmentRenderer<3>(shape));
             break;
         case Shapes::AbstractShape3D::Type::Point:
-            renderer.renderers.push_back(new Implementation::PointRenderer<3>(shape));
+            renderer._renderers.push_back(new Implementation::PointRenderer<3>(shape));
             break;
         case Shapes::AbstractShape3D::Type::Sphere:
         case Shapes::AbstractShape3D::Type::InvertedSphere: /* Isn't publicly subclassed, but shouldn't matter */
-            renderer.renderers.push_back(new Implementation::SphereRenderer<3>(shape));
+            renderer._renderers.push_back(new Implementation::SphereRenderer<3>(shape));
             break;
         case Shapes::AbstractShape3D::Type::Capsule:
-            renderer.renderers.push_back(new Implementation::CapsuleRenderer<3>(shape));
+            renderer._renderers.push_back(new Implementation::CapsuleRenderer<3>(shape));
             break;
         case Shapes::AbstractShape3D::Type::Cylinder:
-            renderer.renderers.push_back(new Implementation::CylinderRenderer<3>(shape));
+            renderer._renderers.push_back(new Implementation::CylinderRenderer<3>(shape));
             break;
         case Shapes::AbstractShape3D::Type::Composition: {
             const Shapes::Composition3D& composition =
@@ -114,19 +114,19 @@ template<> void createDebugMesh(ShapeRenderer<3>& renderer, const Shapes::Implem
 
 }
 
-template<UnsignedInt dimensions> ShapeRenderer<dimensions>::ShapeRenderer(Shapes::AbstractShape<dimensions>& shape, ResourceKey options, SceneGraph::DrawableGroup<dimensions, Float>* drawables): SceneGraph::Drawable<dimensions, Float>(shape.object(), drawables), options(ResourceManager::instance().get<ShapeRendererOptions>(options)) {
+template<UnsignedInt dimensions> ShapeRenderer<dimensions>::ShapeRenderer(Shapes::AbstractShape<dimensions>& shape, ResourceKey options, SceneGraph::DrawableGroup<dimensions, Float>* drawables): SceneGraph::Drawable<dimensions, Float>(shape.object(), drawables), _options(ResourceManager::instance().get<ShapeRendererOptions>(options)) {
     Implementation::createDebugMesh(*this, Shapes::Implementation::getAbstractShape(shape));
 }
 
 template<UnsignedInt dimensions> ShapeRenderer<dimensions>::~ShapeRenderer() {
-    for(auto it = renderers.begin(); it != renderers.end(); ++it)
+    for(auto it = _renderers.begin(); it != _renderers.end(); ++it)
         delete *it;
 }
 
 template<UnsignedInt dimensions> void ShapeRenderer<dimensions>::draw(const typename DimensionTraits<dimensions, Float>::MatrixType&, SceneGraph::Camera<dimensions, Float>& camera) {
     typename DimensionTraits<dimensions, Float>::MatrixType projectionMatrix = camera.projectionMatrix()*camera.cameraMatrix();
-    for(auto it = renderers.begin(); it != renderers.end(); ++it)
-        (*it)->draw(options, projectionMatrix);
+    for(auto it = _renderers.begin(); it != _renderers.end(); ++it)
+        (*it)->draw(_options, projectionMatrix);
 }
 
 template class ShapeRenderer<2>;

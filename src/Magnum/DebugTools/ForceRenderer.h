@@ -131,13 +131,13 @@ template<UnsignedInt dimensions> class MAGNUM_DEBUGTOOLS_EXPORT ForceRenderer: p
     private:
         void draw(const typename DimensionTraits<dimensions, Float>::MatrixType& transformationMatrix, SceneGraph::Camera<dimensions, Float>& camera) override;
 
-        const typename DimensionTraits<dimensions, Float>::VectorType forcePosition;
-        const typename DimensionTraits<dimensions, Float>::VectorType& force;
+        const typename DimensionTraits<dimensions, Float>::VectorType _forcePosition;
+        const typename DimensionTraits<dimensions, Float>::VectorType& _force;
 
-        Resource<ForceRendererOptions> options;
-        Resource<AbstractShaderProgram, Shaders::Flat<dimensions>> shader;
-        Resource<Mesh> mesh;
-        Resource<Buffer> vertexBuffer, indexBuffer;
+        Resource<ForceRendererOptions> _options;
+        Resource<AbstractShaderProgram, Shaders::Flat<dimensions>> _shader;
+        Resource<Mesh> _mesh;
+        Resource<Buffer> _vertexBuffer, _indexBuffer;
 };
 
 /** @brief Two-dimensional force renderer */

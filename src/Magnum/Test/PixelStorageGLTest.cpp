@@ -28,6 +28,9 @@
 #include "Magnum/Image.h"
 #include "Magnum/PixelFormat.h"
 #include "Magnum/Texture.h"
+#ifndef MAGNUM_TARGET_GLES2
+#include "Magnum/TextureArray.h"
+#endif
 #include "Magnum/TextureFormat.h"
 #include "Magnum/Test/AbstractOpenGLTester.h"
 
@@ -410,7 +413,7 @@ void PixelStorageGLTest::unpackCompressed3D() {
 
     CompressedImageView3D image{storage, CompressedPixelFormat::RGBAS3tcDxt3, {4, 4, 1}, CompressedData3D};
 
-    Texture3D texture;
+    Texture2DArray texture;
     texture.setStorage(1, TextureFormat::CompressedRGBAS3tcDxt3, {4, 4, 1})
         .setCompressedSubImage(0, {}, image);
 
@@ -431,7 +434,7 @@ void PixelStorageGLTest::packCompressed3D() {
 
     CompressedImageView3D actual{CompressedPixelFormat::RGBAS3tcDxt3, {4, 4, 1}, ActualCompressedData};
 
-    Texture3D texture;
+    Texture2DArray texture;
     texture.setStorage(1, TextureFormat::CompressedRGBAS3tcDxt3, {4, 4, 1})
         .setCompressedSubImage(0, {}, actual);
 

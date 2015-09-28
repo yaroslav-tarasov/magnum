@@ -28,7 +28,7 @@
 namespace Magnum { namespace Trade {
 
 template<UnsignedInt dimensions> ImageData<dimensions>::ImageData(const PixelStorage storage, const PixelFormat format, const PixelType type, const typename DimensionTraits<dimensions, Int>::VectorType& size, Containers::Array<char>&& data): _compressed{false}, _s{storage}, _format{format}, _type{type}, _size{size}, _data{std::move(data)} {
-    CORRADE_ASSERT(Implementation::imageDataSize(*this) <= _data.size(), "Trade::ImageDat::ImageData(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
+    CORRADE_ASSERT(Implementation::imageDataSize(*this) <= _data.size(), "Trade::ImageData::ImageData(): bad image data size, got" << _data.size() << "but expected at least" << Implementation::imageDataSize(*this), );
 }
 
 /* GCC 4.5 can't handle {} here */

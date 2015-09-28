@@ -41,7 +41,7 @@ if(WITH_GLUTAPPLICATION OR WITH_SDL2APPLICATION)
     if(CORRADE_TARGET_APPLE AND NOT MAGNUM_TARGET_GLES)
         set(NEED_CGLCONTEXT 1)
         set(MagnumSomeContext_OBJECTS $<TARGET_OBJECTS:MagnumCglContextObjects>)
-    elseif(CORRADE_TARGET_WINDOWS AND NOT MAGNUM_TARGET_GLES)
+    elseif(CORRADE_TARGET_WINDOWS AND (NOT MAGNUM_TARGET_GLES OR MAGNUM_TARGET_DESKTOP_GLES))
         set(NEED_WGLCONTEXT 1)
         set(MagnumSomeContext_OBJECTS $<TARGET_OBJECTS:MagnumWglContextObjects>)
     elseif(CORRADE_TARGET_UNIX AND (NOT MAGNUM_TARGET_GLES OR MAGNUM_TARGET_DESKTOP_GLES))
@@ -321,6 +321,37 @@ if(WITH_WINDOWLESSWGLAPPLICATION)
         ARCHIVE DESTINATION ${MAGNUM_LIBRARY_INSTALL_DIR})
 endif()
 
+# Windowless Windows/EGL application
+if(WITH_WINDOWLESSWINDOWSEGLAPPLICATION)
+    set(NEED_EGLCONTEXT 1)
+
+    set(MagnumWindowlessWindowsEglApplication_SRCS
+        WindowlessWindowsEglApplication.cpp
+        Implementation/Egl.cpp
+        $<TARGET_OBJECTS:MagnumEglContextObjects>)
+    set(MagnumWindowlessWindowsEglApplication_HEADERS
+        WindowlessWindowsEglApplication.h)
+    set(MagnumWindowlessWindowsEglApplication_PRIVATE_HEADERS
+        Implementation/Egl.h)
+
+    add_library(MagnumWindowlessWindowsEglApplication STATIC
+        ${MagnumWindowlessWindowsEglApplication_SRCS}
+        ${MagnumWindowlessWindowsEglApplication_HEADERS}
+        ${MagnumWindowlessWindowsEglApplication_PRIVATE_HEADERS})
+    set_target_properties(MagnumWindowlessWindowsEglApplication PROPERTIES
+        COMPILE_FLAGS "-DUNICODE"
+        DEBUG_POSTFIX "-d")
+    target_link_libraries(MagnumWindowlessWindowsEglApplication Magnum ${EGL_LIBRARY})
+    # Assuming that PIC is not needed because the Application lib is always
+    # linked to the executable and not to any intermediate shared lib
+
+    install(FILES ${MagnumWindowlessWindowsEglApplication_HEADERS} DESTINATION ${MAGNUM_INCLUDE_INSTALL_DIR}/Platform)
+    install(TARGETS MagnumWindowlessWindowsEglApplication
+        RUNTIME DESTINATION ${MAGNUM_BINARY_INSTALL_DIR}
+        LIBRARY DESTINATION ${MAGNUM_LIBRARY_INSTALL_DIR}
+        ARCHIVE DESTINATION ${MAGNUM_LIBRARY_INSTALL_DIR})
+endif()
+
 # Windowless CGL application
 if(WITH_WINDOWLESSCGLAPPLICATION)
     set(NEED_CGLCONTEXT 1)
@@ -386,6 +417,8 @@ if(NEED_EGLCONTEXTHANDLER)
         message(FATAL_ERROR "EGL library, required by some window contexts, was not found. Set WITH_*EGL*APPLICATION to OFF to skip building them.")
     endif()
 
+    include_directories(${EGL_INCLUDE_DIR})
+
     set(MagnumEglContextHandler_SRCS
         Implementation/EglContextHandler.cpp
         Implementation/Egl.cpp)
@@ -441,6 +474,13 @@ endif()
 
 # EGL context
 if(NEED_EGLCONTEXT OR WITH_EGLCONTEXT)
+    find_package(EGL)
+    if(NOT EGL_FOUND)
+        message(FATAL_ERROR "EGL library, required by some window contexts, was not found. Set WITH_*APPLICATION and/or WITH_EGLCONTEXT to OFF to skip building them.")
+    endif()
+
+    include_directories(${EGL_INCLUDE_DIR})
+
     add_library(MagnumEglContextObjects OBJECT ${MagnumContext_SRCS})
     set_target_properties(MagnumEglContextObjects PROPERTIES COMPILE_DEFINITIONS "MAGNUM_PLATFORM_USE_EGL")
     if(BUILD_STATIC_PIC)
@@ -517,7 +557,11 @@ if(WITH_MAGNUMINFO)
     elseif(CORRADE_TARGET_UNIX)
         target_link_libraries(magnum-info MagnumWindowlessGlxApplication)
     elseif(CORRADE_TARGET_WINDOWS)
-        target_link_libraries(magnum-info MagnumWindowlessWglApplication)
+        if(NOT MAGNUM_TARGET_GLES OR MAGNUM_TARGET_DESKTOP_GLES)
+            target_link_libraries(magnum-info MagnumWindowlessWglApplication)
+        else()
+            target_link_libraries(magnum-info MagnumWindowlessWindowsEglApplication)
+        endif()
     else()
         message(FATAL_ERROR "magnum-info is not available on this platform. Set WITH_MAGNUMINFO to OFF to skip building it.")
     endif()

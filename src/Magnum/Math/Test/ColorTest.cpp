@@ -337,6 +337,10 @@ void ColorTest::hsvOverflow() {
 void ColorTest::hsvAlpha() {
     CORRADE_COMPARE(Color4ub::fromHSV(std::make_tuple(Deg(230.0f), 0.749f, 0.427f), 23), Color4ub(27, 40, 108, 23));
     CORRADE_COMPARE(Color4ub::fromHSV(Deg(230.0f), 0.749f, 0.427f, 23), Color4ub(27, 40, 108, 23));
+
+    /* Default alpha */
+    CORRADE_COMPARE(Color4ub::fromHSV(std::make_tuple(Deg(230.0f), 0.749f, 0.427f)), Color4ub(27, 40, 108, 255));
+    CORRADE_COMPARE(Color4ub::fromHSV(Deg(230.0f), 0.749f, 0.427f), Color4ub(27, 40, 108, 255));
 }
 
 void ColorTest::swizzleType() {

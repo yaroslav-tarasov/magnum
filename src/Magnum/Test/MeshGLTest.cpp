@@ -1182,7 +1182,10 @@ MultipleShader::MultipleShader() {
                    "    valueInterpolated = position + vec4(normal, 0.0) + vec4(textureCoordinates, 0.0, 0.0);\n"
                    "    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);\n"
                    "}\n");
-    frag.addSource("varying mediump vec4 valueInterpolated;\n"
+    frag.addSource("#if !defined(GL_ES) && __VERSION__ == 120\n"
+                   "#define mediump\n"
+                   "#endif\n"
+                   "varying mediump vec4 valueInterpolated;\n"
                    "void main() { gl_FragColor = valueInterpolated; }\n");
 
     /* GCC 4.4 has explicit std::reference_wrapper constructor */
