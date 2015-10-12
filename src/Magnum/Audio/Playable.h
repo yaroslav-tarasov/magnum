@@ -141,7 +141,7 @@ template<UnsignedInt dimensions> class Playable: public SceneGraph::AbstractGrou
 
     private:
 
-        void clean(const MatrixTypeFor<dimensions, Float>& absoluteTransformationMatrix) override {
+        void clean(const typename DimensionTraits<dimensions, Float>::MatrixType& absoluteTransformationMatrix) override {
             Vector3 position = Vector3::pad(absoluteTransformationMatrix.translation(), 0);
             if(playables()) {
                 position = playables()->soundTransformation().transformVector(position);
@@ -162,7 +162,7 @@ template<UnsignedInt dimensions> class Playable: public SceneGraph::AbstractGrou
             }
         }
 
-        VectorTypeFor<dimensions, Float> _fwd;
+        typename DimensionTraits<dimensions, Float>::VectorType _fwd;
         Float _gain;
         Source _source;
 };

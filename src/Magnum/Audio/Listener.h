@@ -185,7 +185,7 @@ template <UnsignedInt dimensions> class Listener: public SceneGraph::AbstractFea
 
     private:
 
-        virtual void clean(const MatrixTypeFor<dimensions, Float>& absoluteTransformationMatrix) override;
+        virtual void clean(const typename DimensionTraits<dimensions, Float>::MatrixType& absoluteTransformationMatrix) override;
 
         Matrix4 _soundTransformation;
         Float _gain;

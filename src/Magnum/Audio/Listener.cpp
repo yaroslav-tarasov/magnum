@@ -50,7 +50,7 @@ inline Matrix4 padMatrix4(const Matrix4& m) {
 
 }
 
-template<UnsignedInt dimensions> void Listener<dimensions>::clean(const MatrixTypeFor<dimensions, Float>& absoluteTransformationMatrix) {
+template<UnsignedInt dimensions> void Listener<dimensions>::clean(const typename DimensionTraits<dimensions, Float>::MatrixType& absoluteTransformationMatrix) {
     if(!isActive()) {
         /* Only clean if this Listener is active */
         return;
