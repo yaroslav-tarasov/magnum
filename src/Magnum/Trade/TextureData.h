@@ -124,7 +124,7 @@ inline TextureData& TextureData::operator=(TextureData&& other) {
 }
 
 /** @debugoperatorclassenum{Magnum::Trade::TextureData,Magnum::Trade::TextureData::Type} */
-Debug MAGNUM_EXPORT operator<<(Debug debug, TextureData::Type value);
+MAGNUM_EXPORT Debug& operator<<(Debug& debug, TextureData::Type value);
 
 }}
 

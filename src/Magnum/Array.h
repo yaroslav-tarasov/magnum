@@ -228,30 +228,27 @@ template<class T> class Array3D: public Array<3, T> {
 };
 
 /** @debugoperator{Magnum::Array} */
-template<UnsignedInt dimensions, class T> Debug operator<<(Debug debug, const Array<dimensions, T>& value) {
-    debug << "Array(";
-    debug.setFlag(Debug::SpaceAfterEachValue, false);
+template<UnsignedInt dimensions, class T> Debug& operator<<(Debug& debug, const Array<dimensions, T>& value) {
+    debug << "Array(" << Corrade::Utility::Debug::nospace;
     for(UnsignedInt i = 0; i != dimensions; ++i) {
-        if(i != 0) debug << ", ";
+        if(i != 0) debug << ",";
         debug << value[i];
     }
-    debug << ")";
-    debug.setFlag(Debug::SpaceAfterEachValue, true);
-    return debug;
+    return debug << Corrade::Utility::Debug::nospace << ")";
 }
 
 /** @debugoperator{Magnum::Array1D} */
-template<class T> inline Debug operator<<(Debug debug, const Array1D<T>& value) {
+template<class T> inline Debug& operator<<(Debug& debug, const Array1D<T>& value) {
     return debug << static_cast<const Array<1, T>&>(value);
 }
 
 /** @debugoperator{Magnum::Array2D} */
-template<class T> inline Debug operator<<(Debug debug, const Array2D<T>& value) {
+template<class T> inline Debug& operator<<(Debug& debug, const Array2D<T>& value) {
     return debug << static_cast<const Array<2, T>&>(value);
 }
 
 /** @debugoperator{Magnum::Array3D} */
-template<class T> inline Debug operator<<(Debug debug, const Array3D<T>& value) {
+template<class T> inline Debug& operator<<(Debug& debug, const Array3D<T>& value) {
     return debug << static_cast<const Array<3, T>&>(value);
 }
 

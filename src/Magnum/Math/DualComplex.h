@@ -386,20 +386,20 @@ template<class T> class DualComplex: public Dual<Complex<T>> {
 };
 
 /** @debugoperator{Magnum::Math::DualQuaternion} */
-template<class T> Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const DualComplex<T>& value) {
-    debug << "DualComplex({";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, false);
-    debug << value.real().real() << ", " << value.real().imaginary() << "}, {"
-          << value.dual().real() << ", " << value.dual().imaginary() << "})";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, true);
-    return debug;
+template<class T> Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug& debug, const DualComplex<T>& value) {
+    return debug << "DualComplex({" << Corrade::Utility::Debug::nospace
+          << value.real().real() << Corrade::Utility::Debug::nospace << ","
+          << value.real().imaginary() << Corrade::Utility::Debug::nospace << "}, {"
+          << Corrade::Utility::Debug::nospace
+          << value.dual().real() << Corrade::Utility::Debug::nospace << ","
+          << value.dual().imaginary() << Corrade::Utility::Debug::nospace << "})";
 }
 
 /* Explicit instantiation for commonly used types */
 #ifndef DOXYGEN_GENERATING_OUTPUT
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const DualComplex<Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const DualComplex<Float>&);
 #ifndef MAGNUM_TARGET_GLES
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const DualComplex<Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const DualComplex<Double>&);
 #endif
 #endif
 

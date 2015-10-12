@@ -84,10 +84,12 @@ template<class T> class Dual {
         }
 
         /** @brief Real part */
-        constexpr T real() const { return _real; }
+        T& real() { return _real; }
+        constexpr T real() const { return _real; } /**< @overload */
 
         /** @brief Dual part */
-        constexpr T dual() const { return _dual; }
+        T& dual() { return _dual; }
+        constexpr T dual() const { return _dual; } /**< @overload */
 
         /**
          * @brief Add and assign dual number
@@ -209,12 +211,10 @@ template<class T> class Dual {
 #endif
 
 /** @debugoperator{Magnum::Math::Dual} */
-template<class T> Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Dual<T>& value) {
-    debug << "Dual(";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, false);
-    debug << value.real() << ", " << value.dual() << ")";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, true);
-    return debug;
+template<class T> Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug& debug, const Dual<T>& value) {
+    return debug << "Dual(" << Corrade::Utility::Debug::nospace
+        << value.real() << Corrade::Utility::Debug::nospace << ","
+        << value.dual() << Corrade::Utility::Debug::nospace << ")";
 }
 
 /** @relates Dual

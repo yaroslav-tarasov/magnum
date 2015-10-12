@@ -42,7 +42,7 @@ AbstractMaterialData& AbstractMaterialData::operator=(AbstractMaterialData&& oth
     return *this;
 }
 
-Debug operator<<(Debug debug, const MaterialType value) {
+Debug& operator<<(Debug& debug, const MaterialType value) {
     switch(value) {
         #define _c(value) case MaterialType::value: return debug << "Trade::MaterialType::" #value;
         _c(Phong)

@@ -46,7 +46,7 @@ ObjectData3D& ObjectData3D::operator=(ObjectData3D&& other) {
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Debug operator<<(Debug debug, ObjectInstanceType3D value) {
+Debug& operator<<(Debug& debug, ObjectInstanceType3D value) {
     switch(value) {
         #define _c(value) case ObjectInstanceType3D::value: return debug << "Trade::ObjectInstanceType3D::" #value;
         _c(Camera)

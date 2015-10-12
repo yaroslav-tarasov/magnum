@@ -367,43 +367,37 @@ bool AbstractShaderProgram::link(std::initializer_list<std::reference_wrapper<Ab
 
         /* Show error log */
         if(!success) {
-            Error out;
-            out.setFlag(Debug::NewLineAtTheEnd, false);
-            out.setFlag(Debug::SpaceAfterEachValue, false);
+            auto out = Error::noNewlineAtTheEnd();
             out << "AbstractShaderProgram::link(): linking";
             if(shaders.size() != 1) {
                 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_ANDROID)
                 #ifndef CORRADE_GCC44_COMPATIBILITY
-                out << " of shader " << std::to_string(i);
+                out << "of shader" << std::to_string(i);
                 #else
-                out << " of shader " << std::to_string(static_cast<long long int>(i));
+                out << "of shader" << std::to_string(static_cast<long long int>(i));
                 #endif
                 #else
-                out << " of shader " << converter.str();
+                out << "of shader" << converter.str();
                 #endif
             }
-            out << " failed with the following message:\n"
-                << message;
+            out << "failed with the following message:" << Debug::newline << message;
 
         /* Or just warnings, if any */
         } else if(!message.empty() && !Implementation::isProgramLinkLogEmpty(message)) {
-            Warning out;
-            out.setFlag(Debug::NewLineAtTheEnd, false);
-            out.setFlag(Debug::SpaceAfterEachValue, false);
+            auto out = Warning::noNewlineAtTheEnd();
             out << "AbstractShaderProgram::link(): linking";
             if(shaders.size() != 1) {
                 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_ANDROID)
                 #ifndef CORRADE_GCC44_COMPATIBILITY
-                out << " of shader " << std::to_string(i);
+                out << "of shader" << std::to_string(i);
                 #else
-                out << " of shader " << std::to_string(static_cast<long long int>(i));
+                out << "of shader" << std::to_string(static_cast<long long int>(i));
                 #endif
                 #else
-                out << " of shader " << converter.str();
+                out << "of shader" << converter.str();
                 #endif
             }
-            out << " succeeded with the following message:\n"
-                << message;
+            out << "succeeded with the following message:" << Debug::newline << message;
         }
 
         /* Success of all depends on each of them */

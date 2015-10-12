@@ -1136,33 +1136,30 @@ operator/(const Vector<size, Integral>& a, const Vector<size, FloatingPoint>& b)
 }
 
 /** @debugoperator{Magnum::Math::Vector} */
-template<std::size_t size, class T> Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Vector<size, T>& value) {
-    debug << "Vector(";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, false);
+template<std::size_t size, class T> Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug& debug, const Vector<size, T>& value) {
+    debug << "Vector(" << Corrade::Utility::Debug::nospace;
     for(std::size_t i = 0; i != size; ++i) {
-        if(i != 0) debug << ", ";
+        if(i != 0) debug << Corrade::Utility::Debug::nospace << ",";
         debug << value[i];
     }
-    debug << ")";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, true);
-    return debug;
+    return debug << Corrade::Utility::Debug::nospace << ")";
 }
 
 /* Explicit instantiation for types used in OpenGL */
 #ifndef DOXYGEN_GENERATING_OUTPUT
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<2, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<3, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<4, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<2, Int>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<3, Int>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<4, Int>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<2, UnsignedInt>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<3, UnsignedInt>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<4, UnsignedInt>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<2, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<3, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<4, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<2, Int>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<3, Int>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<4, Int>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<2, UnsignedInt>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<3, UnsignedInt>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<4, UnsignedInt>&);
 #ifndef MAGNUM_TARGET_GLES
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<2, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<3, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Vector<4, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<2, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<3, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Vector<4, Double>&);
 #endif
 #endif
 

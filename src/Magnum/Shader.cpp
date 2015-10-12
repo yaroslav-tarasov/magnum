@@ -866,45 +866,37 @@ bool Shader::compile(std::initializer_list<std::reference_wrapper<Shader>> shade
 
         /* Show error log */
         if(!success) {
-            Error out;
-            out.setFlag(Debug::NewLineAtTheEnd, false);
-            out.setFlag(Debug::SpaceAfterEachValue, false);
-            out << "Shader::compile(): compilation of " << shaderName(shader._type)
-                << " shader";
+            auto out = Error::noNewlineAtTheEnd();
+            out << "Shader::compile(): compilation of" << shaderName(shader._type) << "shader";
             if(shaders.size() != 1) {
                 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_ANDROID)
                 #ifndef CORRADE_GCC44_COMPATIBILITY
-                out << " " << std::to_string(i);
+                out << std::to_string(i);
                 #else
-                out << " " << std::to_string(static_cast<long long int>(i));
+                out << std::to_string(static_cast<long long int>(i));
                 #endif
                 #else
-                out << " " << converter.str();
+                out << converter.str();
                 #endif
             }
-            out << " failed with the following message:\n"
-                << message;
+            out << "failed with the following message:" << Debug::newline << message;
 
         /* Or just warnings, if any */
         } else if(!message.empty() && !Implementation::isShaderCompilationLogEmpty(message)) {
-            Warning out;
-            out.setFlag(Debug::NewLineAtTheEnd, false);
-            out.setFlag(Debug::SpaceAfterEachValue, false);
-            out << "Shader::compile(): compilation of " << shaderName(shader._type)
-                << " shader";
+            auto out = Warning::noNewlineAtTheEnd();
+            out << "Shader::compile(): compilation of" << shaderName(shader._type) << "shader";
             if(shaders.size() != 1) {
                 #if !defined(CORRADE_TARGET_NACL_NEWLIB) && !defined(CORRADE_TARGET_ANDROID)
                 #ifndef CORRADE_GCC44_COMPATIBILITY
-                out << " " << std::to_string(i);
+                out << std::to_string(i);
                 #else
-                out << " " << std::to_string(static_cast<long long int>(i));
+                out << std::to_string(static_cast<long long int>(i));
                 #endif
                 #else
-                out << " " << converter.str();
+                out << converter.str();
                 #endif
             }
-            out << " succeeded with the following message:\n"
-                << message;
+            out << "succeeded with the following message:" << Debug::newline << message;
         }
 
         /* Success of all depends on each of them */
@@ -916,7 +908,7 @@ bool Shader::compile(std::initializer_list<std::reference_wrapper<Shader>> shade
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
-Debug operator<<(Debug debug, const Shader::Type value) {
+Debug& operator<<(Debug& debug, const Shader::Type value) {
     switch(value) {
         #define _c(value) case Shader::Type::value: return debug << "Shader::Type::" #value;
         _c(Vertex)

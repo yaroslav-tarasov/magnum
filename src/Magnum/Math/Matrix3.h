@@ -384,7 +384,7 @@ MAGNUM_MATRIXn_OPERATOR_IMPLEMENTATION(3, Matrix3)
 #endif
 
 /** @debugoperator{Magnum::Math::Matrix3} */
-template<class T> inline Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Matrix3<T>& value) {
+template<class T> inline Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug& debug, const Matrix3<T>& value) {
     return debug << static_cast<const Matrix<3, T>&>(value);
 }
 

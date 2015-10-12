@@ -549,19 +549,19 @@ template<class T> inline Quaternion<T> operator/(T scalar, const Quaternion<T>& 
 }
 
 /** @debugoperator{Magnum::Math::Quaternion} */
-template<class T> Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Quaternion<T>& value) {
-    debug << "Quaternion({";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, false);
-    debug << value.vector().x() << ", " << value.vector().y() << ", " << value.vector().z() << "}, " << value.scalar() << ")";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, true);
-    return debug;
+template<class T> Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug& debug, const Quaternion<T>& value) {
+    return debug << "Quaternion({" << Corrade::Utility::Debug::nospace
+        << value.vector().x() << Corrade::Utility::Debug::nospace << ","
+        << value.vector().y() << Corrade::Utility::Debug::nospace << ","
+        << value.vector().z() << Corrade::Utility::Debug::nospace << "},"
+        << value.scalar() << Corrade::Utility::Debug::nospace << ")";
 }
 
 /* Explicit instantiation for commonly used types */
 #ifndef DOXYGEN_GENERATING_OUTPUT
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Quaternion<Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Quaternion<Float>&);
 #ifndef MAGNUM_TARGET_GLES
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const Quaternion<Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const Quaternion<Double>&);
 #endif
 #endif
 

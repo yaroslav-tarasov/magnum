@@ -616,47 +616,44 @@ template<std::size_t size, std::size_t cols, class T> inline RectangularMatrix<c
 }
 
 /** @debugoperator{Magnum::Math::RectangularMatrix} */
-template<std::size_t cols, std::size_t rows, class T> Corrade::Utility::Debug operator<<(Corrade::Utility::Debug debug, const Magnum::Math::RectangularMatrix<cols, rows, T>& value) {
-    debug << "Matrix(";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, false);
+template<std::size_t cols, std::size_t rows, class T> Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug& debug, const Magnum::Math::RectangularMatrix<cols, rows, T>& value) {
+    debug << "Matrix(" << Corrade::Utility::Debug::nospace;
     for(std::size_t row = 0; row != rows; ++row) {
-        if(row != 0) debug << ",\n       ";
+        if(row != 0) debug << Corrade::Utility::Debug::nospace << ",\n      ";
         for(std::size_t col = 0; col != cols; ++col) {
-            if(col != 0) debug << ", ";
+            if(col != 0) debug << Corrade::Utility::Debug::nospace << ",";
             debug << value[col][row];
         }
     }
-    debug << ")";
-    debug.setFlag(Corrade::Utility::Debug::SpaceAfterEachValue, true);
-    return debug;
+    return debug << Corrade::Utility::Debug::nospace << ")";
 }
 
 #ifndef DOXYGEN_GENERATING_OUTPUT
 /* Explicit instantiation for types used in OpenGL */
 /* Square matrices */
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<2, 2, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<3, 3, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<4, 4, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<2, 2, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<3, 3, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<4, 4, Float>&);
 #ifndef MAGNUM_TARGET_GLES
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<2, 2, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<3, 3, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<4, 4, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<2, 2, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<3, 3, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<4, 4, Double>&);
 #endif
 
 /* Rectangular matrices */
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<2, 3, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<3, 2, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<2, 4, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<4, 2, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<3, 4, Float>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<4, 3, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<2, 3, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<3, 2, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<2, 4, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<4, 2, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<3, 4, Float>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<4, 3, Float>&);
 #ifndef MAGNUM_TARGET_GLES
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<2, 3, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<3, 2, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<2, 4, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<4, 2, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<3, 4, Double>&);
-extern template Corrade::Utility::Debug MAGNUM_EXPORT operator<<(Corrade::Utility::Debug, const RectangularMatrix<4, 3, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<2, 3, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<3, 2, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<2, 4, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<4, 2, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<3, 4, Double>&);
+extern template MAGNUM_EXPORT Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug&, const RectangularMatrix<4, 3, Double>&);
 #endif
 
 #define MAGNUM_RECTANGULARMATRIX_SUBCLASS_IMPLEMENTATION(cols, rows, ...)   \

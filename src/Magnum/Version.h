@@ -118,7 +118,7 @@ inline std::pair<Int, Int> version(Version version) {
 }
 
 /** @debugoperatorenum{Magnum::Version} */
-Debug MAGNUM_EXPORT operator<<(Debug debug, Version value);
+MAGNUM_EXPORT Debug& operator<<(Debug& debug, Version value);
 
 }
 

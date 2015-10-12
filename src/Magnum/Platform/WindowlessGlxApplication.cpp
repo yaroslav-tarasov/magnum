@@ -25,6 +25,7 @@
 
 #include "WindowlessGlxApplication.h"
 
+#include <cstring>
 #include <Corrade/Utility/Assert.h>
 #include <Corrade/Utility/Debug.h>
 
@@ -71,14 +72,22 @@ bool WindowlessGlxApplication::tryCreateContext(const Configuration&) {
 
     /* Choose config */
     int configCount = 0;
-    static const int fbAttributes[] = { None };
+    constexpr static const int fbAttributes[] = { None };
     GLXFBConfig* configs = glXChooseFBConfig(_display, DefaultScreen(_display), fbAttributes, &configCount);
     if(!configCount) {
         Error() << "Platform::WindowlessGlxApplication::tryCreateContext(): no supported framebuffer configuration found";
         return false;
     }
 
-    GLint contextAttributes[] = {
+    /* Create pbuffer */
+    constexpr static const int pbufferAttributes[] = {
+        GLX_PBUFFER_WIDTH,  32,
+        GLX_PBUFFER_HEIGHT, 32,
+        None
+    };
+    _pbuffer = glXCreatePbuffer(_display, configs[0], pbufferAttributes);
+
+    constexpr static const GLint contextAttributes[] = {
         #ifdef MAGNUM_TARGET_GLES
         #ifdef MAGNUM_TARGET_GLES3
         GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -89,27 +98,52 @@ bool WindowlessGlxApplication::tryCreateContext(const Configuration&) {
         #endif
         GLX_CONTEXT_MINOR_VERSION_ARB, 0,
         GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
+        #else
+        /* Similarly to what's done in Sdl2Application, try to request core
+           context first */
+        GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+        GLX_CONTEXT_MINOR_VERSION_ARB, 1,
+        GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+        GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
         #endif
         0
     };
 
-    /** @todo Use some extension wrangler for this, not GLEW, as it apparently needs context to create context, yo dawg wtf. */
-    PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC) glXGetProcAddress((const GLubyte*)"glXCreateContextAttribsARB");
+    const PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC) glXGetProcAddress((const GLubyte*)"glXCreateContextAttribsARB");
     _glContext = glXCreateContextAttribsARB(_display, configs[0], nullptr, True, contextAttributes);
+
+    #ifndef MAGNUM_TARGET_GLES
+    /* Fall back to (forward compatible) GL 2.1, if version is not
+       user-specified and either core context creation fails or we are on
+       binary NVidia drivers on Linux. NVidia, instead of creating
+       forward-compatible context with highest available version, forces the
+       version to the one specified, which is completely useless behavior. */
+    constexpr static const char nvidiaVendorString[] = "NVIDIA Corporation";
+    if(!_glContext
+        #ifndef CORRADE_TARGET_APPLE
+        /* We need to make the context current first, sorry about the ugly code */
+        || (glXMakeContextCurrent(_display, _pbuffer, _pbuffer, _glContext) && std::strncmp(reinterpret_cast<const char*>(glGetString(GL_VENDOR)), nvidiaVendorString, sizeof(nvidiaVendorString)) == 0)
+        #endif
+    ) {
+        /* Don't print any warning when doing the NV workaround, because the
+           bug will be there probably forever */
+        if(!_glContext) Warning()
+            << "Platform::WindowlessGlxApplication::tryCreateContext(): cannot create core context, falling back to compatibility context";
+        else {
+            glXMakeCurrent(_display, None, nullptr);
+            glXDestroyContext(_display, _glContext);
+        }
+
+        _glContext = glXCreateContextAttribsARB(_display, configs[0], nullptr, True, nullptr);
+    }
+    #endif
+
+    XFree(configs);
+
     if(!_glContext) {
         Error() << "Platform::WindowlessGlxApplication::tryCreateContext(): cannot create context";
         return false;
     }
-
-    /* Create pbuffer */
-    int pbufferAttributes[] = {
-        GLX_PBUFFER_WIDTH,  32,
-        GLX_PBUFFER_HEIGHT, 32,
-        None
-    };
-    _pbuffer = glXCreatePbuffer(_display, configs[0], pbufferAttributes);
-
-    XFree(configs);
 
     /* Set OpenGL context as current */
     if(!glXMakeContextCurrent(_display, _pbuffer, _pbuffer, _glContext)) {
@@ -117,14 +151,15 @@ bool WindowlessGlxApplication::tryCreateContext(const Configuration&) {
         return false;
     }
 
-    _context.reset(new Platform::Context);
-    return true;
+    /* Return true if the initialization succeeds */
+    return !!(_context = Platform::Context::tryCreate());
 }
 
 WindowlessGlxApplication::~WindowlessGlxApplication() {
     _context.reset();
 
     glXMakeCurrent(_display, None, nullptr);
+    glXDestroyPbuffer(_display, _pbuffer);
     glXDestroyContext(_display, _glContext);
 }
 
