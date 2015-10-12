@@ -48,7 +48,7 @@ struct PlayableTest: TestSuite::Tester {
 };
 
 PlayableTest::PlayableTest() {
-    addTests({&PlayableTest::testFeature,
+    addTests<PlayableTest>({&PlayableTest::testFeature,
               &PlayableTest::testGroup});
 }
 

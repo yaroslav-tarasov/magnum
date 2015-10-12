@@ -55,7 +55,7 @@ struct ListenerTest: TestSuite::Tester {
 };
 
 ListenerTest::ListenerTest(): _context() {
-    addTests({&ListenerTest::testFeature2D,
+    addTests<ListenerTest>({&ListenerTest::testFeature2D,
               &ListenerTest::testFeature3D,
               &ListenerTest::testUpdateGroups});
 }
