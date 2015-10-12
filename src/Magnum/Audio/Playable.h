@@ -76,7 +76,8 @@ To manage multiple Playables at once, use @ref PlayableGroup.
 @see @ref Source, @ref PlayableGroup, @ref Listener
 */
 template<UnsignedInt dimensions> class Playable: public SceneGraph::AbstractGroupedFeature<dimensions, Playable<dimensions>, Float> {
-    friend PlayableGroup<dimensions>;
+    /* GCC 4.6 needs the class keyword */
+    friend class PlayableGroup<dimensions>;
 
     public:
 

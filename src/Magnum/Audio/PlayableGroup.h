@@ -77,7 +77,8 @@ For two dimensional scenes simply replace `3D` with `2D`. When using a
 @see @ref Playable, @ref SceneGraph::FeatureGroup, @ref Listener
 */
 template<UnsignedInt dimensions> class PlayableGroup: public SceneGraph::FeatureGroup<dimensions, Playable<dimensions>, Float> {
-    friend Playable<dimensions>;
+    /* GCC 4.6 needs the class keyword */
+    friend class Playable<dimensions>;
 
     public:
 
