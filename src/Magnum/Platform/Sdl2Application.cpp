@@ -203,7 +203,8 @@ bool Sdl2Application::tryCreateContext(const Configuration& configuration) {
        binary NVidia drivers on Linux/Windows. NVidia, instead of creating
        forward-compatible context with highest available version, forces the
        version to the one specified, which is completely useless behavior. */
-    constexpr static const char nvidiaVendorString[] = "NVIDIA Corporation";
+    /* GCC 4.6 can't have both const and constexpr here */
+    static const char nvidiaVendorString[] = "NVIDIA Corporation";
     if(configuration.version() == Version::None && (!_glContext
         #ifndef CORRADE_TARGET_APPLE
         || std::strncmp(reinterpret_cast<const char*>(glGetString(GL_VENDOR)), nvidiaVendorString, sizeof(nvidiaVendorString)) == 0

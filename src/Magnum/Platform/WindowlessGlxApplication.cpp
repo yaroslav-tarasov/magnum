@@ -72,7 +72,8 @@ bool WindowlessGlxApplication::tryCreateContext(const Configuration&) {
 
     /* Choose config */
     int configCount = 0;
-    constexpr static const int fbAttributes[] = { None };
+    /* GCC 4.6 can't have both const and constexpr here */
+    static const int fbAttributes[] = { None };
     GLXFBConfig* configs = glXChooseFBConfig(_display, DefaultScreen(_display), fbAttributes, &configCount);
     if(!configCount) {
         Error() << "Platform::WindowlessGlxApplication::tryCreateContext(): no supported framebuffer configuration found";
@@ -80,14 +81,16 @@ bool WindowlessGlxApplication::tryCreateContext(const Configuration&) {
     }
 
     /* Create pbuffer */
-    constexpr static const int pbufferAttributes[] = {
+    /* GCC 4.6 can't have both const and constexpr here */
+    static const int pbufferAttributes[] = {
         GLX_PBUFFER_WIDTH,  32,
         GLX_PBUFFER_HEIGHT, 32,
         None
     };
     _pbuffer = glXCreatePbuffer(_display, configs[0], pbufferAttributes);
 
-    constexpr static const GLint contextAttributes[] = {
+    /* GCC 4.6 can't have both const and constexpr here */
+    static const GLint contextAttributes[] = {
         #ifdef MAGNUM_TARGET_GLES
         #ifdef MAGNUM_TARGET_GLES3
         GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -118,7 +121,8 @@ bool WindowlessGlxApplication::tryCreateContext(const Configuration&) {
        binary NVidia drivers on Linux. NVidia, instead of creating
        forward-compatible context with highest available version, forces the
        version to the one specified, which is completely useless behavior. */
-    constexpr static const char nvidiaVendorString[] = "NVIDIA Corporation";
+    /* GCC 4.6 can't have both const and constexpr here */
+    static const char nvidiaVendorString[] = "NVIDIA Corporation";
     if(!_glContext
         #ifndef CORRADE_TARGET_APPLE
         /* We need to make the context current first, sorry about the ugly code */
