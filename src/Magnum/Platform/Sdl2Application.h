@@ -250,6 +250,7 @@ class Sdl2Application {
             char** argv;    /**< @brief Argument values */
         };
 
+        class WindowConfiguration;
         class Configuration;
         class InputEvent;
         class KeyEvent;
@@ -530,13 +531,112 @@ class Sdl2Application {
 };
 
 /**
+@brief Window configuration
+
+@see @ref Configuration
+*/
+class Sdl2Application::WindowConfiguration {
+    public:
+        /**
+         * @brief Window flag
+         *
+         * @see @ref WindowFlags, @ref setWindowFlags()
+         */
+        enum class WindowFlag: Uint32 {
+            Resizable = SDL_WINDOW_RESIZABLE,       /**< Resizable window */
+            Fullscreen = SDL_WINDOW_FULLSCREEN,     /**< Fullscreen window */
+            Hidden = SDL_WINDOW_HIDDEN,             /**< Hidden window */
+            Maximized = SDL_WINDOW_MAXIMIZED,       /**< Maximized window */
+            Minimized = SDL_WINDOW_MINIMIZED,       /**< Minimized window */
+            MouseLocked = SDL_WINDOW_INPUT_GRABBED  /**< Window with mouse locked */
+        };
+
+        /**
+         * @brief Window flags
+         *
+         * @see @ref setWindowFlags()
+         */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
+        typedef Containers::EnumSet<WindowFlag, SDL_WINDOW_RESIZABLE|
+            SDL_WINDOW_FULLSCREEN|SDL_WINDOW_HIDDEN|SDL_WINDOW_MAXIMIZED|
+            SDL_WINDOW_MINIMIZED|SDL_WINDOW_INPUT_GRABBED> WindowFlags;
+        #else
+        typedef Containers::EnumSet<WindowFlag> WindowFlags;
+        #endif
+
+        /*implicit*/ WindowConfiguration();
+        ~WindowConfiguration();
+
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        /**
+         * @brief Window title
+         *
+         * @note Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
+         */
+        std::string title() const { return _title; }
+        #endif
+
+        /**
+         * @brief Set window title
+         * @return Reference to self (for method chaining)
+         *
+         * Default is `"Magnum SDL2 Application"`.
+         * @note In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" this function
+         *      does nothing and is included only for compatibility. You need
+         *      to set the title separately in application's HTML markup.
+         */
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        WindowConfiguration& setTitle(std::string title) {
+            _title = std::move(title);
+            return *this;
+        }
+        #else
+        template<class T> WindowConfiguration& setTitle(const T&) { return *this; }
+        #endif
+
+        /** @brief Window size */
+        Vector2i size() const { return _size; }
+
+        /**
+         * @brief Set window size
+         * @return Reference to self (for method chaining)
+         *
+         * Default is `{800, 600}`.
+         */
+        WindowConfiguration& setSize(const Vector2i& size) {
+            _size = size;
+            return *this;
+        }
+
+        /** @brief Window flags */
+        WindowFlags windowFlags() const { return _windowFlags; }
+
+        /**
+         * @brief Set window flags
+         * @return Reference to self (for method chaining)
+         *
+         * Default are none.
+         */
+        WindowConfiguration& setWindowFlags(WindowFlags flags) {
+            _windowFlags = flags;
+            return *this;
+        }
+
+    private:
+        #ifndef CORRADE_TARGET_EMSCRIPTEN
+        std::string _title;
+        #endif
+        Vector2i _size;
+        WindowFlags _windowFlags;
+};
+
+/**
 @brief Configuration
 
-The created window is always with double-buffered OpenGL context and 24bit
-depth buffer.
+The created OpenGL context is always double-buffered with 24bit depth buffer.
 @see @ref Sdl2Application(), @ref createContext(), @ref tryCreateContext()
 */
-class Sdl2Application::Configuration {
+class Sdl2Application::Configuration: public WindowConfiguration {
     public:
         #ifndef CORRADE_TARGET_EMSCRIPTEN
         /**
@@ -570,90 +670,7 @@ class Sdl2Application::Configuration {
         #endif
         #endif
 
-        /**
-         * @brief Window flag
-         *
-         * @see @ref WindowFlags, @ref setWindowFlags()
-         */
-        enum class WindowFlag: Uint32 {
-            Resizable = SDL_WINDOW_RESIZABLE,       /**< Resizable window */
-            Fullscreen = SDL_WINDOW_FULLSCREEN,     /**< Fullscreen window */
-            Hidden = SDL_WINDOW_HIDDEN,             /**< Hidden window */
-            Maximized = SDL_WINDOW_MAXIMIZED,       /**< Maximized window */
-            Minimized = SDL_WINDOW_MINIMIZED,       /**< Minimized window */
-            MouseLocked = SDL_WINDOW_INPUT_GRABBED  /**< Window with mouse locked */
-        };
-
-        /**
-         * @brief Window flags
-         *
-         * @see @ref setWindowFlags()
-         */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        typedef Containers::EnumSet<WindowFlag, SDL_WINDOW_RESIZABLE|
-            SDL_WINDOW_FULLSCREEN|SDL_WINDOW_HIDDEN|SDL_WINDOW_MAXIMIZED|
-            SDL_WINDOW_MINIMIZED|SDL_WINDOW_INPUT_GRABBED> WindowFlags;
-        #else
-        typedef Containers::EnumSet<WindowFlag> WindowFlags;
-        #endif
-
         /*implicit*/ Configuration();
-        ~Configuration();
-
-        #ifndef CORRADE_TARGET_EMSCRIPTEN
-        /**
-         * @brief Window title
-         *
-         * @note Not available in @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten".
-         */
-        std::string title() const { return _title; }
-        #endif
-
-        /**
-         * @brief Set window title
-         * @return Reference to self (for method chaining)
-         *
-         * Default is `"Magnum SDL2 Application"`.
-         * @note In @ref CORRADE_TARGET_EMSCRIPTEN "Emscripten" this function
-         *      does nothing and is included only for compatibility. You need
-         *      to set the title separately in application's HTML markup.
-         */
-        #ifndef CORRADE_TARGET_EMSCRIPTEN
-        Configuration& setTitle(std::string title) {
-            _title = std::move(title);
-            return *this;
-        }
-        #else
-        template<class T> Configuration& setTitle(const T&) { return *this; }
-        #endif
-
-        /** @brief Window size */
-        Vector2i size() const { return _size; }
-
-        /**
-         * @brief Set window size
-         * @return Reference to self (for method chaining)
-         *
-         * Default is `{800, 600}`.
-         */
-        Configuration& setSize(const Vector2i& size) {
-            _size = size;
-            return *this;
-        }
-
-        /** @brief Window flags */
-        WindowFlags windowFlags() const { return _windowFlags; }
-
-        /**
-         * @brief Set window flags
-         * @return Reference to self (for method chaining)
-         *
-         * Default are none.
-         */
-        Configuration& setWindowFlags(WindowFlags flags) {
-            _windowFlags = flags;
-            return *this;
-        }
 
         #ifndef CORRADE_TARGET_EMSCRIPTEN
         /**
@@ -738,12 +755,27 @@ class Sdl2Application::Configuration {
         }
         #endif
 
-    private:
+        /* Overloads to remove WTF-factor from method chaining order */
+        #ifndef DOXYGEN_GENERATING_OUTPUT
         #ifndef CORRADE_TARGET_EMSCRIPTEN
-        std::string _title;
+        Configuration& setTitle(std::string title) {
+            WindowConfiguration::setTitle(std::move(title));
+            return *this;
+        }
+        #else
+        template<class T> Configuration& setTitle(const T&) { return *this; }
         #endif
-        Vector2i _size;
-        WindowFlags _windowFlags;
+        Configuration& setSize(const Vector2i& size) {
+            WindowConfiguration::setSize(size);
+            return *this;
+        }
+        Configuration& setWindowFlags(WindowFlags flags) {
+            WindowConfiguration::setWindowFlags(flags);
+            return *this;
+        }
+        #endif
+
+    private:
         Int _sampleCount;
         #ifndef CORRADE_TARGET_EMSCRIPTEN
         Version _version;
@@ -1077,7 +1109,7 @@ CORRADE_ENUMSET_OPERATORS(Sdl2Application::Flags)
 #ifndef CORRADE_TARGET_EMSCRIPTEN
 CORRADE_ENUMSET_OPERATORS(Sdl2Application::Configuration::Flags)
 #endif
-CORRADE_ENUMSET_OPERATORS(Sdl2Application::Configuration::WindowFlags)
+CORRADE_ENUMSET_OPERATORS(Sdl2Application::WindowConfiguration::WindowFlags)
 CORRADE_ENUMSET_OPERATORS(Sdl2Application::InputEvent::Modifiers)
 CORRADE_ENUMSET_OPERATORS(Sdl2Application::MouseMoveEvent::Buttons)
 

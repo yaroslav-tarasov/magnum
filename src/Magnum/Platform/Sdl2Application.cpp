@@ -412,17 +412,20 @@ void Sdl2Application::mousePressEvent(MouseEvent&) {}
 void Sdl2Application::mouseReleaseEvent(MouseEvent&) {}
 void Sdl2Application::mouseMoveEvent(MouseMoveEvent&) {}
 
-Sdl2Application::Configuration::Configuration():
+Sdl2Application::WindowConfiguration::WindowConfiguration():
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     _title("Magnum SDL2 Application"),
     #endif
-    _size(800, 600), _windowFlags{}, _sampleCount(0)
+    _size(800, 600), _windowFlags{} {}
+
+Sdl2Application::WindowConfiguration::~WindowConfiguration() = default;
+
+Sdl2Application::Configuration::Configuration():
+    _sampleCount(0)
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     , _version(Version::None), _sRGBCapable{false}
     #endif
     {}
-
-Sdl2Application::Configuration::~Configuration() = default;
 
 Sdl2Application::InputEvent::Modifiers Sdl2Application::MouseEvent::modifiers() {
     if(modifiersLoaded) return _modifiers;
