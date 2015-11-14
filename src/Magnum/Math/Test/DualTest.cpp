@@ -201,7 +201,7 @@ void DualTest::sincos() {
     const auto result = std::make_pair(
         Dual(0.5f, 0.8660254037844386f*Constants::pi()/2),
         Dual(0.8660254037844386f, -0.5f*Constants::pi()/2));
-    CORRADE_COMPARE(Math::sincos(Math::Dual<Deg>(Deg{30.0f}, Deg{90.0f}), result);
+    CORRADE_COMPARE(Math::sincos(Math::Dual<Deg>(Deg{30.0f}, Deg{90.0f})), result);
     CORRADE_COMPARE(Math::sincos(Math::Dual<Rad>(Rad(Constants::pi()/6), Rad(Constants::pi()/2))), result);
 }
 
