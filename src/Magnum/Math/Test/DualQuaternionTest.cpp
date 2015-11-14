@@ -193,7 +193,11 @@ void DualQuaternionTest::constructConversion() {
     typedef Math::DualQuaternion<Int> DualQuaternioni;
 
     constexpr DualQuaternion a{{{1.3f, 2.7f, -15.0f}, 7.0f}, {{1.0f, -2.0f, 3.0f}, 0.0f}};
-    constexpr DualQuaternioni b{a};
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    /* Not constexpr under GCC < 4.7 */
+    constexpr
+    #endif
+    DualQuaternioni b{a};
 
     CORRADE_COMPARE(b, (DualQuaternioni{{{1, 2, -15}, 7}, {{1, -2, 3}, 0}}));
 
