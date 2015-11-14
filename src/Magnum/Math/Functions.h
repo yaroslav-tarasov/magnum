@@ -56,6 +56,9 @@ namespace Implementation {
 
         template<class T> constexpr static T pow(T) { return 1; }
     };
+
+    template<class> struct IsBoolVector: std::false_type {};
+    template<std::size_t size> struct IsBoolVector<BoolVector<size>>: std::true_type {};
 }
 
 /**
@@ -105,7 +108,14 @@ template<class Integral> std::pair<Integral, Integral> div(Integral x, Integral 
 
 /** @todo Can't trigonometric functions be done with only one overload? */
 
-/** @brief Sine */
+/* The functions accept Unit instead of Rad to make them working with operator
+   products (e.g. 2*35.0_degf, which is of type Unit) */
+
+/**
+@brief Sine
+
+@see @ref sincos()
+*/
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T> inline T sin(Rad<T> angle);
 #else
@@ -113,12 +123,31 @@ template<class T> inline T sin(Unit<Rad, T> angle) { return std::sin(angle.toUnd
 template<class T> inline T sin(Unit<Deg, T> angle) { return sin(Rad<T>(angle)); }
 #endif
 
-/** @brief Cosine */
+/**
+@brief Cosine
+
+@see @ref sincos()
+*/
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T> inline T cos(Rad<T> angle);
 #else
 template<class T> inline T cos(Unit<Rad, T> angle) { return std::cos(angle.toUnderlyingType()); }
 template<class T> inline T cos(Unit<Deg, T> angle) { return cos(Rad<T>(angle)); }
+#endif
+
+/**
+@brief Sine and cosine
+
+On some architectures might be faster than doing both computations separately.
+@see @ref sin(), @ref cos(), @ref sincos(const Dual<Rad<T>>&)
+*/
+#ifdef DOXYGEN_GENERATING_OUTPUT
+template<class T> inline std::pair<T, T> sincos(Rad<T> angle);
+#else
+template<class T> inline std::pair<T, T> sincos(Unit<Rad, T> angle) {
+    return {std::sin(T(angle)) ,std::cos(T(angle))};
+}
+template<class T> inline std::pair<T, T> sincos(Unit<Deg, T> angle) { return sincos(Rad<T>(angle)); }
 #endif
 
 /** @brief Tangent */
@@ -341,7 +370,7 @@ template<std::size_t size, class T> Vector<size, T> ceil(const Vector<size, T>& 
 /**
 @brief Square root
 
-@see @ref sqrtInverted(), @ref Vector::length()
+@see @ref sqrtInverted(), @ref Vector::length(), @ref sqrt(const Dual<T>&)
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T> inline T sqrt(const T& a);
@@ -387,13 +416,34 @@ The interpolation for vectors is done as in following, similarly for scalars: @f
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T, class U> inline T lerp(const T& a, const T& b, U t);
 #else
-template<class T, class U> inline T lerp(T a, T b, U t) {
+template<class T, class U> inline typename std::enable_if<!Implementation::IsBoolVector<U>::value, T>::type lerp(T a, T b, U t) {
     return T((U(1) - t)*a + t*b);
 }
-template<std::size_t size, class T, class U> inline Vector<size, T> lerp(const Vector<size, T>& a, const Vector<size, T>& b, U t) {
+template<std::size_t size, class T, class U> inline typename std::enable_if<!Implementation::IsBoolVector<U>::value, Vector<size, T>>::type lerp(const Vector<size, T>& a, const Vector<size, T>& b, U t) {
     return (U(1) - t)*a + t*b;
 }
 #endif
+
+/**
+@overload
+
+Similar to the above, but instead of multiplication and addition it just does
+component-wise selection from either @p a or @p b based on values in @p t.
+*/
+template<std::size_t size, class T> inline Vector<size, T> lerp(const Vector<size, T>& a, const Vector<size, T>& b, const BoolVector<size>& t) {
+    Vector<size, T> out{NoInit};
+    for(std::size_t i = 0; i != size; ++i)
+        out[i] = t[i] ? a[i] : b[i];
+    return out;
+}
+
+/** @overload */
+template<std::size_t size> inline BoolVector<size> lerp(const BoolVector<size>& a, const BoolVector<size>& b, const BoolVector<size>& t) {
+    BoolVector<size> out{NoInit};
+    for(std::size_t i = 0; i != size; ++i)
+        out.set(i, t[i] ? a[i] : b[i]);
+    return out;
+}
 
 /**
 @brief Inverse linear interpolation of two values
@@ -420,7 +470,8 @@ template<std::size_t size, class T, class U> inline Vector<size, T> lerpInverted
 /**
 @brief Fused multiply-add
 
-Computes and returns @f$ ab + c @f$.
+Computes and returns @f$ ab + c @f$. On some architectures might be faster than
+doing the computation manually.
 */
 #ifdef DOXYGEN_GENERATING_OUTPUT
 template<class T> inline T fma(const T& a, const T& b, const T& c);

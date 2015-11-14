@@ -29,6 +29,8 @@
  * @brief Class @ref Magnum::Math::DualQuaternion
  */
 
+#include <cmath>
+
 #include "Magnum/Math/Dual.h"
 #include "Magnum/Math/Matrix4.h"
 #include "Magnum/Math/Quaternion.h"
@@ -37,6 +39,53 @@ namespace Magnum { namespace Math {
 
 namespace Implementation {
     template<class, class> struct DualQuaternionConverter;
+}
+
+/** @relatesalso DualQuaternion
+@brief Screw linear interpolation of two dual quaternions
+@param normalizedA  First dual quaternion
+@param normalizedB  Second dual quaternion
+@param t            Interpolation phase (from range @f$ [0; 1] @f$)
+
+Expects that both dual quaternions are normalized. @f[
+\begin{array}{rcl}
+    l + \epsilon m & = & \hat q_A^* \hat q_B \\
+    \frac{\hat a} 2 & = & acos \left( l_S \right) - \epsilon m_S \frac 1 {|l_V|} \\
+    \hat {\boldsymbol n} & = & \boldsymbol n_0 + \epsilon \boldsymbol n_\epsilon
+    ~~~~~~~~ \boldsymbol n_0 = l_V \frac 1 {|l_V|}
+    ~~~~~~~~ \boldsymbol n_\epsilon = \left( m_V - {\boldsymbol n}_0 \frac {a_\epsilon} 2 l_S \right)\frac 1 {|l_V|} \\
+    {\hat q}_{ScLERP} & = & \hat q_A (\hat q_A^* \hat q_B)^t =
+        \hat q_A \left[ \hat {\boldsymbol n} sin \left( t \frac {\hat a} 2 \right), cos \left( t \frac {\hat a} 2 \right) \right] \\
+\end{array}
+@f]
+@see @ref DualQuaternion::isNormalized(),
+    @ref slerp(const Quaternion<T>&, const Quaternion<T>&, T),
+    @ref lerp(const T&, const T&, U)
+*/
+template<class T> inline DualQuaternion<T> sclerp(const DualQuaternion<T>& normalizedA, const DualQuaternion<T>& normalizedB, const T t) {
+    CORRADE_ASSERT(normalizedA.isNormalized() && normalizedB.isNormalized(),
+        "Math::sclerp(): dual quaternions must be normalized", {});
+    const T dotResult = dot(normalizedA.real().vector(), normalizedB.real().vector());
+
+    /* l + εm = q_A^**q_B, multiplying with -1 ensures shortest path when dot < 0 */
+    const DualQuaternion<T> diff = normalizedA.quaternionConjugated()*(dotResult < T(0) ? -normalizedB : normalizedB);
+    const Quaternion<T>& l = diff.real();
+    const Quaternion<T>& m = diff.dual();
+
+    /* a/2 = acos(l_S) - εm_S/|l_V| */
+    const T invr = l.vector().lengthInverted();
+    const Dual<T> aHalf{std::acos(l.scalar()), -m.scalar()*invr};
+
+    /* direction = n_0 = l_V/|l_V|
+       moment = n_ε = (m_V - n_0*(a_ε/2)*l_S)/|l_V| */
+    const Vector3<T> direction = l.vector()*invr;
+    const Vector3<T> moment = (m.vector() - direction*(aHalf.dual()*l.scalar()))*invr;
+    const Dual<Vector3<T>> n{direction, moment};
+
+    /* q_ScLERP = q_A*(cos(t*a/2) + n*sin(t*a/2)) */
+    Dual<T> sin, cos;
+    std::tie(sin, cos) = Math::sincos(t*Dual<Rad<T>>(aHalf));
+    return normalizedA*DualQuaternion<T>{n*sin, cos};
 }
 
 /**
@@ -144,6 +193,20 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
         constexpr /*implicit*/ DualQuaternion(const Quaternion<T>& real, const Quaternion<T>& dual = Quaternion<T>({}, T(0))): Dual<Quaternion<T>>(real, dual) {}
 
         /**
+         * @brief Construct dual quaternion from dual vector and scalar parts
+         *
+         * @f[
+         *      \hat q = [\hat{\boldsymbol v}, \hat s] = [\boldsymbol v_0, s_0] + \epsilon [\boldsymbol v_\epsilon, s_\epsilon]
+         * @f]
+         */
+        constexpr /*implicit*/ DualQuaternion(const Dual<Vector3<T>>& vector, const Dual<T>& scalar)
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            /* MSVC 2015 can't handle {} here */
+            : Dual<Quaternion<T>>({vector.real(), scalar.real()}, {vector.dual(), scalar.dual()})
+            #endif
+            {}
+
+        /**
          * @brief Construct dual quaternion from vector
          *
          * To be used in transformations later. @f[
@@ -156,6 +219,14 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
         #else
         constexpr explicit DualQuaternion(const Vector3<T>& vector): Dual<Quaternion<T>>({}, {vector, T(0)}) {}
         #endif
+
+        /**
+         * @brief Construct dual quaternion from another of different type
+         *
+         * Performs only default casting on the values, no rounding or anything
+         * else.
+         */
+        template<class U> constexpr explicit DualQuaternion(const DualQuaternion<U>& other): Dual<Quaternion<T>>(other) {}
 
         /** @brief Construct dual quaternion from external representation */
         #ifndef CORRADE_GCC46_COMPATIBILITY
@@ -371,8 +442,11 @@ template<class T> class DualQuaternion: public Dual<Quaternion<T>> {
             return ((*this)*DualQuaternion<T>(vector)*conjugated()).dual().vector();
         }
 
-        MAGNUM_DUAL_SUBCLASS_IMPLEMENTATION(DualQuaternion, Quaternion)
+        MAGNUM_DUAL_SUBCLASS_IMPLEMENTATION(DualQuaternion, Quaternion, T)
+        MAGNUM_DUAL_SUBCLASS_MULTIPLICATION_IMPLEMENTATION(DualQuaternion, Quaternion)
 };
+
+MAGNUM_DUAL_OPERATOR_IMPLEMENTATION(DualQuaternion, Quaternion, T)
 
 /** @debugoperator{Magnum::Math::DualQuaternion} */
 template<class T> Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug& debug, const DualQuaternion<T>& value) {

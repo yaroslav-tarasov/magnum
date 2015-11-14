@@ -378,7 +378,8 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
         Framebuffer(const Framebuffer&) = delete;
 
         /** @brief Move constructor */
-        Framebuffer(Framebuffer&& other) noexcept;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline Framebuffer(Framebuffer&& other) noexcept;
 
         /**
          * @brief Destructor
@@ -392,7 +393,8 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
         Framebuffer& operator=(const Framebuffer&) = delete;
 
         /** @brief Move assignment */
-        Framebuffer& operator=(Framebuffer&& other) noexcept;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline Framebuffer& operator=(Framebuffer&& other) noexcept;
 
         /** @brief OpenGL framebuffer ID */
         GLuint id() const { return _id; }
@@ -405,7 +407,8 @@ class MAGNUM_EXPORT Framebuffer: public AbstractFramebuffer, public AbstractObje
          * equivalent to moved-from state.
          * @see @ref wrap()
          */
-        GLuint release();
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline GLuint release();
 
         #ifndef MAGNUM_TARGET_WEBGL
         /**

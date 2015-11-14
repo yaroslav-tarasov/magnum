@@ -23,28 +23,28 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Buffer.h"
+namespace Magnum {
 
-#include <Corrade/Utility/Debug.h>
+/** @page openal OpenAL
+@brief State of OpenAL support, version and extension requirements.
 
-namespace Magnum { namespace Audio {
+@todo OpenAL mapping table
 
-Debug& operator<<(Debug& debug, const Buffer::Format value) {
-    switch(value) {
-        #define _c(value) case Buffer::Format::value: return debug << "Audio::Buffer::Format::" #value;
-        _c(Mono8)
-        _c(Mono16)
-        _c(Stereo8)
-        _c(Stereo16)
+State of implementation of particular OpenAL extensions is in the following
+table.
 
-        _c(MonoFloat)
-        _c(StereoFloat)
-        _c(MonoDouble)
-        _c(StereoDouble)
-        #undef _c
-    }
+-   @subpage openal-support
 
-    return debug << "Audio::Buffer::Format::(invalid)";
+@section openal-required-extensions Extension requirements
+
+The @ref Audio library requires at least stock OpenAL 1.1 with no extensions,
+but some specific functionality has greater requirements. Following is the list
+of features requiring specific OpenAL extensions.
+
+-   @subpage requires-al-extension
+
+@page requires-al-extension Functionality requiring specific OpenAL extension
+
+*/
+
 }
-
-}}

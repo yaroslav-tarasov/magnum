@@ -193,7 +193,8 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
         TransformFeedback(const TransformFeedback&) = delete;
 
         /** @brief Move constructor */
-        TransformFeedback(TransformFeedback&& other) noexcept;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline TransformFeedback(TransformFeedback&& other) noexcept;
 
         /**
          * @brief Destructor
@@ -207,7 +208,8 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
         TransformFeedback& operator=(const TransformFeedback&) = delete;
 
         /** @brief Move assignment */
-        TransformFeedback& operator=(TransformFeedback&& other) noexcept;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline TransformFeedback& operator=(TransformFeedback&& other) noexcept;
 
         /** @brief OpenGL transform feedback ID */
         GLuint id() const { return _id; }
@@ -220,7 +222,8 @@ class MAGNUM_EXPORT TransformFeedback: public AbstractObject {
          * then equivalent to moved-from state.
          * @see @ref wrap()
          */
-        GLuint release();
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline GLuint release();
 
         #ifndef MAGNUM_TARGET_WEBGL
         /**

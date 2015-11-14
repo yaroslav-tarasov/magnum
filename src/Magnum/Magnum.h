@@ -66,6 +66,7 @@ using namespace Corrade;
 using Corrade::Utility::Debug;
 using Corrade::Utility::Warning;
 using Corrade::Utility::Error;
+using Corrade::Utility::Fatal;
 
 #ifdef DOXYGEN_GENERATING_OUTPUT
 /**

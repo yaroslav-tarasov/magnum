@@ -24,18 +24,4 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/configure.h)
-
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-
-corrade_add_test(AudioAbstractImporterTest AbstractImporterTest.cpp LIBRARIES MagnumAudio)
-corrade_add_test(AudioBufferTest BufferTest.cpp LIBRARIES MagnumAudio)
-corrade_add_test(AudioContextTest ContextTest.cpp LIBRARIES MagnumAudio)
-corrade_add_test(AudioRendererTest RendererTest.cpp LIBRARIES MagnumAudio)
-corrade_add_test(AudioSourceTest SourceTest.cpp LIBRARIES MagnumAudio)
-
-if(WITH_SCENEGRAPH)
-    corrade_add_test(AudioListenerTest ListenerTest.cpp LIBRARIES MagnumSceneGraph MagnumAudio)
-    corrade_add_test(AudioPlayableTest PlayableTest.cpp LIBRARIES MagnumSceneGraph MagnumAudio)
-endif()
+install(FILES extensions.h DESTINATION ${MAGNUM_EXTERNAL_INCLUDE_INSTALL_DIR}/OpenAL)

@@ -89,7 +89,7 @@ Expects that both quaternions are normalized. @f[
 @f]
 @see @ref Quaternion::isNormalized(), @ref slerp(const Quaternion<T>&, const Quaternion<T>&, T),
     @ref lerp(const T&, const T&, U)
- */
+*/
 template<class T> inline Quaternion<T> lerp(const Quaternion<T>& normalizedA, const Quaternion<T>& normalizedB, T t) {
     CORRADE_ASSERT(normalizedA.isNormalized() && normalizedB.isNormalized(),
         "Math::lerp(): quaternions must be normalized", {});
@@ -102,7 +102,8 @@ template<class T> inline Quaternion<T> lerp(const Quaternion<T>& normalizedA, co
 @param normalizedB  Second quaternion
 @param t            Interpolation phase (from range @f$ [0; 1] @f$)
 
-Expects that both quaternions are normalized. @f[
+Expects that both quaternions are normalized. If the quaternions are the same
+or one is a negation of the other, returns the first argument. @f[
     q_{SLERP} = \frac{sin((1 - t) \theta) q_A + sin(t \theta) q_B}{sin \theta}
     ~ ~ ~ ~ ~ ~ ~
     \theta = acos \left( \frac{q_A \cdot q_B}{|q_A| \cdot |q_B|} \right) = acos(q_A \cdot q_B)
@@ -112,7 +113,12 @@ Expects that both quaternions are normalized. @f[
 template<class T> inline Quaternion<T> slerp(const Quaternion<T>& normalizedA, const Quaternion<T>& normalizedB, T t) {
     CORRADE_ASSERT(normalizedA.isNormalized() && normalizedB.isNormalized(),
         "Math::slerp(): quaternions must be normalized", {});
-    const T a = Implementation::angle(normalizedA, normalizedB);
+    const T cosHalfAngle = dot(normalizedA, normalizedB);
+
+    /* Avoid division by zero */
+    if(std::abs(cosHalfAngle) >= T(1)) return Quaternion<T>{normalizedA};
+
+    const T a = std::acos(cosHalfAngle);
     return (std::sin((T(1) - t)*a)*normalizedA + std::sin(t*a)*normalizedB)/std::sin(a);
 }
 
@@ -125,6 +131,8 @@ Represents 3D rotation. See @ref transformations for brief introduction.
     @ref Matrix4
 */
 template<class T> class Quaternion {
+    template<class> friend class Quaternion;
+
     public:
         typedef T Type; /**< @brief Underlying data type */
 
@@ -223,6 +231,14 @@ template<class T> class Quaternion {
          * @see @ref transformVector(), @ref transformVectorNormalized()
          */
         constexpr explicit Quaternion(const Vector3<T>& vector): _vector(vector), _scalar(T(0)) {}
+
+        /**
+         * @brief Construct dual complex number from another of different type
+         *
+         * Performs only default casting on the values, no rounding or anything
+         * else.
+         */
+        template<class U> constexpr explicit Quaternion(const Quaternion<U>& other): _vector{other._vector}, _scalar{T(other._scalar)} {}
 
         /** @brief Construct quaternion from external representation */
         #ifndef CORRADE_GCC46_COMPATIBILITY

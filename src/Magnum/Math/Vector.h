@@ -424,7 +424,7 @@ template<std::size_t size, class T> class Vector {
          * @brief Multiply vector with number
          *
          * @see @ref operator*(const Vector<size, T>&) const,
-         *      @ref operator*=(T), operator*(T, const Vector<size, T>&),
+         *      @ref operator*=(T), @ref operator*(T, const Vector<size, T>&),
          *      @ref operator*(const Vector<size, Integral>&, FloatingPoint)
          */
         Vector<size, T> operator*(T number) const {
@@ -451,7 +451,7 @@ template<std::size_t size, class T> class Vector {
          * @brief Divide vector with number
          *
          * @see @ref operator/(const Vector<size, T>&) const,
-         *      @ref operator/=(T), operator/(T, const Vector<size, T>&),
+         *      @ref operator/=(T), @ref operator/(T, const Vector<size, T>&),
          *      @ref operator/(const Vector<size, Integral>&, FloatingPoint)
          */
         Vector<size, T> operator/(T number) const {

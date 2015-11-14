@@ -149,6 +149,19 @@ template<class T> class DualComplex: public Dual<Complex<T>> {
         constexpr explicit DualComplex(const Vector2<T>& vector): Dual<Complex<T>>({}, Complex<T>(vector)) {}
         #endif
 
+        /**
+         * @brief Construct dual complex number from another of different type
+         *
+         * Performs only default casting on the values, no rounding or anything
+         * else.
+         */
+        template<class U> constexpr explicit DualComplex(const DualComplex<U>& other)
+            #ifndef DOXYGEN_GENERATING_OUTPUT
+            /* MSVC 2015 can't handle {} here */
+            : Dual<Complex<T>>(other)
+            #endif
+            {}
+
         /** @brief Construct dual complex number from external representation */
         #ifndef CORRADE_GCC46_COMPATIBILITY
         template<class U, class V = decltype(Implementation::DualComplexConverter<T, U>::from(std::declval<U>()))>
@@ -356,34 +369,12 @@ template<class T> class DualComplex: public Dual<Complex<T>> {
             return Vector2<T>(((*this)*DualComplex<T>(vector)).dual());
         }
 
-        /* Verbatim copy of DUAL_SUBCLASS_IMPLEMENTATION(), as we need to hide
-           Dual's operator*() and operator/() */
-        #ifndef DOXYGEN_GENERATING_OUTPUT
-        DualComplex<T> operator-() const {
-            return Dual<Complex<T>>::operator-();
-        }
-        DualComplex<T>& operator+=(const Dual<Complex<T>>& other) {
-            Dual<Complex<T>>::operator+=(other);
-            return *this;
-        }
-        DualComplex<T> operator+(const Dual<Complex<T>>& other) const {
-            return Dual<Complex<T>>::operator+(other);
-        }
-        DualComplex<T>& operator-=(const Dual<Complex<T>>& other) {
-            Dual<Complex<T>>::operator-=(other);
-            return *this;
-        }
-        DualComplex<T> operator-(const Dual<Complex<T>>& other) const {
-            return Dual<Complex<T>>::operator-(other);
-        }
-        #endif
-
-    private:
-        /* Just to be sure nobody uses this, as it wouldn't probably work with
-           our operator*() */
-        using Dual<Complex<T>>::operator*;
-        using Dual<Complex<T>>::operator/;
+        MAGNUM_DUAL_SUBCLASS_IMPLEMENTATION(DualComplex, Vector2, T)
+        /* Not using MAGNUM_DUAL_SUBCLASS_MULTIPLICATION_IMPLEMENTATION(), as
+           we have special multiplication/division implementation */
 };
+
+MAGNUM_DUAL_OPERATOR_IMPLEMENTATION(DualComplex, Vector2, T)
 
 /** @debugoperator{Magnum::Math::DualQuaternion} */
 template<class T> Corrade::Utility::Debug& operator<<(Corrade::Utility::Debug& debug, const DualComplex<T>& value) {

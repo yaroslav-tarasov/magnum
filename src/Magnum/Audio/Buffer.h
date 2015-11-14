@@ -31,6 +31,9 @@
 
 #include <utility>
 #include <al.h>
+#include <alc.h>
+#include "MagnumExternal/OpenAL/extensions.h"
+
 #include <Corrade/Containers/ArrayView.h>
 
 #include "Magnum/Magnum.h"
@@ -52,7 +55,35 @@ class Buffer {
             Mono8 = AL_FORMAT_MONO8,        /**< 8-bit unsigned mono */
             Mono16 = AL_FORMAT_MONO16,      /**< 16-bit signed mono */
             Stereo8 = AL_FORMAT_STEREO8,    /**< 8-bit interleaved unsigned stereo */
-            Stereo16 = AL_FORMAT_STEREO16   /**< 16-bit interleaved signed stereo */
+            Stereo16 = AL_FORMAT_STEREO16,   /**< 16-bit interleaved signed stereo */
+
+            /**
+             * @brief 32-bit floating-point mono
+             *
+             * @requires_al_extension Extension @al_extension{EXT,float32}
+             */
+            MonoFloat = AL_FORMAT_MONO_FLOAT32,
+
+            /**
+             * @brief 32-bit interleaved floating-point stereo
+             *
+             * @requires_al_extension Extension @al_extension{EXT,float32}
+             */
+            StereoFloat = AL_FORMAT_STEREO_FLOAT32,
+
+            /**
+             * @brief 64-bit floating-point mono
+             *
+             * @requires_al_extension Extension @al_extension{EXT,double}
+             */
+            MonoDouble = AL_FORMAT_MONO_DOUBLE_EXT,
+
+            /**
+             * @brief 64-bit interleaved floating-point stereo
+             *
+             * @requires_al_extension Extension @al_extension{EXT,double}
+             */
+            StereoDouble = AL_FORMAT_STEREO_DOUBLE_EXT
         };
 
         /**

@@ -57,6 +57,7 @@ Platforms:
 *   **Windows** natively or using ANGLE (through SDL2 or GLUT toolkit) [![Build status](https://ci.appveyor.com/api/projects/status/5b477m034cfaskse/branch/compatibility?svg=true)](https://ci.appveyor.com/project/mosra/magnum/branch/compatibility)
 *   **OS X** (through SDL2 toolkit)
 *   **Android** 2.3 (API Level 9) and higher
+*   **Windows RT** (Store/Phone) using ANGLE (through SDL2 toolkit)
 *   **Google Chrome** (through [Native Client](https://developers.google.com/native-client/),
     both `newlib` and `glibc` toolchains are supported)
 *   **HTML5/JavaScript** (through [Emscripten](https://github.com/kripken/emscripten/wiki))

@@ -23,5 +23,6 @@
 #   DEALINGS IN THE SOFTWARE.
 #
 
+add_subdirectory(OpenAL)
 add_subdirectory(OpenGL)
 add_subdirectory(Optional)

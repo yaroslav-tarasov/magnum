@@ -3,6 +3,7 @@
 
     Copyright © 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2015 Jonathan Hale <squareys@googlemail.com>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -23,28 +24,29 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Buffer.h"
+/** @page openal-support OpenAL support state
+@brief List of (un)supported OpenAL features and extensions.
 
-#include <Corrade/Utility/Debug.h>
+@tableofcontents
 
-namespace Magnum { namespace Audio {
+@section openal-support-state OpenAL implementation state
 
-Debug& operator<<(Debug& debug, const Buffer::Format value) {
-    switch(value) {
-        #define _c(value) case Buffer::Format::value: return debug << "Audio::Buffer::Format::" #value;
-        _c(Mono8)
-        _c(Mono16)
-        _c(Stereo8)
-        _c(Stereo16)
+The extension implementation is considered complete if all its defined types,
+functions and enum values are exposed through the API.
 
-        _c(MonoFloat)
-        _c(StereoFloat)
-        _c(MonoDouble)
-        _c(StereoDouble)
-        #undef _c
-    }
+@subsection openal-extension-support Extensions
 
-    return debug << "Audio::Buffer::Format::(invalid)";
-}
+Extension                                   | Status
+------------------------------------------- | ------
+@al_extension{EXT,double}                   | done
+@al_extension{EXT,float32}                  | done
 
-}}
+@subsection openal-extension-support-soft OpenAL Soft Extensions
+
+Extension                                   | Status
+------------------------------------------- | ------
+@alc_extension{SOFTX,HRTF}                  | done
+@alc_extension{SOFT,HRTF}                   | done
+
+
+*/

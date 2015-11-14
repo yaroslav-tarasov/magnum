@@ -882,7 +882,8 @@ class MAGNUM_EXPORT Buffer: public AbstractObject {
         Buffer(const Buffer&) = delete;
 
         /** @brief Move constructor */
-        Buffer(Buffer&& other) noexcept;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline Buffer(Buffer&& other) noexcept;
 
         /**
          * @brief Destructor
@@ -896,7 +897,8 @@ class MAGNUM_EXPORT Buffer: public AbstractObject {
         Buffer& operator=(const Buffer&) = delete;
 
         /** @brief Move assignment */
-        Buffer& operator=(Buffer&& other) noexcept;
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline Buffer& operator=(Buffer&& other) noexcept;
 
         /** @brief OpenGL buffer ID */
         GLuint id() const { return _id; }
@@ -909,7 +911,8 @@ class MAGNUM_EXPORT Buffer: public AbstractObject {
          * to moved-from state.
          * @see @ref wrap()
          */
-        GLuint release();
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        inline GLuint release();
 
         #ifndef MAGNUM_TARGET_WEBGL
         /**
@@ -1074,7 +1077,8 @@ class MAGNUM_EXPORT Buffer: public AbstractObject {
          * @requires_gl Buffer data queries are not available in OpenGL ES and
          *      WebGL. Use @ref map() in OpenGL ES instead.
          */
-        template<class T = char> Containers::Array<T> data();
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        template<class T = char> inline Containers::Array<T> data();
 
         /**
          * @brief Buffer subdata
@@ -1092,7 +1096,8 @@ class MAGNUM_EXPORT Buffer: public AbstractObject {
          * @requires_gl Buffer data queries are not available in OpenGL ES and
          *      WebGL. Use @ref map() in OpenGL ES instead.
          */
-        template<class T = char> Containers::Array<T> subData(GLintptr offset, GLsizeiptr size);
+        /* MinGW complains loudly if the declaration doesn't also have inline */
+        template<class T = char> inline Containers::Array<T> subData(GLintptr offset, GLsizeiptr size);
         #endif
 
         /**

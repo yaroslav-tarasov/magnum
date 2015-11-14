@@ -3,6 +3,7 @@
 
     Copyright © 2010, 2011, 2012, 2013, 2014, 2015
               Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2015 Jonathan Hale <squareys@googlemail.com>
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -23,28 +24,38 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-#include "Buffer.h"
+#include <sstream>
+#include <Corrade/TestSuite/Tester.h>
 
-#include <Corrade/Utility/Debug.h>
+#include "Magnum/Audio/Extensions.h"
+#include "Magnum/Audio/Context.h"
 
-namespace Magnum { namespace Audio {
+namespace Magnum { namespace Audio { namespace Test {
 
-Debug& operator<<(Debug& debug, const Buffer::Format value) {
-    switch(value) {
-        #define _c(value) case Buffer::Format::value: return debug << "Audio::Buffer::Format::" #value;
-        _c(Mono8)
-        _c(Mono16)
-        _c(Stereo8)
-        _c(Stereo16)
+struct ContextTest: TestSuite::Tester {
+    explicit ContextTest();
 
-        _c(MonoFloat)
-        _c(StereoFloat)
-        _c(MonoDouble)
-        _c(StereoDouble)
-        #undef _c
-    }
+    void extensionsString();
+    void isExtensionEnabled();
 
-    return debug << "Audio::Buffer::Format::(invalid)";
+    Context _context;
+};
+
+ContextTest::ContextTest() {
+    addTests({&ContextTest::extensionsString,
+              &ContextTest::isExtensionEnabled});
 }
 
-}}
+void ContextTest::extensionsString() {
+    std::vector<std::string> extensions = _context.extensionStrings();
+
+    CORRADE_VERIFY(extensions.size() > 0);
+}
+
+void ContextTest::isExtensionEnabled() {
+    CORRADE_VERIFY(Context::current()->isExtensionSupported<Extensions::ALC::EXT::ENUMERATION>());
+}
+
+}}}
+
+CORRADE_TEST_MAIN(Magnum::Audio::Test::ContextTest)
