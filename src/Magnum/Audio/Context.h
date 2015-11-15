@@ -60,7 +60,8 @@ See also @ref Audio::Extensions namespace, which contain compile-time informatio
 about OpenAL extensions.
 */
 class MAGNUM_AUDIO_EXPORT Extension {
-    friend Context;
+    /* GCC 4.6 needs the class keyword */
+    friend class Context;
 
     public:
         /** @brief All OpenAL extensions */
