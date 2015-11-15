@@ -182,7 +182,10 @@ void QuaternionTest::constructConversion() {
     typedef Math::Quaternion<Int> Quaternioni;
 
     constexpr Quaternion a{{1.3f, 2.7f, -15.0f}, 7.0f};
-    constexpr Quaternioni b{a};
+    #ifndef CORRADE_GCC46_COMPATIBILITY
+    constexpr /* Not constexpr under GCC < 4.7 */
+    #endif
+    Quaternioni b{a};
 
     CORRADE_COMPARE(b, (Quaternioni{{1, 2, -15}, 7}));
 

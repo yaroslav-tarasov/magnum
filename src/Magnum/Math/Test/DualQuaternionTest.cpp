@@ -194,8 +194,7 @@ void DualQuaternionTest::constructConversion() {
 
     constexpr DualQuaternion a{{{1.3f, 2.7f, -15.0f}, 7.0f}, {{1.0f, -2.0f, 3.0f}, 0.0f}};
     #ifndef CORRADE_GCC46_COMPATIBILITY
-    /* Not constexpr under GCC < 4.7 */
-    constexpr
+    constexpr /* Not constexpr under GCC < 4.7 */
     #endif
     DualQuaternioni b{a};
 
