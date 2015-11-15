@@ -42,7 +42,7 @@ struct ContextTest: TestSuite::Tester {
 };
 
 ContextTest::ContextTest() {
-    addTests({&ContextTest::extensionsString,
+    addTests<ContextTest>({&ContextTest::extensionsString,
               &ContextTest::isExtensionEnabled});
 }
 
