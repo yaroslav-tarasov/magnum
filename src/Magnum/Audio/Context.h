@@ -188,6 +188,8 @@ class MAGNUM_AUDIO_EXPORT Context {
     private:
         static Context* _current;
 
+        MAGNUM_AUDIO_LOCAL void initialize(const Configuration& config);
+
         /* Create a context with given configuration. Returns `true` on success.
          * @ref alcCreateContext(). */
         MAGNUM_AUDIO_LOCAL bool tryCreateContext(const Configuration& config);

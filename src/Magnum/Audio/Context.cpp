@@ -55,9 +55,15 @@ const std::vector<Extension>& Extension::extensions() {
 
 Context* Context::_current = nullptr;
 
-Context::Context(): Context{Configuration{}} {}
+Context::Context() {
+    initialize(Configuration{});
+}
 
 Context::Context(const Configuration& config) {
+    initialize(config);
+}
+
+void Context::initialize(const Context::Configuration& config) {
     CORRADE_ASSERT(!_current, "Audio::Context: context already created", );
 
     /* Open default device */
