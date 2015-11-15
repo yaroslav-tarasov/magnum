@@ -84,8 +84,13 @@ void Context::initialize(const Context::Configuration& config) {
 
     /* Add all extensions to a map for faster lookup */
     std::unordered_map<std::string, Extension> extensionMap;
-    for(const Extension& extension: Extension::extensions())
+    for(const Extension& extension: Extension::extensions()) {
+        #ifndef CORRADE_GCC46_COMPATIBILITY
         extensionMap.emplace(extension._string, extension);
+        #else
+        extensionMap.insert({extension._string, extension});
+        #endif
+    }
 
     /* Check for presence of extensions */
     const std::vector<std::string> extensions = extensionStrings();
