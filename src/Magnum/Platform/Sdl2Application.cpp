@@ -56,6 +56,69 @@ Sdl2Application::InputEvent::Modifiers fixedModifiers(Uint16 mod) {
 
 }
 
+Sdl2ApplicationWindow::Sdl2ApplicationWindow(Sdl2Application& application, NoCreateT): _application{application},
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    _window{nullptr},
+    #endif
+    _windowFlags{WindowFlag::Redraw} {}
+
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+Sdl2ApplicationWindow::Sdl2ApplicationWindow(Sdl2Application& application, const Sdl2ApplicationWindow::WindowConfiguration& configuration): Sdl2ApplicationWindow{application, NoCreate} {
+    if(!tryCreateWindow(configuration)) std::exit(1);
+}
+
+Sdl2ApplicationWindow::Sdl2ApplicationWindow(Sdl2Application& application): Sdl2ApplicationWindow{application, WindowConfiguration{}} {}
+#endif
+
+Sdl2ApplicationWindow::~Sdl2ApplicationWindow() {
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    destroyWindow();
+    #endif
+}
+
+#ifndef CORRADE_TARGET_EMSCRIPTEN
+bool Sdl2ApplicationWindow::tryCreateWindow(const WindowConfiguration& configuration) {
+    CORRADE_INTERNAL_ASSERT(!_window);
+
+    /* Flags: if not hidden, set as shown */
+    Uint32 windowFlags(configuration.windowFlags());
+    if(!(configuration.windowFlags() & WindowConfiguration::WindowFlag::Hidden))
+        windowFlags |= SDL_WINDOW_SHOWN;
+
+    /* Create window */
+    if(!(_window = SDL_CreateWindow(configuration.title().data(),
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        configuration.size().x(), configuration.size().y(),
+        SDL_WINDOW_OPENGL|windowFlags)))
+    {
+        Error() << "Platform::Sdl2Application::tryCreateContext(): cannot create window:" << SDL_GetError();
+        return false;
+    }
+
+    /* Add itself to the window list */
+    const std::size_t windowId = SDL_GetWindowID(_window);
+    CORRADE_INTERNAL_ASSERT(windowId <= _application._windows.size() + 2);
+    for(std::size_t i = _application._windows.size(); i < windowId; ++i)
+        _application._windows.push_back(nullptr);
+    _application._windows.push_back(this);
+
+    return true;
+}
+
+void Sdl2ApplicationWindow::destroyWindow() {
+    /* Already done, nothing to do */
+    if(!_window) return;
+
+    /* Remove itself from the window list */
+    const std::size_t id = SDL_GetWindowID(_window);
+    CORRADE_INTERNAL_ASSERT(id < _application._windows.size());
+    _application._windows[id] = nullptr;
+
+    SDL_DestroyWindow(_window);
+    _window = nullptr;
+}
+#endif
+
 #ifdef CORRADE_TARGET_EMSCRIPTEN
 Sdl2Application* Sdl2Application::_instance = nullptr;
 void Sdl2Application::staticMainLoop() {
@@ -71,15 +134,16 @@ Sdl2Application::Sdl2Application(const Arguments& arguments, const Configuration
     createContext(configuration);
 }
 
-Sdl2Application::Sdl2Application(const Arguments& arguments, std::nullptr_t): _glContext{nullptr},
+Sdl2Application::Sdl2Application(const Arguments& arguments, std::nullptr_t): Sdl2ApplicationWindow{*this, NoCreate}, _glContext{nullptr},
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     _minimalLoopPeriod{0},
     #endif
-    _context{new Context{NoCreate, arguments.argc, arguments.argv}}, _flags{Flag::Redraw}
+    _context{new Context{NoCreate, arguments.argc, arguments.argv}}
 {
     #ifdef CORRADE_TARGET_EMSCRIPTEN
     CORRADE_ASSERT(!_instance, "Platform::Sdl2Application::Sdl2Application(): the instance is already created", );
     _instance = this;
+    _windows[0] = this;
     #endif
 
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -109,11 +173,6 @@ bool Sdl2Application::tryCreateContext(const Configuration& configuration) {
     /* sRGB */
     SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, configuration.isSRGBCapable());
     #endif
-
-    /* Flags: if not hidden, set as shown */
-    Uint32 windowFlags(configuration.windowFlags());
-    if(!(configuration.windowFlags() & Configuration::WindowFlag::Hidden))
-        windowFlags |= SDL_WINDOW_SHOWN;
 
     /** @todo Remove when Emscripten has proper SDL2 support */
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -163,15 +222,8 @@ bool Sdl2Application::tryCreateContext(const Configuration& configuration) {
         #endif
     }
 
-    /* Create window */
-    if(!(_window = SDL_CreateWindow(configuration.title().data(),
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        configuration.size().x(), configuration.size().y(),
-        SDL_WINDOW_OPENGL|windowFlags)))
-    {
-        Error() << "Platform::Sdl2Application::tryCreateContext(): cannot create window:" << SDL_GetError();
-        return false;
-    }
+    /* Create the main window */
+    if(!tryCreateWindow(configuration)) return false;
 
     /* Create context */
     _glContext = SDL_GL_CreateContext(_window);
@@ -203,21 +255,14 @@ bool Sdl2Application::tryCreateContext(const Configuration& configuration) {
             << SDL_GetError() << "(falling back to compatibility context)";
         else SDL_GL_DeleteContext(_glContext);
 
-        SDL_DestroyWindow(_window);
+        destroyWindow();
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, int(configuration.flags()));
 
-        if(!(_window = SDL_CreateWindow(configuration.title().data(),
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            configuration.size().x(), configuration.size().y(),
-            SDL_WINDOW_OPENGL|windowFlags)))
-        {
-            Error() << "Platform::Sdl2Application::tryCreateContext(): cannot create window:" << SDL_GetError();
-            return false;
-        }
+        if(!tryCreateWindow(configuration)) return false;
 
         /* Create compatibility context */
         _glContext = SDL_GL_CreateContext(_window);
@@ -227,8 +272,7 @@ bool Sdl2Application::tryCreateContext(const Configuration& configuration) {
     /* Cannot create context (or fallback compatibility context on desktop) */
     if(!_glContext) {
         Error() << "Platform::Sdl2Application::tryCreateContext(): cannot create context:" << SDL_GetError();
-        SDL_DestroyWindow(_window);
-        _window = nullptr;
+        destroyWindow();
         return false;
     }
 
@@ -241,11 +285,11 @@ bool Sdl2Application::tryCreateContext(const Configuration& configuration) {
     return _context->tryCreate();
 }
 
-void Sdl2Application::swapBuffers() {
+void Sdl2ApplicationWindow::swapBuffers() {
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     SDL_GL_SwapWindow(_window);
     #else
-    SDL_Flip(_glContext);
+    SDL_Flip(_application._glContext);
     #endif
 }
 
@@ -275,7 +319,9 @@ Sdl2Application::~Sdl2Application() {
 
     #ifndef CORRADE_TARGET_EMSCRIPTEN
     SDL_GL_DeleteContext(_glContext);
-    SDL_DestroyWindow(_window);
+    /* Destroy all windows before calling SDL_Quit */
+    for(Sdl2ApplicationWindow* w: _windows)
+        if(w) w->destroyWindow();
     #else
     SDL_FreeSurface(_glContext);
     CORRADE_INTERNAL_ASSERT(_instance == this);
@@ -312,35 +358,41 @@ void Sdl2Application::mainLoop() {
             case SDL_WINDOWEVENT:
                 switch(event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED:
-                        viewportEvent({event.window.data1, event.window.data2});
-                        _flags |= Flag::Redraw;
+                        CORRADE_INTERNAL_ASSERT(event.window.windowID < _windows.size() && _windows[event.window.windowID]);
+                        _windows[event.window.windowID]->viewportEvent({event.window.data1, event.window.data2});
+                        _windows[event.window.windowID]->_windowFlags |= WindowFlag::Redraw;
                         break;
                     case SDL_WINDOWEVENT_EXPOSED:
-                        _flags |= Flag::Redraw;
+                        CORRADE_INTERNAL_ASSERT(event.window.windowID < _windows.size() && _windows[event.window.windowID]);
+                        _windows[event.window.windowID]->_windowFlags |= WindowFlag::Redraw;
                         break;
                 } break;
 
             case SDL_KEYDOWN:
             case SDL_KEYUP: {
+                CORRADE_INTERNAL_ASSERT(event.key.windowID < _windows.size() && _windows[event.key.windowID]);
                 KeyEvent e(static_cast<KeyEvent::Key>(event.key.keysym.sym), fixedModifiers(event.key.keysym.mod));
-                event.type == SDL_KEYDOWN ? keyPressEvent(e) : keyReleaseEvent(e);
+                event.type == SDL_KEYDOWN ? _windows[event.key.windowID]->keyPressEvent(e) : _windows[event.key.windowID]->keyReleaseEvent(e);
             } break;
 
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP: {
+                CORRADE_INTERNAL_ASSERT(event.button.windowID < _windows.size() && _windows[event.button.windowID]);
                 MouseEvent e(static_cast<MouseEvent::Button>(event.button.button), {event.button.x, event.button.y});
-                event.type == SDL_MOUSEBUTTONDOWN ? mousePressEvent(e) : mouseReleaseEvent(e);
+                event.type == SDL_MOUSEBUTTONDOWN ? _windows[event.button.windowID]->mousePressEvent(e) : _windows[event.button.windowID]->mouseReleaseEvent(e);
             } break;
 
             case SDL_MOUSEWHEEL:
+                CORRADE_INTERNAL_ASSERT(event.wheel.windowID < _windows.size() && _windows[event.wheel.windowID]);
                 if(event.wheel.y != 0) {
                     MouseEvent e(event.wheel.y > 0 ? MouseEvent::Button::WheelUp : MouseEvent::Button::WheelDown, {event.wheel.x, event.wheel.y});
-                    mousePressEvent(e);
+                    _windows[event.wheel.windowID]->mousePressEvent(e);
                 } break;
 
             case SDL_MOUSEMOTION: {
+                CORRADE_INTERNAL_ASSERT(event.motion.windowID < _windows.size() && _windows[event.motion.windowID]);
                 MouseMoveEvent e({event.motion.x, event.motion.y}, {event.motion.xrel, event.motion.yrel}, static_cast<MouseMoveEvent::Button>(event.motion.state));
-                mouseMoveEvent(e);
+                _windows[event.motion.windowID]->mouseMoveEvent(e);
                 break;
             }
 
@@ -358,23 +410,27 @@ void Sdl2Application::mainLoop() {
     if(!(_flags & Flag::NoTickEvent)) tickEvent();
 
     /* Draw event */
-    if(_flags & Flag::Redraw) {
-        _flags &= ~Flag::Redraw;
-        drawEvent();
+    bool somethingDrawn = false;
+    for(std::size_t i = 0; i != _windows.size(); ++i) {
+        if(!_windows[i] || !(_windows[i]->_windowFlags & WindowFlag::Redraw)) continue;
 
-        #ifndef CORRADE_TARGET_EMSCRIPTEN
-        /* If VSync is not enabled, delay to prevent CPU hogging (if set) */
+        _windows[i]->_windowFlags &= ~WindowFlag::Redraw;
+        _windows[i]->drawEvent();
+        somethingDrawn = true;
+    }
+
+    #ifndef CORRADE_TARGET_EMSCRIPTEN
+    /* If VSync is not enabled, delay to prevent CPU hogging (if set) */
+    if(somethingDrawn) {
         if(!(_flags & Flag::VSyncEnabled) && _minimalLoopPeriod) {
             const UnsignedInt loopTime = SDL_GetTicks() - timeBefore;
             if(loopTime < _minimalLoopPeriod)
                 SDL_Delay(_minimalLoopPeriod - loopTime);
         }
-        #endif
 
         return;
     }
 
-    #ifndef CORRADE_TARGET_EMSCRIPTEN
     /* If not drawing anything, delay to prevent CPU hogging (if set) */
     if(_minimalLoopPeriod) {
         const UnsignedInt loopTime = SDL_GetTicks() - timeBefore;
@@ -388,14 +444,14 @@ void Sdl2Application::mainLoop() {
     #endif
 }
 
-void Sdl2Application::setMouseLocked(bool enabled) {
+void Sdl2Application::setMouseLocked(Sdl2ApplicationWindow* const window) {
     /** @todo Implement this in Emscripten */
     #ifndef CORRADE_TARGET_EMSCRIPTEN
-    SDL_SetWindowGrab(_window, enabled ? SDL_TRUE : SDL_FALSE);
-    SDL_SetRelativeMouseMode(enabled ? SDL_TRUE : SDL_FALSE);
+    SDL_SetWindowGrab(window ? window->_window : _window, window ? SDL_TRUE : SDL_FALSE);
+    SDL_SetRelativeMouseMode(window ? SDL_TRUE : SDL_FALSE);
     #else
     CORRADE_ASSERT(false, "Sdl2Application::setMouseLocked(): not implemented", );
-    static_cast<void>(enabled);
+    static_cast<void>(window);
     #endif
 }
 
@@ -405,12 +461,12 @@ void Sdl2Application::tickEvent() {
     _flags |= Flag::NoTickEvent;
 }
 
-void Sdl2Application::viewportEvent(const Vector2i&) {}
-void Sdl2Application::keyPressEvent(KeyEvent&) {}
-void Sdl2Application::keyReleaseEvent(KeyEvent&) {}
-void Sdl2Application::mousePressEvent(MouseEvent&) {}
-void Sdl2Application::mouseReleaseEvent(MouseEvent&) {}
-void Sdl2Application::mouseMoveEvent(MouseMoveEvent&) {}
+void Sdl2ApplicationWindow::viewportEvent(const Vector2i&) {}
+void Sdl2ApplicationWindow::keyPressEvent(KeyEvent&) {}
+void Sdl2ApplicationWindow::keyReleaseEvent(KeyEvent&) {}
+void Sdl2ApplicationWindow::mousePressEvent(MouseEvent&) {}
+void Sdl2ApplicationWindow::mouseReleaseEvent(MouseEvent&) {}
+void Sdl2ApplicationWindow::mouseMoveEvent(MouseMoveEvent&) {}
 
 Sdl2Application::WindowConfiguration::WindowConfiguration():
     #ifndef CORRADE_TARGET_EMSCRIPTEN
@@ -427,13 +483,13 @@ Sdl2Application::Configuration::Configuration():
     #endif
     {}
 
-Sdl2Application::InputEvent::Modifiers Sdl2Application::MouseEvent::modifiers() {
+Sdl2ApplicationWindow::InputEvent::Modifiers Sdl2ApplicationWindow::MouseEvent::modifiers() {
     if(modifiersLoaded) return _modifiers;
     modifiersLoaded = true;
     return _modifiers = fixedModifiers(Uint16(SDL_GetModState()));
 }
 
-Sdl2Application::InputEvent::Modifiers Sdl2Application::MouseMoveEvent::modifiers() {
+Sdl2ApplicationWindow::InputEvent::Modifiers Sdl2ApplicationWindow::MouseMoveEvent::modifiers() {
     if(modifiersLoaded) return _modifiers;
     modifiersLoaded = true;
     return _modifiers = fixedModifiers(Uint16(SDL_GetModState()));
