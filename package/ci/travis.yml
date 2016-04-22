@@ -40,7 +40,7 @@ install:
 
 # GLFW (cached)
 - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install homebrew/versions/glfw3; fi
-- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! -e "$HOME/glfw/include" ]; then curl -O https://github.com/glfw/glfw/releases/download/3.1.2/glfw-3.1.2.zip && unzip glfw-3.1.2.zip && cd glfw-3.1.2 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/glfw -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF && cmake --build . --target install && cd ../..; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! -e "$HOME/glfw/include" ]; then wget https://github.com/glfw/glfw/releases/download/3.1.2/glfw-3.1.2.zip && unzip glfw-3.1.2.zip && cd glfw-3.1.2 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/glfw -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF && cmake --build . --target install && cd ../..; fi
 
 # Corrade
 - git clone --depth 1 git://github.com/mosra/corrade.git
