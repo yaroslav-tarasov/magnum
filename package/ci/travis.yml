@@ -1,23 +1,26 @@
 # kate: indent-width 2;
 
-language: cpp
 
 matrix:
   include:
-  - os: linux
+  - language: cpp
+    os: linux
     compiler: gcc
     env:
     - TARGET=desktop
     # Otherwise the job gets killed (probably because using too much memory)
     - JOBS_LIMIT=4
-  - os: osx
+  - language: cpp
+    os: osx
     compiler: clang
     env: TARGET=desktop
-  - os: osx
+  - language: cpp
+    os: osx
     env:
     - TARGET=ios-simulator
     - TARGET_GLES2=ON
-  - os: osx
+  - language: cpp
+    os: osx
     env:
     - TARGET=ios-simulator
     - TARGET_GLES2=OFF
@@ -29,6 +32,30 @@ matrix:
     env:
     - TARGET=emscripten
     - TARGET_GLES2=OFF
+  - language: android
+    os: linux
+    env:
+    - TARGET=android
+    - TARGET_GLES2=ON
+    # Otherwise the job gets killed (probably because using too much memory)
+    - JOBS_LIMIT=4
+    android:
+      components:
+      - build-tools-19.0.0
+      - android-19
+      - sys-img-armeabi-v7a-android-19
+  - language: android
+    os: linux
+    env:
+    - TARGET=android
+    - TARGET_GLES2=OFF
+    # Otherwise the job gets killed (probably because using too much memory)
+    - JOBS_LIMIT=4
+    android:
+      components:
+      - build-tools-19.0.0
+      - android-19
+      - sys-img-armeabi-v7a-android-19
 
 addons:
   apt:
@@ -56,8 +83,9 @@ install:
 - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
 
 - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.7; fi
-- if [ "$TRAVIS_OS_NAME" == "linux" ]; then export PLATFORM_GL_API=GLX; fi
-- if [ "$TRAVIS_OS_NAME" == "osx" ]; then export PLATFORM_GL_API=CGL; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then wget -nc http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin && chmod +x android-*.bin && ./android-*.bin -y | grep -v Extracting; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop" ]; then export PLATFORM_GL_API=GLX; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "desktop" ]; then export PLATFORM_GL_API=CGL; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then gem install xcpretty; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then brew upgrade cmake; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "emscripten" ]; then brew install emscripten && export LLVM=/usr/local/opt/emscripten/libexec/llvm/bin && emcc; fi
@@ -66,14 +94,15 @@ install:
 # SDL (cached)
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "desktop" ]; then brew install sdl2; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then curl -O https://www.libsdl.org/release/SDL2-2.0.4.tar.gz && tar -xzvf SDL2-2.0.4.tar.gz && cd SDL2-2.0.4/Xcode-iOS/SDL && xcodebuild -sdk iphonesimulator8.1 | xcpretty && mkdir -p ../../../sdl2/lib && cp build/Release-iphonesimulator/libSDL2.a ../../../sdl2/lib && mkdir -p ../../../sdl2/include/SDL2 && cp -R ../../include/* ../../../sdl2/include/SDL2 && cd ../../..; fi
-- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! -e "$HOME/sdl2/include" ]; then curl -O http://www.libsdl.org/release/SDL2-2.0.4.tar.gz && tar -xzvf SDL2-2.0.4.tar.gz && cd SDL2-2.0.4 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/sdl2 -DCMAKE_BUILD_TYPE=Release && cmake --build . --target install && cd ../..; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop" ] && [ ! -e "$HOME/sdl2/include" ]; then curl -O http://www.libsdl.org/release/SDL2-2.0.4.tar.gz && tar -xzvf SDL2-2.0.4.tar.gz && cd SDL2-2.0.4 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/sdl2 -DCMAKE_BUILD_TYPE=Release && cmake --build . --target install && cd ../..; fi
 
 # GLFW (cached)
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "desktop" ]; then brew install homebrew/versions/glfw3; fi
-- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ ! -e "$HOME/glfw/include" ]; then wget https://github.com/glfw/glfw/releases/download/3.1.2/glfw-3.1.2.zip && unzip glfw-3.1.2.zip && cd glfw-3.1.2 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/glfw -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF && cmake --build . --target install && cd ../..; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop" ] && [ ! -e "$HOME/glfw/include" ]; then wget https://github.com/glfw/glfw/releases/download/3.1.2/glfw-3.1.2.zip && unzip glfw-3.1.2.zip && cd glfw-3.1.2 && mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/glfw -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF && cmake --build . --target install && cd ../..; fi
 
 script:
-- if [ "$TRAVIS_OS_NAME" == "linux" ]; then ./package/ci/travis-desktop.sh; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "desktop" ]; then ./package/ci/travis-desktop.sh; fi
+- if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TARGET" == "android" ]; then ./package/ci/travis-android-arm.sh; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "desktop" ]; then ./package/ci/travis-desktop.sh; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "ios-simulator" ]; then ./package/ci/travis-ios-simulator.sh; fi
 - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$TARGET" == "emscripten" ]; then ./package/ci/travis-emscripten.sh; fi
