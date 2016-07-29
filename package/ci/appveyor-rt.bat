@@ -2,9 +2,9 @@ call "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat" || e
 set PATH=%APPVEYOR_BUILD_FOLDER%\deps-native\bin;%PATH%
 
 rem Build ANGLE
-git clone --depth 1 git://github.com/MSOpenTech/angle.git || exit /b
+git clone --depth 1 git://github.com/MSOpenTech/angle.git  || exit /b
 cd angle\winrt\10\src || exit /b
-msbuild angle.sln /p:Configuration=Release /p:NoWarn=4467 || exit /b
+msbuild angle.sln /p:Configuration=Release /p:NoWarn=4467 /property:WarningLevel=1 || exit /b
 cd ..\..\..\.. || exit /b
 
 rem Build SDL
