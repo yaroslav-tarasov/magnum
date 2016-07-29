@@ -4,7 +4,7 @@ set PATH=%APPVEYOR_BUILD_FOLDER%\deps-native\bin;%PATH%
 rem Build ANGLE
 git clone --depth 1 git://github.com/MSOpenTech/angle.git || exit /b
 cd angle\winrt\10\src || exit /b
-msbuild angle.sln /p:Configuration=Release /p:NoWarn=2220 || exit /b
+msbuild angle.sln /p:Configuration=Release /t:TreatWarningsAsErrors=false || exit /b
 cd ..\..\..\.. || exit /b
 
 rem Build SDL
